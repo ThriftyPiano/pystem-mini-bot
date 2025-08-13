@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Car IDE</title>
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+    <!-- File Manager -->
+    <script src="file.js?version=1.1"></script>
+    <!-- Robot Controller -->
+    <script src="robot.js?version=1.1"></script>
+    <!-- Serial Terminal -->
+    <script src="terminal.js?version=1.1"></script>
+    <!-- Example Manager -->
+    <script src="example.js?version=1.1"></script>
+    <!-- Monaco MicroPython Auto-completion -->
+    <script src="monaco-micropython-v2.js?version=1.1"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 0;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
+        }
+        #main-content {
+            flex: 1 1 auto;
+            display: flex;
+            min-height: 0;
+        }
+        #left-sidebar {
+            flex: 0 0 25%;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ccc;
+        }
+        #file-manager {
+            flex: 1 1 33.33%;
+            background: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        #examples-section {
+            flex: 1 1 33.33%;
+            background: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-top: 1px solid #ccc;
+        }
+        
+        #examples-header {
+            padding: 8px;
+            background: #e8e8e8;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        #examples-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+        }
+        
+        .example-item {
+            padding: 4px 6px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .example-item:hover {
+            background: #e0e0e0;
+        }
+        
+        .loading-message, .error-message, .no-examples {
+            padding: 8px;
+            color: #666;
+            font-style: italic;
+            font-size: 11px;
+        }
+        #file-manager-header {
+            padding: 8px;
+            background: #e8e8e8;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+        }
+        .file-item {
+            padding: 4px 6px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .file-item:hover {
+            background: #e0e0e0;
+        }
+        .file-item.active {
+            background: #007acc;
+            color: white;
+        }
+        .file-actions {
+            display: none;
+            gap: 4px;
+        }
+        .file-item:hover .file-actions {
+            display: flex;
+        }
+        .file-action-btn {
+            padding: 1px 4px;
+            font-size: 10px;
+            border: none;
+            background: rgba(0,0,0,0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            color: inherit;
+        }
+        .file-action-btn:hover {
+            background: rgba(0,0,0,0.2);
+        }
+        .new-file-btn {
+            padding: 3px 6px;
+            font-size: 11px;
+            border: 1px solid #999;
+            background: #fff;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .new-file-btn:hover {
+            background: #f0f0f0;
+        }
+        #container {
+            flex: 1 1 75%;
+            min-height: 0;
+            min-height: 600px;
+            height: 100%;
+            min-width: 300px;
+        }
+        #editor-terminal-container {
+            flex: 1 1 80%;
+            display: flex;
+            min-height: 0;
+        }
+        #terminal-container {
+            flex: 1 1 33.33%;
+            min-height: 200px;
+            overflow: hidden;
+            border-top: 1px solid #ccc;
+        }
+        button {
+            padding: 4px 12px;
+            font-size: 11px;
+            border: 1px solid #888;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 1200px) {
+            #left-sidebar {
+                flex: 0 0 30%;
+                min-width: 200px;
+            }
+            #container {
+                flex: 1 1 70%;
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            #left-sidebar {
+                flex: 0 0 40%;
+                min-width: 180px;
+            }
+            #container {
+                flex: 1 1 60%;
+                min-width: 200px;
+            }
+        }
+        
+        @media (max-width: 700px) {
+            #main-content {
+                flex-direction: column;
+            }
+            
+            /* On mobile: editor comes first (after toolbar) */
+            #container {
+                order: 1;
+                flex: 0 0 40vh; /* Fixed height for editor */
+                min-height: 300px;
+                min-width: auto;
+                width: 100%;
+            }
+            
+            /* File manager comes second */
+            #left-sidebar {
+                order: 2;
+                flex: 0 0 auto;
+                height: auto;
+                min-width: auto;
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            #file-manager {
+                flex: 0 0 25vh; /* Fixed height for file manager */
+                min-height: 150px;
+                height: auto;
+                width: 100%;
+            }
+            
+            #examples-section {
+                flex: 0 0 20vh; /* Fixed height for examples */
+                min-height: 120px;
+                height: auto;
+                width: 100%;
+                border-top: 1px solid #ccc;
+            }
+            
+            /* Terminal comes last */
+            #terminal-container {
+                flex: 0 0 20vh; /* Fixed height for terminal */
+                min-height: 120px;
+                height: auto;
+                width: 100%;
+                border-top: 1px solid #ccc;
+                border-left: none;
+            }
+            
+            /* Make buttons more mobile-friendly */
+            #toolbar {
+                flex-wrap: wrap;
+                padding: 6px;
+                gap: 4px;
+            }
+            
+            #toolbar button {
+                padding: 6px 10px;
+                font-size: 10px;
+                min-width: 70px;
+            }
+            
+            #toolbar span {
+                margin-right: 6px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <span style="font-weight: bold; margin-right: 12px; font-size: 12px;">Robot</span>
+        <button id="btn-connect">Connect</button>
+        <button id="btn-disconnect">Disconnect</button>
+        <button id="btn-upload-code">Write to Robot</button>
+        <button id="btn-download-code">Read from Robot</button>
+    </div>
+    <div id="main-content">
+        <div id="left-sidebar">
+            <div id="file-manager">
+                <div id="file-manager-header">
+                    Files in browser
+                    <button class="new-file-btn" id="new-file-btn">+ New</button>
+                </div>
+                <div id="file-list"></div>
+            </div>
+            
+            <!-- Examples Section -->
+            <div id="examples-section">
+                <div id="examples-header">
+                    Examples
+                </div>
+                <div id="examples-list">
+                    <!-- Examples will be loaded dynamically -->
+                </div>
+            </div>
+            
+            <div id="terminal-container"></div>
+        </div>
+        <div id="container"></div>
+    </div>
+    <script>
+        // Initialize file manager
+        const fileManager = new FileManager();
+        let editor = null;
+
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('container'), {
+                value: '',
+                language: 'python',
+                theme: 'vs',
+                fontSize: 12,
+                automaticLayout: true,
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: {
+                    other: true,
+                    comments: false,
+                    strings: false
+                },
+                parameterHints: {
+                    enabled: true
+                },
+                suggestSelection: 'first',
+                wordBasedSuggestions: 'off', // Use our custom suggestions instead
+                'semanticHighlighting.enabled': true,
+                suggest: {
+                    showKeywords: true,
+                    showSnippets: true,
+                    showFunctions: true,
+                    showConstructors: true,
+                    showFields: true,
+                    showVariables: true,
+                    showClasses: true,
+                    showModules: true,
+                    showMethods: true,
+                    showProperties: true,
+                    showUnits: true,
+                    showValues: true,
+                    showConstants: true,
+                    showEnums: true,
+                    showEnumMembers: true,
+                    showEvents: true,
+                    showOperators: true,
+                    showTypeParameters: true,
+                    showWords: false,
+                    showColors: false,
+                    showFiles: false,
+                    showReferences: false,
+                    showFolders: false,
+                    localityBonus: true,
+                    insertMode: 'insert'
+                }
+            });
+            
+            // Connect editor to file manager
+            fileManager.setEditor(editor);
+            
+            // Initialize example manager
+            exampleManager.init();
+            
+            // Initialize MicroPython auto-completion
+            const microPythonSetup = new MonacoMicroPythonSetup();
+            microPythonSetup.initialize().then(() => {
+                console.log('MicroPython auto-completion ready!');
+            });
+            
+            // Save file on editor content change
+            editor.onDidChangeModelContent(() => {
+                // Debounce saves
+                clearTimeout(window.saveTimeout);
+                window.saveTimeout = setTimeout(() => {
+                    fileManager.saveCurrentFile();
+                }, 1000);
+            });
+        });
+
+        // Button implementations
+        document.addEventListener('DOMContentLoaded', function() {
+            const connectBtn = document.getElementById('btn-connect');
+            const disconnectBtn = document.getElementById('btn-disconnect');
+            const uploadBtn = document.getElementById('btn-upload-code');
+            const downloadBtn = document.getElementById('btn-download-code');
+
+            // Update button states
+            function updateButtonStates() {
+                const isConnected = robotIsConnected();
+                connectBtn.disabled = isConnected;
+                disconnectBtn.disabled = !isConnected;
+                uploadBtn.disabled = !isConnected;
+                downloadBtn.disabled = !isConnected;
+                
+                connectBtn.textContent = isConnected ? 'Connected' : 'Connect';
+                connectBtn.style.background = isConnected ? '#4CAF50' : '';
+                connectBtn.style.color = isConnected ? 'white' : '';
+            }
+            
+            // Make updateButtonStates globally accessible
+            window.updateButtonStates = updateButtonStates;
+
+            // Connect button
+            connectBtn.addEventListener('click', async function() {
+                try {
+                    connectBtn.disabled = true;
+                    connectBtn.textContent = 'Connecting...';
+                    
+                    const result = await robotConnect();
+                    
+                    if (result) {
+                        console.log('Successfully connected to ESP32 device');
+                        updateButtonStates();
+                    } else {
+                        // User canceled - just reset the button
+                        connectBtn.disabled = false;
+                        connectBtn.textContent = 'Connect';
+                    }
+                } catch (error) {
+                    console.error('Connection failed:', error);
+                    alert('Failed to connect to device: ' + error.message + '\nTry unplugging and reconnecting the device.');
+                    connectBtn.disabled = false;
+                    connectBtn.textContent = 'Connect';
+                }
+            });
+
+            // Disconnect button
+            disconnectBtn.addEventListener('click', async function() {
+                try {
+                    disconnectBtn.disabled = true;
+                    disconnectBtn.textContent = 'Disconnecting...';
+                    
+                    await robotDisconnect();
+                    
+                    console.log('Successfully disconnected from ESP32 device');
+                    updateButtonStates();
+                    disconnectBtn.textContent = 'Disconnect';
+                } catch (error) {
+                    console.error('Disconnect failed:', error);
+                    alert('Failed to disconnect: ' + error.message);
+                    disconnectBtn.disabled = false;
+                    disconnectBtn.textContent = 'Disconnect';
+                }
+            });
+
+            // Upload code button
+            uploadBtn.addEventListener('click', async function() {
+                try {
+                    if (!editor) {
+                        alert('Editor not ready yet. Please wait a moment and try again.');
+                        return;
+                    }
+
+                    const code = editor.getValue();
+                    if (!code.trim()) {
+                        alert('No code to upload. Please write some Python code first.');
+                        return;
+                    }
+
+                    // Get current filename from file manager
+                    let currentFile = null;
+                    let filename = 'main.py';
+                    
+                    if (fileManager && typeof fileManager.getCurrentFileName === 'function') {
+                        currentFile = fileManager.getCurrentFileName();
+                        filename = currentFile || 'main.py';
+                    } else {
+                        console.warn('FileManager not ready or getCurrentFileName method not available');
+                    }
+
+                    uploadBtn.disabled = true;
+                    uploadBtn.textContent = 'Writing...';
+                    
+                    await robotUploadCode(code);
+                    
+                    console.log(`Successfully uploaded code ${filename}`);
+                    alert(`Code successfully written to robot!`);
+
+                } catch (error) {
+                    console.error('Upload failed:', error);
+                    alert('Failed to write code to robot: ' + error.message);
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Write to Robot';
+                    updateButtonStates();
+                }
+            });
+
+            // Download code button
+            downloadBtn.addEventListener('click', async function() {
+                try {
+                    if (!editor) {
+                        alert('Editor not ready yet. Please wait a moment and try again.');
+                        return;
+                    }
+
+                    // Check if editor has content and warn user
+                    const currentContent = editor.getValue();
+                    if (currentContent.trim()) {
+                        const confirmed = confirm('The current editor has content that will be replaced. Do you want to continue?');
+                        if (!confirmed) {
+                            return;
+                        }
+                    }
+
+                    // Get current filename from file manager
+                    let filename = 'main.py';
+                    if (fileManager && typeof fileManager.getCurrentFileName === 'function') {
+                        const currentFile = fileManager.getCurrentFileName();
+                        filename = currentFile || 'main.py';
+                    }
+
+                    downloadBtn.disabled = true;
+                    downloadBtn.textContent = 'Reading...';
+
+                    const downloadedCode = await robotDownloadCode();
+                    
+                    // Set the downloaded content in the editor
+                    editor.setValue(downloadedCode);
+                    
+                    // Update file manager if the filename is different
+                    if (fileManager && typeof fileManager.saveCurrentFile === 'function') {
+                        fileManager.saveCurrentFile();
+                    }
+
+                    console.log(`Successfully downloaded code from ${filename}`);
+                    alert(`Code successfully read from robot!`);
+
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    alert('Failed to read code from robot: ' + error.message);
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = 'Read from Robot';
+                    updateButtonStates();
+                }
+            });
+
+            // Initial button state
+            updateButtonStates();
+        });
+    </script>
+</body>
+</html>

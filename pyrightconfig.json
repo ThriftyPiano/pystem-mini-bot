@@ -1,0 +1,34 @@
+{
+    "include": [
+        "**/*.py"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__"
+    ],
+    "stubPath": "stubs",
+    "venvPath": ".",
+    "venv": "",
+    "pythonVersion": "3.11",
+    "pythonPlatform": "Linux",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.11",
+            "pythonPlatform": "Linux",
+            "extraPaths": [
+                "./stubs",
+                "/home/codespace/.python/current/lib/python3.12/site-packages"
+            ]
+        }
+    ],
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": false,
+    "autoImportCompletions": true,
+    "reportMissingImports": "none",
+    "reportMissingModuleSource": "none",
+    "reportUndefinedVariable": "warning",
+    "reportUnknownMemberType": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownArgumentType": "none"
+}
