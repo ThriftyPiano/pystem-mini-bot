@@ -13,6 +13,6 @@ adc.atten(machine.ADC.ATTN_11DB)
 def reflection(port):
     # Read the analog value from the sensor.
     # The value will be a 12-bit integer (0-4095).
-    sensor_value = adc.read()
+    sensor_value = adc.read() + 1
     sensor_value = 100 - int(math.log2(sensor_value) * 8)
     return sensor_value
