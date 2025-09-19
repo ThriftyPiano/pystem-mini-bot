@@ -38,6 +38,38 @@
             flex-direction: column;
             height: 100vh;
         }
+        #title-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #title-bar h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        #back-to-home {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.3s ease;
+        }
+        #back-to-home:hover {
+            background: rgba(255,255,255,0.3);
+        }
         #toolbar {
             display: flex;
             gap: 8px;
@@ -298,6 +330,10 @@
     </style>
 </head>
 <body>
+    <div id="title-bar">
+        <h1>🤖 Mini Bot IDE</h1>
+        <a href="index.html" id="back-to-home">← Back to Home</a>
+    </div>
     <div id="toolbar">
         <span style="font-weight: bold; margin-right: 12px; font-size: 12px;">Robot</span>
         <button id="btn-connect">Connect</button>
