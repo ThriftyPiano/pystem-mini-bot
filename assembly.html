@@ -12,7 +12,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PySTEM Mini Bot - Assembly Instructions</title>
+    <title>PySTEM Mini Bot - Assembly Guide</title>
     <style>
         * {
             margin: 0;
@@ -46,29 +46,25 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
+        h2 {
+            color: #667eea;
+            margin: 20px 0 15px;
+        }
+
+        h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #555;
+            margin: 20px 0 10px;
+        }
+
         .subtitle {
             font-size: 1.2em;
             opacity: 0.9;
             margin-bottom: 30px;
-        }
-
-        .back-button {
-            display: inline-block;
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 1em;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-
-        .back-button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
         }
 
         .content-section {
@@ -78,218 +74,220 @@
             margin-bottom: 30px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
-
-        .step-card {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 25px;
-            margin: 20px 0;
+        
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
             border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .step-card h3 {
+        ol, ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .step {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        a {
             color: #667eea;
-            margin-bottom: 15px;
+            text-decoration: none;
         }
 
-        .placeholder-content {
-            background: #e9ecef;
-            border: 2px dashed #6c757d;
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            margin: 20px 0;
-            color: #6c757d;
+        a:hover {
+            text-decoration: underline;
         }
 
-        .placeholder-content h4 {
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-
-        .grid-layout {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .warning-box h4 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-
-        .tools-list {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .tools-list h4 {
-            color: #0c5460;
-            margin-bottom: 15px;
-        }
-
-        .tools-list ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .tools-list li {
-            padding: 5px 0;
-        }
-
-        .tools-list li:before {
-            content: "🔧 ";
-            margin-right: 8px;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .content-section {
-                padding: 20px;
-            }
-
-            .grid-layout {
-                grid-template-columns: 1fr;
-            }
+        strong {
+            color: #d32f2f;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>🔧 Assembly Instructions</h1>
-            <p class="subtitle">Step-by-step guide to building your PySTEM Mini Bot</p>
-            <a href="index.html" class="back-button">← Back to Main Page</a>
+            <h1>PySTEM Mini Bot Assembly Guide</h1>
+            <p class="subtitle">Step by step instructions to build your own robot</p>
         </header>
 
         <div class="content-section">
-            <h2>📋 Overview</h2>
-            <p>This guide will walk you through the complete assembly process of the PySTEM Mini Bot. The build should take approximately 2-3 hours and requires basic tools and minimal technical experience.</p>
+            <h2>Required Tools</h2>
+            <ul>
+                <li>2mm hex head screwdriver (<a href="https://www.amazon.com/HARFINGTON-Screwdriver-Magnetic-Hexagonal-Precision/dp/B0DB1XPPMN/">amazon</a>)</li>
+                <li>5.5mm hex nut driver (<a href="https://www.amazon.com/Dynamite-DYN2803-Nut-Driver-5-5mm/dp/B000BQ4XP6/">amazon</a>)</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Required Parts</h2>
+            <ul>
+                <li>3D printed parts (<a href="https://www.thingiverse.com/thing:7135823">thingiverse</a>)</li>
+                <li>Assorted button head M3 screws (<a href="https://www.amazon.com/dp/B0811NDFNJ">amazon</a>)</li>
+                <li>12mm magnetic bead (<a href="https://www.amazon.com/Hematite-Natural-Gemstone-Crafting-Jewelry/dp/B0C3MX8J4F/">amazon</a>)</li>
+                <li>ACEBOTT ESP32 Max 1.0 development board (<a href="https://www.amazon.com/ACEBOTT-Development-Board-Compatible-Arduino/dp/B0D5D7Q42V/">amazon</a>)</li>
+                <li>FS90MR continuous servo (<a href="https://www.robotshop.com/products/feetech-6v-22kg-digital-360-degree-core-gear-servo">robotshop</a>)</li>
+                <li>2.4" wheel for continuous servo (<a href="https://www.robotshop.com/products/24-wheel-micro-continuous-rotation-fs90r-servo">robotshop</a>)</li>
+                <li>LM393 Speed sensor module (<a href="https://www.amazon.com/dp/B0776RHKB1">amazon</a>)</li>
+                <li>Encoder disk for speed sensor (<a href="https://www.amazon.com/ThtRht-Measuring-Photoelectric-Encoders-Optocoupler/dp/B0DZCMJ96S/">amazon</a>)</li>
+                <li>IR reflective sensor (<a href="https://www.amazon.com/dp/B0F5QD9FB4">amazon</a>)</li>
+                <li>MPU-6050 gyroscope module (<a href="https://www.amazon.com/dp/B0CJDS7WVY">amazon</a>)</li>
+                <li>Button switch (<a href="https://www.amazon.com/dp/B0DQ3WM7K1">amazon</a>)</li>
+                <li>Female to female dupont wire (<a href="https://www.amazon.com/dp/B0BRTJQGS6">amazon</a>)</li>
+                <li>4 AA battery box with plug (<a href="https://www.amazon.com/dp/B07D1JLG3C">amazon</a>)</li>
+            </ul>
+        </div>
+        <div class="content-section">
+            <h2>Assembly Steps</h2>
             
-            <div class="warning-box">
-                <h4>⚠️ Before You Start</h4>
-                <p>Please read through all instructions before beginning. Ensure you have all required components and tools. Adult supervision is recommended for younger builders.</p>
+            <div class="step">
+                <h3>1. Install Magnetic Bead as Omni Wheel</h3>
+                <p>Use a 30mm screw to go through the ball mount.</p>
+                <img src="images/image23.png" alt="Insert screw into ball mount" />
+                
+                <p>Press fit the magnetic bead into the ball mount</p>
+                <img src="images/image19.png" alt="Press fit magnetic bead" />
+                
+                <p>Secure the ball mount on the chassis</p>
+                <img src="images/image26.png" alt="Secure ball mount" />
             </div>
-        </div>
 
-        <div class="grid-layout">
-            <div class="content-section">
-                <h2>🛠️ Required Tools</h2>
-                <div class="placeholder-content">
-                    <h4>Tools List Coming Soon</h4>
-                    <p>Complete list of required tools and equipment will be added here.</p>
+            <div class="step">
+                <h3>2. Mount MPU-6050 Module</h3>
+                <p>Fasten 2 12mm screws on the servo cover to mount the MPU-6050.</p>
+                <img src="images/image10.png" alt="Insert mounting screws" />
+                
+                <p>Place the MPU-6050 with 1.8mm spacers to protect the resistor when fastening.</p>
+                <img src="images/image22.png" alt="Place MPU-6050 with spacers" />
+                
+                <p>Fasten the MPU-6050 on the servo cover</p>
+                <img src="images/image5.png" alt="Fasten MPU-6050" />
+                
+                <p>Connect the 4-pin dupont wire to MPU-6050, following the color coding exactly.</p>
+                <img src="images/image21.png" alt="Connect MPU-6050 wires" />
+            </div>
+
+            <div class="step">
+                <h3>3. Install Continuous Servos and Wheels</h3>
+                <p>Insert 3 20mm screws through the holes on one side of the chassis</p>
+                <img src="images/image3.png" alt="Insert chassis screws" />
+                
+                <p>Attach the wheel cover with nuts, keeping them loose for easy wheel installation later.</p>
+                <img src="images/image18.png" alt="Attach wheel cover" />
+                
+                <p>Snap the wheels onto the continuous servo and fasten the screws.</p>
+                <img src="images/image12.png" alt="Attach wheels to servo" />
+                
+                <p>Attach the speed encoder mount to the wheels and place the encoder disk on the mount.</p>
+                <img src="images/image27.png" alt="Install encoder disk" />
+                
+                <p>Assemble the continuous servo with wheel and encoder disk onto the chassis, then tighten the wheel cover screws.</p>
+                <img src="images/image8.png" alt="Install servo assembly" />
+                
+                <p>Repeat these steps to install the second continuous servo and wheel on the other side.</p>
+                <img src="images/image2.png" alt="Second servo installation" />
+            </div>
+
+            <div class="step">
+                <h3>4. Install Line Sensors</h3>
+                <p>Put the servo cover on and fasten with 20mm screws.</p>
+                <img src="images/image16.png" alt="Install servo cover" />
+                
+                <h3>Install sensors and switch</h3>
+                <p>Use 30mm screws to fasten speed encoders. Connect dupont wire following the colored order.</p>
+                <img src="images/image25.png" alt="Install speed encoders" />
+                
+                <p>Use a 25mm screw to fasten the IR reflective sensor. Connect dupont wire following the colored order.</p>
+                <img src="images/image24.png" alt="Install IR reflective sensor" />
+                
+                <p>Route all wires through the middle hole to the flat side of the chassis.</p>
+                <img src="images/image6.png" alt="Route wires through chassis" />
+                
+                <p>Snap the button switch onto the chassis top. Use a thin stripe of tape to make sure it fits tightly. Connect the dupont wire following the colored order.</p>
+                <img src="images/image11.png" alt="Install button switch" />
+            <div class="step">
+                <h3>5. Install ESP32 Board</h3>
+                <p>Insert 3 12mm screws from the bottom of the chassis through to the top. Add 3.5mm spacers to raise the board.</p>
+                <img src="images/image13.png" alt="Install board mounting screws" />
+                
+                <p>Place the ESP32 board and secure it with nuts</p>
+                <img src="images/image20.png" alt="Secure ESP32 board" />
+            </div>
+
+            <div class="step">
+                <h3>6. Connect Wires</h3>
+                <p>Connect the servo wires:</p>
+                <ul>
+                    <li>Top servo wire to pin 16</li>
+                    <li>Bottom servo wire to pin 17</li>
+                </ul>
+                <p>Be sure to follow the color coding exactly.</p>
+                <img src="images/image7.png" alt="Connect servo wires" />
+                
+                <p>Connect the encoder wires:</p>
+                <ul>
+                    <li>Top encoder wire to pin 13</li>
+                    <li>Bottom encoder wire to pin 14</li>
+                </ul>
+                <p>Ensure proper color coding.</p>
+                <img src="images/image9.png" alt="Connect encoder wires" />
+
+                <p>Connect the remaining components:</p>
+                <ul>
+                    <li>MPU-6050 wire to pin H13</li>
+                    <li>IR reflective sensor wire to pin 32</li>
+                    <li>Button switch wire to pin 26</li>
+                </ul>
+                <p>Follow the color coding exactly for all connections.</p>
+                <img src="images/image1.png" alt="Connect remaining components" />
+            </div>
+
+            <div class="step">
+                <h3>7. Install Top Covers</h3>
+                <p>Insert 4 45mm screws through the top cover holes. Two of these screws will also secure the battery cover.</p>
+                <img src="images/image17.png" alt="Insert cover screws" />
+                
+                <p>Secure the top cover to the chassis</p>
+                <img src="images/image15.png" alt="Attach top cover" />
+                
+                <p>Use two 10mm screws to secure the remaining holes of the battery cover</p>
+                <img src="images/image14.png" alt="Secure battery cover" />
+                
+                <p>Install the battery box and connect the power plug to the ESP32 board. <strong>Do not turn on the power yet.</strong></p>
+                <img src="images/image4.png" alt="Install battery box" />
+            </div>
+
+            <div class="step">
+                <h3>8. Final Inspection and Testing</h3>
+                <ol>
+                    <li>Double check that all screws are properly fastened</li>
+                    <li>Verify all wire connections and color coding</li>
+                    <li>Place the robot car on the ground</li>
+                    <li>Turn on the power</li>
+                    <li>Press the button switch</li>
+                </ol>
+                
+                <div class="content-section">
+                    <h4>Success Criteria</h4>
+                    <p>The robot car should move in a straight line. If it doesn't:</p>
+                    <ol>
+                        <li>Turn off the power immediately</li>
+                        <li>Check all wire connections</li>
+                        <li>Verify color coding of all connections</li>
+                        <li>Ensure all components are properly mounted</li>
+                    </ol>
                 </div>
             </div>
-
-            <div class="content-section">
-                <h2>📦 Bill of Materials</h2>
-                <div class="placeholder-content">
-                    <h4>Component List Coming Soon</h4>
-                    <p>Complete parts list with suppliers and quantities will be added here.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-section">
-            <h2>🔧 Assembly Steps</h2>
-            
-            <div class="step-card">
-                <h3>Step 1: Chassis Preparation</h3>
-                <div class="placeholder-content">
-                    <h4>3D Printed Chassis Assembly</h4>
-                    <p>Instructions for preparing and assembling the 3D printed chassis components will be detailed here, including images and diagrams.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 2: Motor Installation</h3>
-                <div class="placeholder-content">
-                    <h4>Servo Motor Mounting</h4>
-                    <p>Step-by-step guide for mounting the continuous rotation servo motors and attaching the wheels with encoders.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 3: Electronics Integration</h3>
-                <div class="placeholder-content">
-                    <h4>ESP32 and Sensor Installation</h4>
-                    <p>Instructions for mounting the ESP32 microcontroller and connecting the IR reflective sensor.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 4: Wiring and Connections</h3>
-                <div class="placeholder-content">
-                    <h4>Electrical Connections</h4>
-                    <p>Detailed wiring diagrams and connection instructions for all electronic components.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 5: Power System</h3>
-                <div class="placeholder-content">
-                    <h4>Battery Installation and Power Management</h4>
-                    <p>Instructions for installing the 6V battery system and power distribution.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <h3>Step 6: Software Setup</h3>
-                <div class="placeholder-content">
-                    <h4>Firmware Installation and Testing</h4>
-                    <p>Guide for flashing the firmware and initial testing procedures.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-section">
-            <h2>📐 Wiring Schematics</h2>
-            <div class="placeholder-content">
-                <h4>Circuit Diagrams Coming Soon</h4>
-                <p>Detailed wiring schematics and circuit diagrams will be provided here, showing all connections between components.</p>
-            </div>
-        </div>
-
-        <div class="content-section">
-            <h2>🔍 Troubleshooting</h2>
-            <div class="placeholder-content">
-                <h4>Common Issues and Solutions</h4>
-                <p>A comprehensive troubleshooting guide will be added here to help resolve common assembly and operational issues.</p>
-            </div>
-        </div>
-
-        <div class="content-section">
-            <h2>✅ Testing and Calibration</h2>
-            <div class="placeholder-content">
-                <h4>System Testing Procedures</h4>
-                <p>Instructions for testing all systems and calibrating the robot for optimal performance will be detailed here.</p>
-            </div>
-        </div>
-
-        <div class="content-section" style="text-align: center;">
-            <h2>🎉 Congratulations!</h2>
-            <p>Once assembly is complete, you'll be ready to start programming your PySTEM Mini Bot!</p>
-            <br>
-            <a href="ide.html" class="back-button">🚀 Start Programming</a>
         </div>
     </div>
 </body>
