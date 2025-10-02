@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2V391V0KHM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-2V391V0KHM');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySTEM Mini Bot - Firmware Flashing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .back-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .step-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .step-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .firmware-info {
+            background: #e7f1ff;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .firmware-info h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+            margin: 10px;
+        }
+
+        .download-button:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .method-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .method-card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .requirements {
+            background: #fff8e1;
+            border: 1px solid #ffcc02;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .requirements h5 {
+            color: #b8860b;
+            margin-bottom: 10px;
+        }
+
+        ol {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        ol li {
+            margin: 10px 0;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        ul li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+        <!-- Universal Navigation Bar -->
+        <nav style="width:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0 8px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:24px;">
+            <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:32px;align-items:center;">
+                <a href="index.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🏠 Home</a>
+                <a href="assembly.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🔧 Assembly</a>
+                <a href="firmware.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💾 Firmware</a>
+                <a href="ide.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💻 IDE</a>
+            </div>
+        </nav>
+        <div class="container">
+        <header>
+            <h1>⚡ Firmware Flashing Guide</h1>
+            <p class="subtitle">How to flash MicroPython firmware to your ESP32</p>
+            <a href="index.html" class="back-button">← Back to Main Page</a>
+        </header>
+
+        <div class="content-section">
+            <h2>📋 Overview</h2>
+            <p>This guide will walk you through flashing the MicroPython firmware to your ESP32 microcontroller for the PySTEM Mini Bot. The firmware enables Python programming and provides all the necessary libraries for robot control.</p>
+            
+            <div class="firmware-info">
+                <h3>🔧 Current Firmware</h3>
+                <p><strong>ESP32_GENERIC-20250415-v1.25.0.bin</strong></p>
+                <p>MicroPython v1.25.0 specifically configured for ESP32 Generic boards</p>
+                <a href="firmware/ESP32_GENERIC-20250415-v1.25.0.bin" class="download-button" download>💾 Download Firmware</a>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Before You Start</h4>
+                <p>Flashing firmware will erase all existing code on your ESP32. Make sure to backup any important files before proceeding. Ensure your ESP32 is properly connected and your computer recognizes the device.</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>📋 Prerequisites</h2>
+            <div class="info-box">
+                <h4>What You'll Need</h4>
+                <ul>
+                    <li>ESP32 development board</li>
+                    <li>USB cable (typically micro-USB or USB-C depending on your board)</li>
+                    <li>Computer with Windows, macOS, or Linux</li>
+                    <li>Internet connection for downloading tools</li>
+                    <li>ESP32 drivers installed (if needed)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>💻 Flashing Method: Command Line</h2>
+            <div class="method-card">
+                <h3>💻 Command Line Flashing</h3>
+                <p><strong>Using esptool.py for more control</strong></p>
+                
+                <div class="requirements">
+                    <h5>Requirements:</h5>
+                    <ul>
+                        <li>Python 3.6+ installed</li>
+                        <li>pip package manager</li>
+                        <li>Command line access</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h4>💡 Note:</h4>
+                    <p>If <code>pip</code> doesn't work, try <code>pip3</code>. Similarly, if <code>python</code> doesn't work, try <code>python3</code>.</p>
+                </div>
+
+                <ol>
+                    <li><strong>Install esptool:</strong>
+                        <div class="code-block">pip install esptool</div>
+                        <p>If this doesn't work, try: <code>pip3 install esptool</code></p>
+                    </li>
+                    <li><strong>Open Terminal/Command Prompt:</strong>
+                        <br><strong>Windows:</strong> Press Win+R, type <code>cmd</code>, press Enter
+                        <br><strong>macOS:</strong> Press Cmd+Space, type <code>terminal</code>, press Enter
+                        <br><strong>Linux:</strong> Press Ctrl+Alt+T or search for "Terminal" in applications
+                    </li>
+                    <li><strong>Connect ESP32:</strong>
+                        <br>Plug your ESP32 into your computer using a USB cable
+                    </li>
+                    <li><strong>Erase flash:</strong>
+                        <div class="code-block">esptool.py --chip esp32 erase_flash</div>
+                    </li>
+                    <li><strong>Flash firmware:</strong>
+                        <div class="code-block">esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 ESP32_GENERIC-20250415-v1.25.0.bin</div>
+                    </li>
+                    <li><strong>Test with LED blink:</strong>
+                        <br>Go to our <a href="ide.html">Python IDE</a> and run the LED blink example program to verify everything is working
+                    </li>
+                </ol>
+
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🔧 Troubleshooting</h2>
+            
+            <div class="step-card">
+                <h3>ESP32 Not Detected</h3>
+                <ul>
+                    <li>Install ESP32 drivers from the manufacturer</li>
+                    <li>Try a different USB cable (data cables, not just charging cables)</li>
+                    <li>Try a different USB port</li>
+                    <li>Press and hold the BOOT button while connecting</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Flash Failed</h3>
+                <ul>
+                    <li>Lower the baud rate (try 115200 instead of 460800)</li>
+                    <li>Put ESP32 in download mode: Hold BOOT + press RESET, release RESET, then release BOOT</li>
+                    <li>Ensure no other programs are using the serial port</li>
+                    <li>Try flashing with a shorter USB cable</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>Permission Denied (Linux/macOS)</h3>
+                <ul>
+                    <li>Add your user to the dialout group: <code>sudo usermod -a -G dialout $USER</code></li>
+                    <li>Or use sudo with esptool commands</li>
+                    <li>Log out and back in after changing groups</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>✅ Verification</h2>
+            <p>After successful flashing, verify your ESP32 is working correctly:</p>
+            
+            <ol>
+                <li><strong>Connect via Serial:</strong> Use a terminal program (PuTTY, Arduino Serial Monitor, or our web IDE)</li>
+                <li><strong>Check MicroPython:</strong> You should see the MicroPython REPL prompt <code>>>></code></li>
+                <li><strong>Test Basic Commands:</strong>
+                    <div class="code-block">>>> print("Hello PySTEM Mini Bot!")<br>Hello PySTEM Mini Bot!<br>>>> import machine<br>>>> machine.freq()<br>240000000</div>
+                </li>
+            </ol>
+
+            <div class="success-box">
+                <h4>🎉 Success!</h4>
+                <p>If you see the MicroPython prompt and can run basic commands, your firmware flash was successful! You're now ready to start programming your PySTEM Mini Bot.</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🚀 Next Steps</h2>
+            <p>With firmware successfully flashed, you're ready to start programming!</p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="ide.html" class="download-button">🚀 Open Python IDE</a>
+            </div>
+
+            <div class="info-box">
+                <h4>📚 What's Next?</h4>
+                <ul>
+                    <li>Use our browser-based IDE to write Python programs</li>
+                    <li>Start by running the LED blink example to test your ESP32</li>
+                    <li>Try the example programs for motors, sensors, and movement</li>
+                    <li>Connect your robot hardware following the assembly guide</li>
+                    <li>Progress from simple LED blinking to complex robot behaviors</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
