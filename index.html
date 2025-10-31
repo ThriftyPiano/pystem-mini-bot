@@ -181,6 +181,86 @@
             margin-bottom: 10px;
         }
 
+        /* Hiring banner */
+        .hire-banner {
+            background: #f2f4f7; /* light gray */
+            color: #0b63d6; /* blue text */
+            border-radius: 10px;
+            padding: 18px 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(229,46,113,0.12);
+            margin-bottom: 20px;
+        }
+
+        .hire-banner .left {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex: 1 1 auto;
+        }
+
+        .hire-banner .emoji {
+            font-size: 28px;
+        }
+
+        .hire-banner .content {
+            line-height: 1.2;
+        }
+
+        .hire-banner h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.1rem;
+        }
+
+        .hire-banner p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .hire-banner .cta {
+            background: #cbd5df; /* darker gray */
+            color: #0b63d6; /* blue text */
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            border: 2px solid rgba(11,99,214,0.15);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .hire-banner .cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(11,99,214,0.12);
+            background: #b7c7d7; /* slightly darker gray */
+        }
+
+        @media (max-width: 720px) {
+            .hire-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .hire-banner .cta { align-self: stretch; text-align:center }
+        }
+
+        .hire-banner .details {
+            display: none;
+            margin-top: 8px;
+            max-height: 320px;
+            overflow: auto;
+            background: rgba(255,255,255,0.03);
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+
+        .hire-banner.expanded .details {
+            display: block;
+        }
+
         .github-link {
             display: inline-block;
             background: #333;
@@ -282,7 +362,7 @@
         <!-- Universal Navigation Bar -->
         <nav class="universal-navbar" style="width:100vw;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0 8px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:24px;overflow-x:hidden;">
             <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;position:relative;">
-                <a href="https://discord.gg/W5c48TxVz5" target="_blank" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;background:#5865F2;padding:8px 16px;border-radius:6px;display:flex;align-items:center;gap:8px;position:absolute;left:0;">
+                <a href="https://discord.gg/kwWs22VNMk" target="_blank" rel="noopener noreferrer" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;background:#5865F2;padding:8px 16px;border-radius:6px;display:flex;align-items:center;gap:8px;position:absolute;left:0;">
                     <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg" alt="Discord" style="height:20px;width:20px;vertical-align:middle;"> Join Discord
                 </a>
                 <div style="display:flex;flex:1;justify-content:center;gap:32px;align-items:center;">
@@ -293,7 +373,36 @@
                 </div>
             </div>
         </nav>
+        <!-- Hiring / Join banner -->
         <div class="container">
+            <div class="hire-banner" id="hireBanner" role="region" aria-label="We're hiring banner">
+                <div class="left">
+                    <div class="emoji">🚀</div>
+                    <div class="content">
+                        <h3>We’re hiring — Join the PySTEM MiniBot Team!</h3>
+                        <p>Mission: Make robotics &amp; STEM learning accessible for all. <strong>Build a pathway from zero → your first robot → FLL → FTC.</strong></p>
+                        <div class="details" id="hireDetails">
+                            <p style="margin-top:6px; margin-bottom:6px;">Why PySTEM MiniBot?</p>
+                            <ul style="margin:6px 0 0 18px; padding:0;">
+                                <li>🤖 Assemble your own real robot – hands-on and fun</li>
+                                <li>💻 Learn Python coding for motors &amp; sensors</li>
+                                <li>⚡ Explore electronics &amp; engineering basics</li>
+                                <li>🏆 Gain skills for FLL &amp; FTC competitions</li>
+                                <li>💰 Low cost &amp; open source</li>
+                            </ul>
+                            <p style="margin-top:8px;"><strong>Your Role:</strong> Help promote, test, and develop our PySTEM MiniBot. Gain real robotics experience, and boost your STEM portfolio for school and competitions.</p>
+                            <p style="margin-top:6px; font-weight:600;">Join our Discord &rarr; Let’s bridge the learning gap &amp; support FIRST programs together!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="right">
+                    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                        <a class="cta" href="https://discord.gg/kwWs22VNMk" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;">Join our Discord →</a>
+                        <button id="bannerToggle" style="background:#cbd5df;border:1px solid rgba(11,99,214,0.12);color:#0b63d6;padding:6px 8px;border-radius:6px;cursor:pointer;">More</button>
+                    </div>
+                </div>
+            </div>
+        
         <header>
             <h1>🤖 PySTEM Mini Bot</h1>
             <p class="subtitle">Learn Programming Through Hands-On Robotics</p>
@@ -415,33 +524,21 @@
             </div>
         </div>
 
-        <a href="https://discord.gg/kwWs22VNMk" target="_blank" class="discord-button" title="Join our Discord community">
+        <a href="https://discord.gg/kwWs22VNMk" target="_blank" class="discord-button" title="Join our Discord community" aria-label="Join our Discord community" rel="noopener noreferrer">
             <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z'/%3E%3C/svg%3E" alt="Discord" />
         </a>
+        <script>
+            (function(){
+                var btn = document.getElementById('bannerToggle');
+                var banner = document.getElementById('hireBanner');
+                if(!btn || !banner) return;
+                btn.addEventListener('click', function(){
+                    var expanded = banner.classList.toggle('expanded');
+                    btn.textContent = expanded ? 'Less' : 'More';
+                    // If expanded, scroll into view a bit
+                    if(expanded) banner.scrollIntoView({behavior:'smooth', block:'center'});
+                });
+            })();
+        </script>
     </body>
-</html>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 25px;">
-                    <a href="https://github.com/ThriftyPiano/pystem-mini-bot" class="github-link" target="_blank">📂 Explore the Full Repository</a>
-                    <a href="https://www.thingiverse.com/thing:7135823" class="thingiverse-link" target="_blank">🖨️ Download 3D Files</a>
-                    <a href="assembly.html" class="ide-button">🔧 Assembly Instructions</a>
-                </div>
-                
-                <p style="margin-top: 20px; font-style: italic; color: #666; text-align: center;">
-                    Join our community of makers, educators, and students building the future of accessible robotics education!
-                </p>
-            </div>
-        </div>
-
-        <div class="content-section" style="text-align: center;">
-            <h2>Ready to Start Learning?</h2>
-            <p>Jump into the programming environment and start building your first robot programs!</p>
-            <br>
-            <a href="ide.html" class="ide-button">🚀 Launch IDE</a>
-        </div>
-    </div>
-</body>
 </html>
