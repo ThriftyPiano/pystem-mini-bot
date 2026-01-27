@@ -1,13 +1,13 @@
 # filename: motor.py
 # SPIKE Prime Compatible Motor Module for ESP32
-# Supports continuous servo motors with LM393 encoders
+# FIXES: Hard Stop, Proportional Control, Debouncing, Debug Prints
 
 from machine import Pin, PWM, Timer
 import time
 import math
 from config import MOTOR_PINS, MOTOR_CONFIG
 
-# Port constants (matching SPIKE Prime API)
+# Port constants
 PORT_A = 'A'
 PORT_B = 'B'
 PORT_C = 'C'
@@ -29,32 +29,32 @@ class Motor:
         self.servo_pin = servo_pin
         self.encoder_pin = encoder_pin
         
-        # Setup servo PWM (50Hz for standard servos)
+        # Setup servo PWM (50Hz)
         self.pwm = PWM(Pin(servo_pin))
         self.pwm.freq(50)
         
-        # Setup encoder pin
-        self.encoder = Pin(encoder_pin, Pin.IN)
+        # Setup encoder pin with Pull-Up (Stabilizes signal)
+        self.encoder = Pin(encoder_pin, Pin.IN, Pin.PULL_UP)
         
         # Encoder state
         self.position = 0
         self.pulse_count = 0
         self.last_pulse_time = time.ticks_ms()
         self.velocity = 0
-        self.direction = 1  # 1 for forward, -1 for reverse
+        self.direction = 1 
         
         # Motor state
         self.target_position = 0
-        self.target_velocity = MOTOR_CONFIG['default_speed_dps']  # Default target velocity
+        self.target_velocity = MOTOR_CONFIG['default_speed_dps']
         self.is_running = False
         self.current_speed = 0
+        self.print_ticks = False  # Switch for debug printing
         
-        # Setup encoder interrupt (count rising edges)
+        # Setup encoder interrupt
         self.encoder.irq(trigger=Pin.IRQ_RISING, handler=self._encoder_callback)
         
         # Timer for position control
         timer_id = ord(port) - ord('A')
-        # ESP32 only supports 0-3, so error if port is invalid
         if timer_id < 0 or timer_id > 3:
             raise ValueError("Only ports A-D are supported.")
         self.control_timer = Timer(timer_id)
@@ -63,17 +63,25 @@ class Motor:
         self._set_servo_speed(0)
     
     def _encoder_callback(self, pin):
-        """Handle encoder interrupts to track position"""
+        """Handle encoder interrupts with DEBOUNCING"""
         current_time = time.ticks_ms()
         
-        # Count pulses
+        # 1. Debounce Filter: Ignore clicks faster than 5ms
+        if time.ticks_diff(current_time, self.last_pulse_time) < 5:
+            return
+            
+        # 2. Count pulses
         self.pulse_count += 1
         
-        # Update position based on direction and pulse count
+        # 3. Optional Debug Print
+        if self.print_ticks:
+            print(f"TICK! Total: {self.pulse_count}")
+
+        # 4. Update Position
         degrees_per_pulse = 360 / MOTOR_CONFIG['pulses_per_revolution']
         self.position += self.direction * degrees_per_pulse
         
-        # Calculate velocity (degrees per second)
+        # 5. Calculate Velocity
         dt = time.ticks_diff(current_time, self.last_pulse_time) / 1000.0
         if dt > 0:
             self.velocity = degrees_per_pulse / dt * self.direction
@@ -81,189 +89,181 @@ class Motor:
         self.last_pulse_time = current_time
     
     def _set_servo_speed(self, speed):
-        """Set servo speed (-100 to 100, 0 = stop)"""
-        # Convert speed to servo pulse width
-        # Typical servo: 1ms = full reverse, 1.5ms = stop, 2ms = full forward
-        if speed == 0:
-            pulse_width = 1500  # Stop position
-            self.direction = 0
-            self.pwm.duty_u16(0)
-        else:
-            self.pwm.freq(50)
-            # Map -100 to 100 -> 1000 to 2000 microseconds
-            pulse_width = int(1500 + (speed * 5))
-            pulse_width = max(1000, min(2000, pulse_width))
-            # Track direction for encoder counting
-            self.direction = 1 if speed > 0 else -1
+        """Set servo speed. 0 = HARD STOP (Cut Power)"""
         
-        # Convert to duty cycle (50Hz = 20ms period)
-        duty = int((pulse_width / 20000) * 1023)
+        # --- THE FIX: HARD STOP ---
         if speed == 0:
-            duty = 0
-        self.pwm.duty_u16(int(duty * 64))  # Convert to 16-bit duty cycle
+            self.direction = 0
+            self.pwm.duty_u16(0)  # CUT SIGNAL COMPLETELY
+            return
+        # --------------------------
+
+        self.pwm.freq(50)
+        # Map speed to pulse width (1000-2000us)
+        pulse_width = int(1500 + (speed * 5))
+        pulse_width = max(1000, min(2000, pulse_width))
+        
+        # Track direction
+        self.direction = 1 if speed > 0 else -1
+        
+        # Convert to duty cycle
+        duty = int((pulse_width / 20000) * 1023)
+        self.pwm.duty_u16(int(duty * 64))
         self.current_speed = speed
     
     def _position_control(self, timer):
-        """Position control loop"""
+        """Loop to check if we reached the target"""
         if not self.is_running:
             self._set_servo_speed(0)
             self.control_timer.deinit()
             return
             
-        error = self.target_position - self.position
+        # 1. Take a Snapshot (Thread Safety)
+        current_pos_snapshot = self.position
+        error = self.target_position - current_pos_snapshot
         
-        if abs(error) < MOTOR_CONFIG['position_tolerance']:  # Use configured tolerance
-            self._set_servo_speed(0)
+        # Debug Print to see what is happening
+        if self.print_ticks:
+            print(f"Tgt: {self.target_position:.1f} | Cur: {current_pos_snapshot:.1f} | Err: {error:.1f}")
+        
+        # 2. Check Arrival (Tolerance check)
+        # If within 1 tick (approx 20 deg), STOP.
+        if abs(error) <= 30:  # Increased tolerance slightly to catch fast movements
+            print(">>> TARGET REACHED! STOPPING. <<<")
             self.is_running = False
+            self.print_ticks = False
+            self._set_servo_speed(0)  # This triggers the Hard Stop
             self.control_timer.deinit()
             return
         
-        # Use target velocity to limit speed
-        # Convert target velocity to speed percentage
-        max_speed_percent = max(-100, min(100, self.target_velocity / (MOTOR_CONFIG['max_speed_dps'] / 100)))
+        # 3. Proportional Control (Slow down closer to target)
+        kp = 0.8  # Aggressiveness
+        speed_command = error * kp
         
-        # # Simple proportional control with velocity limiting
-        # speed = max(-100, min(100, error * 0.2))
-        # # Limit speed to target velocity
-        # if speed > 0:
-        #     speed = min(speed, abs(max_speed_percent))
-        # else:
-        #     speed = max(speed, -abs(max_speed_percent))
-        
-        # # Ensure minimum speed is not too low
-        # if abs(speed) < 15:  # Minimum speed threshold
-        #     speed = 15 if speed > 0 else -15
-        # self._set_servo_speed(speed)
-
-        self._set_servo_speed(max_speed_percent)
+        # 4. Limit Speed
+        max_user_speed = abs(self.target_velocity / (MOTOR_CONFIG['max_speed_dps'] / 100))
+        if speed_command > 0:
+            final_speed = min(speed_command, max_user_speed)
+        else:
+            final_speed = max(speed_command, -max_user_speed)
+            
+        # 5. Minimum Power (Prevent Stalling)
+        if abs(final_speed) < 15:
+            final_speed = 15 if final_speed > 0 else -15
+            
+        self._set_servo_speed(final_speed)
 
     def stop(self):
-        """Stop the motor"""
+        """Force Stop"""
+        print(f'STOP command sent to Port {self.port}')
         self.is_running = False
-        self._set_servo_speed(0)
+        self.print_ticks = False
         self.control_timer.deinit()
-        self.pwm.duty_u16(0)
-        print('stop motor ' + self.port)
+        self._set_servo_speed(0) # Triggers Hard Stop
 
 # Global motor instances
 _motors = {}
 
 def _get_motor(port):
-    """Get or create motor instance for port"""
     if port not in _motors:
         if port in MOTOR_PINS:
             pins = MOTOR_PINS[port]
             _motors[port] = Motor(port, pins['servo'], pins['encoder'])
         else:
-            raise ValueError(f"Invalid port: {port}. Available ports: {list(MOTOR_PINS.keys())}")
-    
+            raise ValueError(f"Invalid port: {port}")
     return _motors[port]
 
-# SPIKE Prime Motor API Functions
+# --- API Functions ---
 
 def run(port, velocity, *, acceleration=1000):
-    """Run motor at specified velocity (degrees per second)"""
     motor = _get_motor(port)
-    
-    # Convert degrees per second to servo speed percentage
-    # Use configured max speed for conversion
     speed_percent = max(-100, min(100, velocity / (MOTOR_CONFIG['max_speed_dps'] / 100)))
     motor._set_servo_speed(speed_percent)
     motor.is_running = True
 
 def run_for_degrees(port, degrees, velocity, *, stop=True, acceleration=1000, deceleration=1000):
-    """Run motor for specified degrees"""
     motor = _get_motor(port)
+    
+    # Enable Prints
+    motor.print_ticks = True
     
     start_position = motor.position
     motor.target_position = start_position + degrees
-    motor.target_velocity = velocity  # Store target velocity for position control
+    motor.target_velocity = velocity
     motor.is_running = True
     
-    # Start position control
+    # Start the "Brain" loop
     motor.control_timer.init(period=MOTOR_CONFIG['control_loop_ms'], mode=Timer.PERIODIC, callback=motor._position_control)
     
-    # Wait for completion if blocking
+    # Safety Timeout (Stop after 5 seconds if stuck)
+    start_time = time.ticks_ms()
+    
     if stop:
         while motor.is_running:
             time.sleep_ms(10)
+            # Timeout protection
+            if time.ticks_diff(time.ticks_ms(), start_time) > 5000:
+                print("TIMEOUT: Forcing stop.")
+                motor.stop()
+                break
 
+# Helper wrappers
 def run_for_time(port, time_ms, velocity, *, stop=True, acceleration=1000, deceleration=1000):
-    """Run motor for specified time"""
     motor = _get_motor(port)
-    
-    # Convert degrees per second to servo speed percentage
     speed_percent = max(-100, min(100, velocity / (MOTOR_CONFIG['max_speed_dps'] / 100)))
     motor._set_servo_speed(speed_percent)
     motor.is_running = True
-    
-    # Run for specified time
     time.sleep_ms(time_ms)
-    
     if stop:
         motor.stop()
 
 def run_to_position(port, position, velocity, *, direction=SHORTEST_PATH, stop=True, acceleration=1000, deceleration=1000):
-    """Run motor to absolute position"""
     motor = _get_motor(port)
-    
+    motor.print_ticks = True
     motor.target_position = position
-    motor.target_velocity = velocity  # Store target velocity for position control
+    motor.target_velocity = velocity
     motor.is_running = True
-    
-    # Start position control
     motor.control_timer.init(period=MOTOR_CONFIG['control_loop_ms'], mode=Timer.PERIODIC, callback=motor._position_control)
     
-    # Wait for completion if blocking
+    start_time = time.ticks_ms()
     if stop:
         while motor.is_running:
             time.sleep_ms(10)
+            if time.ticks_diff(time.ticks_ms(), start_time) > 5000:
+                print("TIMEOUT: Forcing stop.")
+                motor.stop()
+                break
 
 def run_to_degrees_counted(port, degrees, velocity, *, stop=True, acceleration=1000, deceleration=1000):
-    """Run motor to position relative to last reset"""
     run_to_position(port, degrees, velocity, stop=stop, acceleration=acceleration, deceleration=deceleration)
 
 def stop(port, *, stop=True):
-    """Stop motor"""
     motor = _get_motor(port)
     motor.stop()
 
 def reset_relative_position(port, position):
-    """Reset relative position counter"""
     motor = _get_motor(port)
     motor.position = position
 
 def get_position(port):
-    """Get current position in degrees"""
     motor = _get_motor(port)
     return motor.position
 
 def get_degrees_counted(port):
-    """Get degrees counted since last reset"""
     return get_position(port)
 
 def get_velocity(port):
-    """Get current velocity in degrees per second"""
     motor = _get_motor(port)
     return motor.velocity
 
 def get_default_velocity(port):
-    """Get default velocity (placeholder)"""
     return MOTOR_CONFIG['default_speed_dps']
 
 def set_degrees_counted(port, degrees_counted):
-    """Set the degrees counted value"""
     reset_relative_position(port, degrees_counted)
 
-def was_interrupted(port):
-    """Check if motor was interrupted (placeholder)"""
-    return False
-
-def was_stalled(port):
-    """Check if motor was stalled (placeholder)"""
-    return False
-
+def was_interrupted(port): return False
+def was_stalled(port): return False
 def get_duty_cycle(port):
-    """Get current duty cycle percentage"""
     motor = _get_motor(port)
     return motor.current_speed
