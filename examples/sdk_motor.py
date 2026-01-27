@@ -160,6 +160,11 @@ class Motor:
         self.print_ticks = False
         self.control_timer.deinit()
         self._set_servo_speed(0) # Triggers Hard Stop
+        time.sleep_ms(50)
+        self._set_servo_speed(0) # Triggers Hard Stop
+        time.sleep_ms(50)
+        self._set_servo_speed(0) # Triggers Hard Stop
+        return
 
 # Global motor instances
 _motors = {}
