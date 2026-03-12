@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2V391V0KHM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2V391V0KHM');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Car - Scratch IDE</title>
+    <!-- Blockly -->
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+    <!-- Robot Controller -->
+    <script src="robot.js?version=1.1"></script>
+    <!-- Serial Terminal -->
+    <script src="terminal.js?version=1.1"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .universal-navbar {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+        #toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 0;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: center;
+        }
+        #main-content {
+            flex: 1 1 auto;
+            display: flex;
+            min-height: 0;
+        }
+        #blockly-area {
+            flex: 1 1 65%;
+            min-height: 0;
+            position: relative;
+        }
+        #blocklyDiv {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        #right-panel {
+            flex: 0 0 35%;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #ccc;
+            min-width: 280px;
+        }
+        #code-preview {
+            flex: 1 1 50%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #code-preview-header {
+            padding: 8px;
+            background: #e8e8e8;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #code-output {
+            flex: 1;
+            overflow: auto;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            white-space: pre;
+            tab-size: 4;
+        }
+        #terminal-container {
+            flex: 1 1 50%;
+            min-height: 150px;
+            overflow: hidden;
+            border-top: 1px solid #ccc;
+        }
+        button {
+            padding: 4px 12px;
+            font-size: 11px;
+            border: 1px solid #888;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #e0e0e0;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            #main-content {
+                flex-direction: column;
+            }
+            #blockly-area {
+                flex: 1 1 50%;
+                min-height: 300px;
+            }
+            #right-panel {
+                flex: 1 1 50%;
+                min-width: auto;
+                border-left: none;
+                border-top: 1px solid #ccc;
+            }
+            #toolbar {
+                flex-wrap: wrap;
+                padding: 6px;
+                gap: 4px;
+            }
+            #toolbar button {
+                padding: 6px 10px;
+                font-size: 10px;
+                min-width: 70px;
+            }
+            #toolbar span {
+                margin-right: 6px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Universal Navigation Bar -->
+    <nav class="universal-navbar" style="width:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0 8px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:0;">
+        <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;position:relative;">
+            <a href="https://discord.gg/W5c48TxVz5" target="_blank" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;background:#5865F2;padding:8px 16px;border-radius:6px;display:flex;align-items:center;gap:8px;position:absolute;left:0;">
+                <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg" alt="Discord" style="height:20px;width:20px;vertical-align:middle;"> Join Discord
+            </a>
+            <div style="display:flex;flex:1;justify-content:center;gap:32px;align-items:center;">
+                <a href="index.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🏠 Home</a>
+                <a href="assembly.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🔧 Assembly</a>
+                <a href="firmware.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💾 Firmware</a>
+                <a href="ide.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💻 IDE</a>
+                <a href="scratch.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🧩 Scratch</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="toolbar">
+        <span style="font-weight: bold; margin-right: 12px; font-size: 12px;">Robot</span>
+        <button id="btn-connect">Connect</button>
+        <button id="btn-disconnect">Disconnect</button>
+        <button id="btn-upload-code">Write to Robot</button>
+    </div>
+
+    <div id="main-content">
+        <div id="blockly-area">
+            <div id="blocklyDiv"></div>
+        </div>
+        <div id="right-panel">
+            <div id="code-preview">
+                <div id="code-preview-header">
+                    Generated Python Code
+                    <button id="btn-copy-code" style="font-size:10px;padding:2px 8px;">Copy</button>
+                </div>
+                <div id="code-output"></div>
+            </div>
+            <div id="terminal-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // PYTHON GENERATOR SETUP
+        // ============================================
+        // Newer Blockly uses python.pythonGenerator; older uses Blockly.Python
+        var pythonGenerator = (typeof python !== 'undefined' && python.pythonGenerator)
+            ? python.pythonGenerator
+            : Blockly.Python;
+
+        // ============================================
+        // CUSTOM ROBOT BLOCKS
+        // ============================================
+
+        // --- Motor Setup ---
+        Blockly.Blocks['robot_motor_pair'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("pair motors (left A, right B)");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(230);
+                this.setTooltip("Pair left motor (port A) and right motor (port B)");
+            }
+        };
+        pythonGenerator.forBlock['robot_motor_pair'] = function(block) {
+            return 'motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)\n';
+        };
+
+        // --- Move Forward/Backward for Degrees ---
+        Blockly.Blocks['robot_move_degrees'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("move")
+                    .appendField(new Blockly.FieldDropdown([["forward","1"],["backward","-1"]]), "DIR")
+                    .appendField("for")
+                    .appendField(new Blockly.FieldNumber(360, 1), "DEGREES")
+                    .appendField("degrees at speed")
+                    .appendField(new Blockly.FieldNumber(360, 1, 1000), "SPEED");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(160);
+                this.setTooltip("Move the robot forward or backward for a number of degrees");
+            }
+        };
+        pythonGenerator.forBlock['robot_move_degrees'] = function(block) {
+            var dir = block.getFieldValue('DIR');
+            var degrees = block.getFieldValue('DEGREES');
+            var speed = block.getFieldValue('SPEED');
+            var actualDeg = (dir === '-1') ? '-' + degrees : degrees;
+            return 'motor_pair.move_for_degrees(motor_pair.PAIR_1, ' + actualDeg + ', 0, velocity=' + speed + ')\n';
+        };
+
+        // --- Move Forward/Backward for Time ---
+        Blockly.Blocks['robot_move_time'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("move")
+                    .appendField(new Blockly.FieldDropdown([["forward","1"],["backward","-1"]]), "DIR")
+                    .appendField("for")
+                    .appendField(new Blockly.FieldNumber(1, 0.1), "SECONDS")
+                    .appendField("seconds at speed")
+                    .appendField(new Blockly.FieldNumber(360, 1, 1000), "SPEED");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(160);
+                this.setTooltip("Move the robot for a number of seconds");
+            }
+        };
+        pythonGenerator.forBlock['robot_move_time'] = function(block) {
+            var dir = block.getFieldValue('DIR');
+            var seconds = block.getFieldValue('SECONDS');
+            var speed = block.getFieldValue('SPEED');
+            var ms = Math.round(seconds * 1000);
+            var vel = (dir === '-1') ? '-' + speed : speed;
+            return 'motor_pair.move_for_time(motor_pair.PAIR_1, ' + ms + ', 0, velocity=' + vel + ')\n';
+        };
+
+        // --- Tank Turn ---
+        Blockly.Blocks['robot_tank_turn'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("spin")
+                    .appendField(new Blockly.FieldDropdown([["right","right"],["left","left"]]), "DIR")
+                    .appendField("for")
+                    .appendField(new Blockly.FieldNumber(68, 1), "DEGREES")
+                    .appendField("degrees at speed")
+                    .appendField(new Blockly.FieldNumber(90, 1, 1000), "SPEED");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(160);
+                this.setTooltip("Spin the robot in place by turning wheels in opposite directions");
+            }
+        };
+        pythonGenerator.forBlock['robot_tank_turn'] = function(block) {
+            var dir = block.getFieldValue('DIR');
+            var degrees = block.getFieldValue('DEGREES');
+            var speed = block.getFieldValue('SPEED');
+            if (dir === 'right') {
+                return 'motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, ' + degrees + ', ' + speed + ', -' + speed + ')\n';
+            } else {
+                return 'motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, -' + degrees + ', -' + speed + ', ' + speed + ')\n';
+            }
+        };
+
+        // --- Stop Motors ---
+        Blockly.Blocks['robot_stop'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("stop motors");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(160);
+                this.setTooltip("Stop both motors");
+            }
+        };
+        pythonGenerator.forBlock['robot_stop'] = function(block) {
+            return 'motor_pair.stop(motor_pair.PAIR_1)\n';
+        };
+
+        // --- Individual Motor ---
+        Blockly.Blocks['robot_motor_run'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("run motor")
+                    .appendField(new Blockly.FieldDropdown([["A (left)","motor.PORT_A"],["B (right)","motor.PORT_B"]]), "PORT")
+                    .appendField("at speed")
+                    .appendField(new Blockly.FieldNumber(360, -1000, 1000), "SPEED");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(200);
+                this.setTooltip("Run a single motor at a given speed (degrees/sec)");
+            }
+        };
+        pythonGenerator.forBlock['robot_motor_run'] = function(block) {
+            var port = block.getFieldValue('PORT');
+            var speed = block.getFieldValue('SPEED');
+            return 'motor.run(' + port + ', ' + speed + ')\n';
+        };
+
+        // --- Motor Stop ---
+        Blockly.Blocks['robot_motor_stop'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("stop motor")
+                    .appendField(new Blockly.FieldDropdown([["A (left)","motor.PORT_A"],["B (right)","motor.PORT_B"]]), "PORT");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(200);
+                this.setTooltip("Stop a single motor");
+            }
+        };
+        pythonGenerator.forBlock['robot_motor_stop'] = function(block) {
+            var port = block.getFieldValue('PORT');
+            return 'motor.stop(' + port + ')\n';
+        };
+
+        // --- LED On/Off ---
+        Blockly.Blocks['robot_led'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("turn LED")
+                    .appendField(new Blockly.FieldDropdown([["on","on"],["off","off"]]), "STATE");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(20);
+                this.setTooltip("Turn the built-in LED on or off");
+            }
+        };
+        pythonGenerator.forBlock['robot_led'] = function(block) {
+            var state = block.getFieldValue('STATE');
+            return 'led.' + state + '()\n';
+        };
+
+        // --- Wait ---
+        Blockly.Blocks['robot_wait'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("wait")
+                    .appendField(new Blockly.FieldNumber(1, 0.01), "SECONDS")
+                    .appendField("seconds");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(65);
+                this.setTooltip("Pause the program for a number of seconds");
+            }
+        };
+        pythonGenerator.forBlock['robot_wait'] = function(block) {
+            var seconds = block.getFieldValue('SECONDS');
+            return 'time.sleep(' + seconds + ')\n';
+        };
+
+        // --- Read Color Sensor ---
+        Blockly.Blocks['robot_read_sensor'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("color sensor reflection");
+                this.setOutput(true, "Number");
+                this.setColour(290);
+                this.setTooltip("Read color sensor reflection (0=black, 100=white)");
+            }
+        };
+        pythonGenerator.forBlock['robot_read_sensor'] = function(block) {
+            return ['reflection(\'C\')', pythonGenerator.ORDER_FUNCTION_CALL];
+        };
+
+        // --- Print ---
+        Blockly.Blocks['robot_print'] = {
+            init: function() {
+                this.appendValueInput("TEXT")
+                    .appendField("print");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(330);
+                this.setTooltip("Print a message to the serial terminal");
+            }
+        };
+        pythonGenerator.forBlock['robot_print'] = function(block) {
+            var text = pythonGenerator.valueToCode(block, 'TEXT', pythonGenerator.ORDER_NONE) || "''";
+            return 'print(' + text + ')\n';
+        };
+
+        // ============================================
+        // BLOCKLY TOOLBOX
+        // ============================================
+        var toolbox = {
+            kind: 'categoryToolbox',
+            contents: [
+                {
+                    kind: 'category',
+                    name: 'Setup',
+                    colour: 230,
+                    contents: [
+                        { kind: 'block', type: 'robot_motor_pair' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Movement',
+                    colour: 160,
+                    contents: [
+                        { kind: 'block', type: 'robot_move_degrees', fields: { DIR: '1', DEGREES: 360, SPEED: 360 } },
+                        { kind: 'block', type: 'robot_move_degrees', fields: { DIR: '1', DEGREES: 3600, SPEED: 360 } },
+                        { kind: 'block', type: 'robot_move_time', fields: { DIR: '1', SECONDS: 1, SPEED: 360 } },
+                        { kind: 'block', type: 'robot_tank_turn', fields: { DIR: 'right', DEGREES: 68, SPEED: 90 } },
+                        { kind: 'block', type: 'robot_stop' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Motors',
+                    colour: 200,
+                    contents: [
+                        { kind: 'block', type: 'robot_motor_run' },
+                        { kind: 'block', type: 'robot_motor_stop' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'LED',
+                    colour: 20,
+                    contents: [
+                        { kind: 'block', type: 'robot_led', fields: { STATE: 'on' } },
+                        { kind: 'block', type: 'robot_led', fields: { STATE: 'off' } }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Sensors',
+                    colour: 290,
+                    contents: [
+                        { kind: 'block', type: 'robot_read_sensor' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Timing',
+                    colour: 65,
+                    contents: [
+                        { kind: 'block', type: 'robot_wait', fields: { SECONDS: 1 } },
+                        { kind: 'block', type: 'robot_wait', fields: { SECONDS: 0.5 } }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Output',
+                    colour: 330,
+                    contents: [
+                        { kind: 'block', type: 'robot_print' }
+                    ]
+                },
+                { kind: 'sep' },
+                {
+                    kind: 'category',
+                    name: 'Logic',
+                    colour: 210,
+                    contents: [
+                        { kind: 'block', type: 'controls_if' },
+                        { kind: 'block', type: 'controls_ifelse' },
+                        { kind: 'block', type: 'logic_compare' },
+                        { kind: 'block', type: 'logic_operation' },
+                        { kind: 'block', type: 'logic_negate' },
+                        { kind: 'block', type: 'logic_boolean' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Loops',
+                    colour: 120,
+                    contents: [
+                        { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 10 } } } } },
+                        { kind: 'block', type: 'controls_whileUntil' },
+                        { kind: 'block', type: 'controls_for' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Math',
+                    colour: 230,
+                    contents: [
+                        { kind: 'block', type: 'math_number' },
+                        { kind: 'block', type: 'math_arithmetic' },
+                        { kind: 'block', type: 'math_modulo' },
+                        { kind: 'block', type: 'math_random_int' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Text',
+                    colour: 160,
+                    contents: [
+                        { kind: 'block', type: 'text' },
+                        { kind: 'block', type: 'text_join' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Variables',
+                    colour: 330,
+                    custom: 'VARIABLE'
+                }
+            ]
+        };
+
+        // ============================================
+        // INITIALIZE BLOCKLY
+        // ============================================
+        var workspace = Blockly.inject('blocklyDiv', {
+            toolbox: toolbox,
+            grid: {
+                spacing: 20,
+                length: 3,
+                colour: '#ccc',
+                snap: true
+            },
+            zoom: {
+                controls: true,
+                wheel: true,
+                startScale: 0.9,
+                maxScale: 3,
+                minScale: 0.3,
+                scaleSpeed: 1.2
+            },
+            trashcan: true,
+            scrollbars: true
+        });
+
+        // Generate imports based on which blocks are used
+        function generateImports(code) {
+            var imports = [];
+            if (code.indexOf('motor_pair.') !== -1) {
+                imports.push('import motor_pair');
+            }
+            if (code.indexOf('motor.') !== -1) {
+                imports.push('import motor');
+            }
+            if (code.indexOf('time.') !== -1) {
+                imports.push('import time');
+            }
+            if (code.indexOf('led.') !== -1) {
+                imports.push('from machine import Pin');
+                imports.push('led = Pin(2, Pin.OUT)');
+            }
+            if (code.indexOf('reflection(') !== -1) {
+                imports.push('from color_sensor import reflection');
+            }
+            return imports;
+        }
+
+        // Update code preview when blocks change
+        function updateCode() {
+            var rawCode = pythonGenerator.workspaceToCode(workspace);
+            var imports = generateImports(rawCode);
+            var fullCode = '';
+            if (imports.length > 0) {
+                fullCode = imports.join('\n') + '\n\n';
+            }
+            fullCode += rawCode;
+            document.getElementById('code-output').textContent = fullCode;
+        }
+        workspace.addChangeListener(updateCode);
+
+        // Save/load workspace to localStorage
+        function saveWorkspace() {
+            var json = Blockly.serialization.workspaces.save(workspace);
+            localStorage.setItem('scratch-workspace', JSON.stringify(json));
+        }
+        function loadWorkspace() {
+            var data = localStorage.getItem('scratch-workspace');
+            if (data) {
+                try {
+                    var parsed = JSON.parse(data);
+                    // Check if saved workspace actually has blocks
+                    if (parsed.blocks && parsed.blocks.blocks && parsed.blocks.blocks.length > 0) {
+                        Blockly.serialization.workspaces.load(parsed, workspace);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Could not load saved workspace:', e);
+                }
+            }
+            // Load default starter program: LED blink
+            var defaultWorkspace = {
+                "blocks": {
+                    "languageVersion": 0,
+                    "blocks": [
+                        {
+                            "type": "robot_print",
+                            "x": 30,
+                            "y": 30,
+                            "inputs": {
+                                "TEXT": {
+                                    "block": {
+                                        "type": "text",
+                                        "fields": { "TEXT": "Starting LED blink!" }
+                                    }
+                                }
+                            },
+                            "next": {
+                                "block": {
+                                    "type": "controls_repeat_ext",
+                                    "inputs": {
+                                        "TIMES": {
+                                            "shadow": {
+                                                "type": "math_number",
+                                                "fields": { "NUM": 5 }
+                                            }
+                                        },
+                                        "DO": {
+                                            "block": {
+                                                "type": "robot_led",
+                                                "fields": { "STATE": "on" },
+                                                "next": {
+                                                    "block": {
+                                                        "type": "robot_print",
+                                                        "inputs": {
+                                                            "TEXT": {
+                                                                "block": {
+                                                                    "type": "text",
+                                                                    "fields": { "TEXT": "LED ON" }
+                                                                }
+                                                            }
+                                                        },
+                                                        "next": {
+                                                            "block": {
+                                                                "type": "robot_wait",
+                                                                "fields": { "SECONDS": 1 },
+                                                                "next": {
+                                                                    "block": {
+                                                                        "type": "robot_led",
+                                                                        "fields": { "STATE": "off" },
+                                                                        "next": {
+                                                                            "block": {
+                                                                                "type": "robot_print",
+                                                                                "inputs": {
+                                                                                    "TEXT": {
+                                                                                        "block": {
+                                                                                            "type": "text",
+                                                                                            "fields": { "TEXT": "LED OFF" }
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "next": {
+                                                                                    "block": {
+                                                                                        "type": "robot_wait",
+                                                                                        "fields": { "SECONDS": 1 }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "next": {
+                                        "block": {
+                                            "type": "robot_print",
+                                            "inputs": {
+                                                "TEXT": {
+                                                    "block": {
+                                                        "type": "text",
+                                                        "fields": { "TEXT": "Done blinking!" }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            };
+            try {
+                Blockly.serialization.workspaces.load(defaultWorkspace, workspace);
+            } catch (e) {
+                console.warn('Could not load default workspace:', e);
+            }
+        }
+        workspace.addChangeListener(function(e) {
+            if (e.isUiEvent) return;
+            saveWorkspace();
+        });
+        loadWorkspace();
+
+        // Get full generated code
+        function getFullCode() {
+            var rawCode = pythonGenerator.workspaceToCode(workspace);
+            var imports = generateImports(rawCode);
+            var fullCode = '';
+            if (imports.length > 0) {
+                fullCode = imports.join('\n') + '\n\n';
+            }
+            fullCode += rawCode;
+            return fullCode;
+        }
+
+        // Copy code button
+        document.getElementById('btn-copy-code').addEventListener('click', function() {
+            var code = getFullCode();
+            navigator.clipboard.writeText(code).then(function() {
+                var btn = document.getElementById('btn-copy-code');
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+            });
+        });
+
+        // ============================================
+        // ROBOT CONNECTION BUTTONS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            var connectBtn = document.getElementById('btn-connect');
+            var disconnectBtn = document.getElementById('btn-disconnect');
+            var uploadBtn = document.getElementById('btn-upload-code');
+
+            function updateButtonStates() {
+                var isConnected = robotIsConnected();
+                connectBtn.disabled = isConnected;
+                disconnectBtn.disabled = !isConnected;
+                uploadBtn.disabled = !isConnected;
+
+                connectBtn.textContent = isConnected ? 'Connected' : 'Connect';
+                connectBtn.style.background = isConnected ? '#4CAF50' : '';
+                connectBtn.style.color = isConnected ? 'white' : '';
+            }
+            window.updateButtonStates = updateButtonStates;
+
+            connectBtn.addEventListener('click', async function() {
+                try {
+                    connectBtn.disabled = true;
+                    connectBtn.textContent = 'Connecting...';
+                    var result = await robotConnect();
+                    if (result) {
+                        updateButtonStates();
+                    } else {
+                        connectBtn.disabled = false;
+                        connectBtn.textContent = 'Connect';
+                    }
+                } catch (error) {
+                    alert('Failed to connect: ' + error.message + '\nTry unplugging and reconnecting.');
+                    connectBtn.disabled = false;
+                    connectBtn.textContent = 'Connect';
+                }
+            });
+
+            disconnectBtn.addEventListener('click', async function() {
+                try {
+                    disconnectBtn.disabled = true;
+                    disconnectBtn.textContent = 'Disconnecting...';
+                    await robotDisconnect();
+                    updateButtonStates();
+                    disconnectBtn.textContent = 'Disconnect';
+                } catch (error) {
+                    alert('Failed to disconnect: ' + error.message);
+                    disconnectBtn.disabled = false;
+                    disconnectBtn.textContent = 'Disconnect';
+                }
+            });
+
+            uploadBtn.addEventListener('click', async function() {
+                try {
+                    var code = getFullCode();
+                    if (!code.trim()) {
+                        alert('No blocks to upload. Drag some blocks into the workspace first.');
+                        return;
+                    }
+                    uploadBtn.disabled = true;
+                    uploadBtn.textContent = 'Writing...';
+                    await robotUploadCode(code);
+                    alert('Code successfully written to robot!');
+                } catch (error) {
+                    alert('Failed to write code: ' + error.message);
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Write to Robot';
+                    updateButtonStates();
+                }
+            });
+
+            updateButtonStates();
+        });
+
+        // Resize Blockly when window resizes
+        window.addEventListener('resize', function() {
+            Blockly.svgResize(workspace);
+        });
+    </script>
+</body>
+</html>
