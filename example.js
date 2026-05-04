@@ -11,6 +11,8 @@ const exampleManager = {
         'sdk_motor.py',
         'sdk_motor_pair.py',
         'sdk_orientation.py',
+        'sdk_wonder_echo.py',
+        'voice_drive.py',
     ],
 
     async init() {

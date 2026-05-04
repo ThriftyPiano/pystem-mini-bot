@@ -79,14 +79,23 @@ class OrientationSensor:
         # Initialize I2C
         self.i2c = I2C(1, sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
         
-        # Find MPU6050 device
+        # Find MPU6050 device (fixed address: 0x68, or 0x69 if AD0 is pulled high).
+        # Don't use devices[0] — other I2C peripherals (e.g. WonderEcho at 0x34)
+        # may also be on the bus.
         devices = self.i2c.scan()
         if not devices:
             raise OSError("No I2C devices found. Please check your wiring.")
-        
-        # Use first device found (typically MPU6050 at 0x68)
-        mpu_address = devices[0]
-        print(f"Found I2C device at address: {hex(mpu_address)}")
+
+        if 0x68 in devices:
+            mpu_address = 0x68
+        elif 0x69 in devices:
+            mpu_address = 0x69
+        else:
+            raise OSError(
+                "MPU-6050 not found at 0x68/0x69. Devices on bus: "
+                + ", ".join(hex(d) for d in devices)
+            )
+        print(f"Found MPU-6050 at I2C address: {hex(mpu_address)}")
         
         # Initialize MPU6050
         self.mpu = MPU6050(self.i2c, address=mpu_address)
