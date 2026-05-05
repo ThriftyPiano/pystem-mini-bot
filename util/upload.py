@@ -26,12 +26,22 @@ def upload_file(src_path, dest_name=None, repl=None):
         payload = f.read()
     hex_str = binascii.hexlify(payload).decode()
 
-    lines = ["import binascii", "buf=b''"]
+    # Stream chunks directly to the file rather than buffering the whole
+    # payload in RAM — the ESP32 heap fragments fast and a 16KB+ file plus
+    # its hex string can exhaust contiguous memory before f.write() runs.
+    lines = [
+        "import binascii, gc",
+        "f=open(%r,'wb')" % dest_name,
+        "n=0",
+    ]
     for i in range(0, len(hex_str), CHUNK):
-        lines.append("buf+=binascii.unhexlify(%r)" % hex_str[i:i + CHUNK])
-    lines.append("f=open(%r,'wb'); f.write(buf); f.close()" % dest_name)
-    lines.append("import gc; gc.collect()")
-    lines.append("print('UPLOADED', len(buf), %r)" % dest_name)
+        lines.append("n+=f.write(binascii.unhexlify(%r))" % hex_str[i:i + CHUNK])
+        # gc every ~8KB of source to keep heap from fragmenting
+        if (i // CHUNK) % 8 == 7:
+            lines.append("gc.collect()")
+    lines.append("f.close()")
+    lines.append("gc.collect()")
+    lines.append("print('UPLOADED', n, %r)" % dest_name)
     code = "\n".join(lines)
 
     if repl is None:
