@@ -55,6 +55,12 @@ class Motor:
         self.measured_velocity = 0.0       # smoothed dps (used by controller)
         self.last_control_position = 0.0
         self.last_control_time = 0
+        # Ramped/slewed target. The controller tracks this rather than the
+        # commanded self.target_velocity so a step from 0 -> 180 doesn't slam
+        # both motors at full PWM at once (the stronger motor would reach
+        # speed in a single tick while the weaker one was still breaking
+        # static friction). RAMP_RATE_DPS_PER_SEC sets the slew limit.
+        self._ramped_target = 0.0
         
         # Setup encoder interrupt
         self.encoder.irq(trigger=Pin.IRQ_RISING, handler=self._encoder_callback)
@@ -161,24 +167,41 @@ class Motor:
 
     def _velocity_control(self, timer):
         """Closed-loop velocity controller. Drives PWM so encoder velocity
-        tracks self.target_velocity. Uses feed-forward from the open-loop
-        speed map plus a PI correction off encoder feedback."""
+        tracks a slew-limited version of self.target_velocity. The slew
+        ('ramped target') lets both wheels accelerate together so the
+        weaker motor isn't left behind on a step input."""
         if not self.is_running:
             self._set_servo_speed(0)
             self.control_timer.deinit()
             return
 
-        target = self.target_velocity
-        if target == 0:
-            # Hard stop on zero target — no integral wind-down.
+        commanded = self.target_velocity
+        dt = MOTOR_CONFIG['control_loop_ms'] / 1000.0
+
+        # Slew the ramped target toward the commanded target. 300 dps/sec
+        # gives a ~0.6 s ramp from 0 to 180 dps — long enough that motor B
+        # has time to break static friction before motor A overshoots, but
+        # not so long that voice-control feels sluggish.
+        RAMP_RATE = 300.0
+        max_step = RAMP_RATE * dt
+        err_t = commanded - self._ramped_target
+        if abs(err_t) <= max_step:
+            self._ramped_target = commanded
+        elif err_t > 0:
+            self._ramped_target += max_step
+        else:
+            self._ramped_target -= max_step
+
+        if commanded == 0 and self._ramped_target == 0:
+            # Fully stopped — hard stop, kill integrator.
             self._set_servo_speed(0)
             self.velocity_integral = 0.0
             return
 
-        # Measure velocity from position delta over the control tick. This
-        # averages over the full 50 ms window and is much less noisy than the
-        # per-pulse self.velocity (which at 180 dps target only sees ~1 pulse
-        # per tick). Then EMA-smooth to absorb residual jitter.
+        target = self._ramped_target
+
+        # Measure velocity from position delta over the control tick (much
+        # less noisy than self.velocity which is per-pulse). Then EMA-smooth.
         now = time.ticks_ms()
         dt_ctrl = time.ticks_diff(now, self.last_control_time) / 1000.0
         if dt_ctrl <= 0 or self.last_control_time == 0:
@@ -187,8 +210,6 @@ class Motor:
             inst = (self.position - self.last_control_position) / dt_ctrl
         self.last_control_position = self.position
         self.last_control_time = now
-        # EMA: alpha=0.5 means new sample is half-weight; quick response,
-        # still kills single-tick spikes.
         self.measured_velocity = 0.5 * self.measured_velocity + 0.5 * inst
         measured = self.measured_velocity
 
@@ -196,27 +217,26 @@ class Motor:
         max_dps = MOTOR_CONFIG['max_speed_dps']
         ff_percent = target / (max_dps / 100.0)
 
-        # PI correction in PWM-percent units. KP=0.05 means 1 dps of error
-        # adjusts PWM by 0.05%; KI=0.4 over 50 ms = 0.02% per dps·tick.
-        dt = MOTOR_CONFIG['control_loop_ms'] / 1000.0
         self.velocity_integral += error * dt
-        # Anti-windup: clamp integral so a stalled motor can't ramp PWM forever.
         self.velocity_integral = max(-200, min(200, self.velocity_integral))
 
+        # KI is high so a stalled wheel breaks free quickly: with target=25
+        # and FF ~5%, motor B needs ~24% PWM to overcome static friction;
+        # at KI=1.5 the integrator gets there in ~600 ms instead of ~2 s.
         kp = 0.05
-        ki = 0.4
+        ki = 1.5
         correction = error * kp + self.velocity_integral * ki
 
         new_percent = ff_percent + correction
-        # Clamp to same sign as target. The encoder is single-channel and
-        # tracks direction from the commanded PWM sign — if we let the
-        # controller dip past zero to brake, the next encoder pulse from a
-        # still-rolling wheel would decrement position and read negative
-        # velocity, which then poisons the next control cycle.
-        if target > 0:
+        # Clamp PWM sign to match the ramped target's sign so the
+        # single-channel encoder doesn't see a direction flip on a
+        # still-rolling wheel. Near zero we cut PWM entirely.
+        if target > 0.1:
             new_percent = max(0.5, min(100, new_percent))
-        else:
+        elif target < -0.1:
             new_percent = max(-100, min(-0.5, new_percent))
+        else:
+            new_percent = 0
         self._set_servo_speed(new_percent)
 
     def stop(self):
@@ -227,6 +247,7 @@ class Motor:
         self.control_mode = 'idle'
         self.velocity_integral = 0.0
         self.measured_velocity = 0.0
+        self._ramped_target = 0.0
         self.velocity = 0
         self.control_timer.deinit()
         self._set_servo_speed(0) # Triggers Hard Stop
@@ -262,6 +283,7 @@ def run(port, velocity, *, acceleration=1000):
         # can't bias the first measurement.
         motor.velocity_integral = 0.0
         motor.measured_velocity = 0.0
+        motor._ramped_target = 0.0  # always start from zero so the slew kicks in
         motor.last_control_position = motor.position
         motor.last_control_time = time.ticks_ms()
         motor.control_timer.deinit()

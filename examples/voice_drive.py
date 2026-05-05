@@ -21,7 +21,12 @@ import time
 # STEP 2: How fast to move
 # --------------------------------------------
 DRIVE_VELOCITY = 180   # forward/backward speed in deg/sec
-TURN_VELOCITY  = 200   # in-place spin speed
+TURN_VELOCITY  = 25    # in-place spin speed -> chassis ~22 deg/sec yaw rate.
+                       # ~16 sec for a full 360 spin, leaving plenty of time
+                       # to issue the next voice command. The closed-loop
+                       # integrator ramps PWM up to overcome static friction
+                       # automatically, so the slow target works on different
+                       # surfaces.
 
 # STEP 3: Action functions
 # --------------------------------------------
