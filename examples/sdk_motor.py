@@ -49,6 +49,12 @@ class Motor:
         self.is_running = False
         self.current_speed = 0
         self.print_ticks = False  # Switch for debug printing
+        # Closed-loop velocity control state
+        self.control_mode = 'idle'   # 'idle' | 'velocity' | 'position'
+        self.velocity_integral = 0.0
+        self.measured_velocity = 0.0       # smoothed dps (used by controller)
+        self.last_control_position = 0.0
+        self.last_control_time = 0
         
         # Setup encoder interrupt
         self.encoder.irq(trigger=Pin.IRQ_RISING, handler=self._encoder_callback)
@@ -153,11 +159,73 @@ class Motor:
             
         self._set_servo_speed(final_speed)
 
+    def _velocity_control(self, timer):
+        """Closed-loop velocity controller. Drives PWM so encoder velocity
+        tracks self.target_velocity. Uses feed-forward from the open-loop
+        speed map plus a PI correction off encoder feedback."""
+        if not self.is_running:
+            self._set_servo_speed(0)
+            self.control_timer.deinit()
+            return
+
+        target = self.target_velocity
+        if target == 0:
+            # Hard stop on zero target — no integral wind-down.
+            self._set_servo_speed(0)
+            self.velocity_integral = 0.0
+            return
+
+        # Measure velocity from position delta over the control tick. This
+        # averages over the full 50 ms window and is much less noisy than the
+        # per-pulse self.velocity (which at 180 dps target only sees ~1 pulse
+        # per tick). Then EMA-smooth to absorb residual jitter.
+        now = time.ticks_ms()
+        dt_ctrl = time.ticks_diff(now, self.last_control_time) / 1000.0
+        if dt_ctrl <= 0 or self.last_control_time == 0:
+            inst = 0.0
+        else:
+            inst = (self.position - self.last_control_position) / dt_ctrl
+        self.last_control_position = self.position
+        self.last_control_time = now
+        # EMA: alpha=0.5 means new sample is half-weight; quick response,
+        # still kills single-tick spikes.
+        self.measured_velocity = 0.5 * self.measured_velocity + 0.5 * inst
+        measured = self.measured_velocity
+
+        error = target - measured
+        max_dps = MOTOR_CONFIG['max_speed_dps']
+        ff_percent = target / (max_dps / 100.0)
+
+        # PI correction in PWM-percent units. KP=0.05 means 1 dps of error
+        # adjusts PWM by 0.05%; KI=0.4 over 50 ms = 0.02% per dps·tick.
+        dt = MOTOR_CONFIG['control_loop_ms'] / 1000.0
+        self.velocity_integral += error * dt
+        # Anti-windup: clamp integral so a stalled motor can't ramp PWM forever.
+        self.velocity_integral = max(-200, min(200, self.velocity_integral))
+
+        kp = 0.05
+        ki = 0.4
+        correction = error * kp + self.velocity_integral * ki
+
+        new_percent = ff_percent + correction
+        # Clamp to same sign as target. The encoder is single-channel and
+        # tracks direction from the commanded PWM sign — if we let the
+        # controller dip past zero to brake, the next encoder pulse from a
+        # still-rolling wheel would decrement position and read negative
+        # velocity, which then poisons the next control cycle.
+        if target > 0:
+            new_percent = max(0.5, min(100, new_percent))
+        else:
+            new_percent = max(-100, min(-0.5, new_percent))
+        self._set_servo_speed(new_percent)
+
     def stop(self):
         """Force Stop"""
         print(f'STOP command sent to Port {self.port}')
         self.is_running = False
         self.print_ticks = False
+        self.control_mode = 'idle'
+        self.velocity_integral = 0.0
         self.control_timer.deinit()
         self._set_servo_speed(0) # Triggers Hard Stop
         time.sleep_ms(50)
@@ -182,9 +250,27 @@ def _get_motor(port):
 
 def run(port, velocity, *, acceleration=1000):
     motor = _get_motor(port)
-    speed_percent = max(-100, min(100, velocity / (MOTOR_CONFIG['max_speed_dps'] / 100)))
-    motor._set_servo_speed(speed_percent)
-    motor.is_running = True
+    motor.target_velocity = velocity
+    if velocity == 0:
+        motor.stop()
+        return
+    if motor.control_mode != 'velocity':
+        # Switch into closed-loop velocity mode. Reset integral and the
+        # per-tick velocity-tracking state so prior position-control work
+        # can't bias the first measurement.
+        motor.velocity_integral = 0.0
+        motor.measured_velocity = 0.0
+        motor.last_control_position = motor.position
+        motor.last_control_time = time.ticks_ms()
+        motor.control_timer.deinit()
+        motor.control_mode = 'velocity'
+        motor.is_running = True
+        motor.control_timer.init(
+            period=MOTOR_CONFIG['control_loop_ms'],
+            mode=Timer.PERIODIC,
+            callback=motor._velocity_control)
+    else:
+        motor.is_running = True
 
 def run_for_degrees(port, degrees, velocity, *, stop=True, acceleration=1000, deceleration=1000):
     motor = _get_motor(port)
@@ -196,8 +282,10 @@ def run_for_degrees(port, degrees, velocity, *, stop=True, acceleration=1000, de
     motor.target_position = start_position + degrees
     motor.target_velocity = velocity
     motor.is_running = True
-    
+
     # Start the "Brain" loop
+    motor.control_timer.deinit()
+    motor.control_mode = 'position'
     motor.control_timer.init(period=MOTOR_CONFIG['control_loop_ms'], mode=Timer.PERIODIC, callback=motor._position_control)
     
     # Safety Timeout (Stop after 5 seconds if stuck)
@@ -228,6 +316,8 @@ def run_to_position(port, position, velocity, *, direction=SHORTEST_PATH, stop=T
     motor.target_position = position
     motor.target_velocity = velocity
     motor.is_running = True
+    motor.control_timer.deinit()
+    motor.control_mode = 'position'
     motor.control_timer.init(period=MOTOR_CONFIG['control_loop_ms'], mode=Timer.PERIODIC, callback=motor._position_control)
     
     start_time = time.ticks_ms()
