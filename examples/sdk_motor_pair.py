@@ -109,9 +109,13 @@ class MotorPair:
                 
                 # Apply correction if yaw error is significant
                 if abs(yaw_error) > 1.0:
-                    # Calculate correction factor (proportional control)
-                    correction = yaw_error * 10
-                    correction = max(-50, min(50, correction))  # Limit correction
+                    # Proportional control. Gain and clamp are sized so the
+                    # correction can overcome ~20% mechanical asymmetry between
+                    # the two motors (open-loop motor.run with mismatched gear
+                    # response). With base velocity 360 dps, ±150 is ~28% PWM
+                    # swing per side.
+                    correction = yaw_error * 25
+                    correction = max(-150, min(150, correction))
                     
                     if correction_mode == 'position':
                         # For move_for_degrees - adjust target_velocity
