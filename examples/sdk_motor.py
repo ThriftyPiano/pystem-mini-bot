@@ -226,6 +226,8 @@ class Motor:
         self.print_ticks = False
         self.control_mode = 'idle'
         self.velocity_integral = 0.0
+        self.measured_velocity = 0.0
+        self.velocity = 0
         self.control_timer.deinit()
         self._set_servo_speed(0) # Triggers Hard Stop
         time.sleep_ms(50)
