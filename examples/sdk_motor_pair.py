@@ -109,13 +109,13 @@ class MotorPair:
                 
                 # Apply correction if yaw error is significant
                 if abs(yaw_error) > 1.0:
-                    # Proportional control. Gain and clamp are sized so the
-                    # correction can overcome ~20% mechanical asymmetry between
-                    # the two motors (open-loop motor.run with mismatched gear
-                    # response). With base velocity 360 dps, ±150 is ~28% PWM
-                    # swing per side.
-                    correction = yaw_error * 25
-                    correction = max(-150, min(150, correction))
+                    # Proportional control. With closed-loop velocity in
+                    # motor.run() the per-motor asymmetry is already gone, so
+                    # the IMU only needs to compensate for floor-level effects
+                    # (traction, slight wheel mismatch, weight bias). Gentler
+                    # gains keep this from oscillating with the inner loop.
+                    correction = yaw_error * 10
+                    correction = max(-60, min(60, correction))
                     
                     if correction_mode == 'position':
                         # For move_for_degrees - adjust target_velocity

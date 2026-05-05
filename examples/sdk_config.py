@@ -15,8 +15,10 @@ MOTOR_PINS = {
 
 # Motor Configuration
 MOTOR_CONFIG = {
-    # Encoder pulses per revolution (adjust for your encoders)
-    'pulses_per_revolution': 20,
+    # Encoder pulses per WHEEL revolution. The encoder disc has 20 slots and
+    # sits on the motor shaft, with a ~2:1 gearbox between the motor and the
+    # wheel — so each wheel turn produces ~40 rising edges on the encoder.
+    'pulses_per_revolution': 40,
     
     # Wheel specifications (for distance calculations)
     'wheel_diameter_cm': 6.0,  # Wheel diameter in cm
