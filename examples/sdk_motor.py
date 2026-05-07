@@ -386,3 +386,11 @@ def was_stalled(port): return False
 def get_duty_cycle(port):
     motor = _get_motor(port)
     return motor.current_speed
+
+# Initialise every configured motor at import time so each PWM pin is
+# explicitly held stopped (duty 0). Otherwise a motor whose port is never
+# touched stays floating after a soft-reset, and a cheap continuous-rotation
+# servo on that pin can drift on noise — making it look like the wrong
+# wheel is moving when a single-port motor.run() is issued.
+for _port in MOTOR_PINS:
+    _get_motor(_port)

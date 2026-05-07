@@ -3,14 +3,11 @@
 # Modify these pin assignments to match your hardware setup
 
 # Motor Pin Mappings
-# Each motor needs: servo pin, encoder pin
+# Each motor needs: servo pin, encoder pin.
+# A = left wheel, B = right wheel (the convention motor_pair / voice_drive expect).
 MOTOR_PINS = {
     'A': {'servo': 16, 'encoder': 13},
-    'B': {'servo': 17, 'encoder': 14},
-    'C': {'servo': 5, 'encoder': 12},
-    'D': {'servo': 18, 'encoder': 25},
-    'E': {'servo': 19, 'encoder': 26},
-    'F': {'servo': 23, 'encoder': 27}
+    'B': {'servo': 18, 'encoder': 25},
 }
 
 # Motor Configuration
