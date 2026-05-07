@@ -3,7 +3,7 @@
 from machine import Pin
 import time
 
-BUTTON_PIN = 26
+BUTTON_PIN = 27
 
 # Enable internal Pull-Down if your button connects to 3.3V
 # OR Pull-Up if your button connects to GND. 

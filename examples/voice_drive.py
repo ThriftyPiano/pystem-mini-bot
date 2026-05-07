@@ -20,13 +20,12 @@ import time
 
 # STEP 2: How fast to move
 # --------------------------------------------
-DRIVE_VELOCITY = 180   # forward/backward speed in deg/sec
-TURN_VELOCITY  = 25    # in-place spin speed -> chassis ~22 deg/sec yaw rate.
-                       # ~16 sec for a full 360 spin, leaving plenty of time
-                       # to issue the next voice command. The closed-loop
+DRIVE_VELOCITY = 270   # forward/backward speed in deg/sec
+TURN_VELOCITY  = 38    # in-place spin speed -> chassis ~34 deg/sec yaw rate.
+                       # ~10 sec for a full 360 spin. The closed-loop
                        # integrator ramps PWM up to overcome static friction
-                       # automatically, so the slow target works on different
-                       # surfaces.
+                       # automatically, so the slow target works across
+                       # different surfaces.
 
 # STEP 3: Action functions
 # --------------------------------------------
@@ -69,6 +68,10 @@ ACTIONS = {
 # --------------------------------------------
 print('Voice control ready. Say "Hello Hiwonder" then a command.')
 print('Press Ctrl-C to exit.')
+
+# Audible "I'm alive" announcement so you know voice_drive is running.
+# TYPE_BROADCAST phrase id 6 = "parking completed" on the stock firmware.
+wonder_echo.speak(wonder_echo.TYPE_BROADCAST, 6)
 
 try:
     while True:
