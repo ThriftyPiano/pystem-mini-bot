@@ -9,13 +9,14 @@
 #   2. Run this program.
 #   3. Say "Hello Hiwonder" to wake the module up.
 #   4. Then say one of: "forward", "backward", "turn left",
-#      "turn right", "stop".
+#      "turn right", "stop", "dance".
 #   5. The robot keeps doing the action until you say another command.
 
 # STEP 1: Import the libraries we need
 # --------------------------------------------
 import motor               # Per-motor velocity control (closed-loop)
 import wonder_echo         # Voice recognition (Hiwonder WonderEcho)
+import head                # Pan/tilt head servos (for the dance)
 import time
 
 # STEP 2: How fast to move
@@ -56,12 +57,19 @@ def stop():
     motor.stop(motor.PORT_A)
     motor.stop(motor.PORT_B)
 
+def do_dance():
+    # Stop the wheels first so the robot doesn't drive off while the head
+    # dances (dance() blocks the poll loop for a few seconds).
+    stop()
+    head.dance()
+
 ACTIONS = {
     wonder_echo.CMD_FORWARD:  ('forward',  go_forward),
     wonder_echo.CMD_BACKWARD: ('backward', go_backward),
     wonder_echo.CMD_LEFT:     ('left',     turn_left),
     wonder_echo.CMD_RIGHT:    ('right',    turn_right),
     wonder_echo.CMD_STOP:     ('stop',     stop),
+    wonder_echo.CMD_DANCE:    ('dance',    do_dance),
 }
 
 # STEP 4: Main loop - listen and dispatch

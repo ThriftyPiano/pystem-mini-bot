@@ -25,6 +25,7 @@ CMD_BACKWARD = 0x02
 CMD_LEFT     = 0x03
 CMD_RIGHT    = 0x04
 CMD_STOP     = 0x09
+CMD_DANCE    = 0x6C  # "dance" (id detected empirically from the module's command set)
 
 class WonderEcho:
     """
