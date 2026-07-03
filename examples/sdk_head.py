@@ -103,32 +103,36 @@ def shake(times=2, *, amount=30, speed_ms=250):
     pan(c)
 
 
-def dance(times=2, *, beat_ms=200):
-    """Do a little head dance: sway, bob, and groove diagonally to a beat.
+def dance(times=2, *, beat_ms=250):
+    """Do a big head dance: wide sways, bobs, and diagonal grooves.
 
-    Amplitudes and speed are kept moderate on purpose — big fast servo
-    slews spike the current draw and can brown out the board (see nod/shake).
+    Uses most of the servo's ~180 deg travel, leaving a small margin off
+    the mechanical stops. The beat is kept fairly slow on purpose — big
+    fast servo slews spike the current draw and can brown out the board
+    (see nod/shake). If it browns out, raise beat_ms or narrow the spans.
     """
     c = HEAD_CONFIG['center_angle']
+    pan_wide = 75   # ~15 <-> 165 for a 90 deg center
+    tilt_wide = 50  # ~40 <-> 140
     for _ in range(times):
-        # sway side to side
-        pan(c - 30)
+        # big sway side to side (near full pan travel)
+        pan(c - pan_wide)
         time.sleep_ms(beat_ms)
-        pan(c + 30)
+        pan(c + pan_wide)
         time.sleep_ms(beat_ms)
         pan(c)
         time.sleep_ms(beat_ms)
-        # bob up and down
-        tilt(c + 20)
+        # big bob up and down
+        tilt(c + tilt_wide)
         time.sleep_ms(beat_ms)
-        tilt(c - 20)
+        tilt(c - tilt_wide)
         time.sleep_ms(beat_ms)
         tilt(c)
         time.sleep_ms(beat_ms)
-        # diagonal grooves
-        look(c - 25, c + 15)
+        # wide diagonal grooves
+        look(c - pan_wide, c + tilt_wide)
         time.sleep_ms(beat_ms)
-        look(c + 25, c - 15)
+        look(c + pan_wide, c - tilt_wide)
         time.sleep_ms(beat_ms)
     center()
 
