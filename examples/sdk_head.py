@@ -103,6 +103,36 @@ def shake(times=2, *, amount=30, speed_ms=250):
     pan(c)
 
 
+def dance(times=2, *, beat_ms=200):
+    """Do a little head dance: sway, bob, and groove diagonally to a beat.
+
+    Amplitudes and speed are kept moderate on purpose — big fast servo
+    slews spike the current draw and can brown out the board (see nod/shake).
+    """
+    c = HEAD_CONFIG['center_angle']
+    for _ in range(times):
+        # sway side to side
+        pan(c - 30)
+        time.sleep_ms(beat_ms)
+        pan(c + 30)
+        time.sleep_ms(beat_ms)
+        pan(c)
+        time.sleep_ms(beat_ms)
+        # bob up and down
+        tilt(c + 20)
+        time.sleep_ms(beat_ms)
+        tilt(c - 20)
+        time.sleep_ms(beat_ms)
+        tilt(c)
+        time.sleep_ms(beat_ms)
+        # diagonal grooves
+        look(c - 25, c + 15)
+        time.sleep_ms(beat_ms)
+        look(c + 25, c - 15)
+        time.sleep_ms(beat_ms)
+    center()
+
+
 def get_position(name):
     """Return the last commanded angle for an axis (PAN or TILT)."""
     return _get(name).angle
