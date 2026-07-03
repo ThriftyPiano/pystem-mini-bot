@@ -8,6 +8,7 @@ const exampleManager = {
         'sdk_boot.py',
         'sdk_color_sensor.py',
         'sdk_config.py',
+        'sdk_head.py',
         'sdk_motor.py',
         'sdk_motor_pair.py',
         'sdk_orientation.py',
