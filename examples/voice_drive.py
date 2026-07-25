@@ -57,18 +57,33 @@ def stop():
     motor.stop(motor.PORT_A)
     motor.stop(motor.PORT_B)
 
+def _dance_poll(ms):
+    # Sleep ~ms while listening for a voice command, so the dance can react
+    # promptly to "stop". Returns the command id (CMD_NONE if none came in).
+    slept = 0
+    while slept < ms:
+        cmd = wonder_echo.read_command()
+        if cmd != wonder_echo.CMD_NONE:
+            return cmd
+        time.sleep_ms(120)
+        slept += 120
+    return wonder_echo.CMD_NONE
+
 def do_dance():
-    # Whole-body dance: the wheels wiggle and spin while the head grooves.
+    # Whole-body dance: the wheels wiggle and spin while the head grooves,
+    # LOOPING until you say another command ("stop" to just stop).
     # motor.run() is non-blocking (a background timer holds each wheel at its
     # target velocity), so we kick off a wheel move and layer head moves on
     # top, then change it up. Kept moderate on purpose: two motors plus two
     # servos moving at once draws a lot of current, and big simultaneous
     # slews can brown out the board -- so gentle acceleration and mostly
     # in-place spins (short forward/back pops add flavor without wandering).
-    SPIN = 110   # deg/sec, lively in-place spin
-    POP  = 170   # deg/sec, short forward/back pop
-    ACC  = 600   # gentler accel -> smaller current spike than the 1000 default
+    SPIN = 100   # deg/sec, lively in-place spin
+    POP  = 150   # deg/sec, short forward/back pop
+    ACC  = 450   # gentle accel -> smaller current spike (matters more for a
+                 # continuous dance; big fast ramps cause supply dips/resets)
     beat = 260
+    c = 90       # head center
 
     def spin_cw():
         motor.run(motor.PORT_A,  SPIN, acceleration=ACC)
@@ -83,23 +98,37 @@ def do_dance():
         motor.run(motor.PORT_A, -POP, acceleration=ACC)
         motor.run(motor.PORT_B,  POP, acceleration=ACC)
 
-    c = 90  # head center
-    for _ in range(2):
-        # spin one way, head leads into the turn
-        spin_cw();  head.look(c - 60, c + 30)
-        time.sleep_ms(beat * 2)
-        # spin back the other way
-        spin_ccw(); head.look(c + 60, c + 30)
-        time.sleep_ms(beat * 2)
-        # little forward/back pops with head bobs
-        pop_forward(); head.tilt(c - 40)
-        time.sleep_ms(beat)
-        pop_back();    head.tilt(c + 40)
-        time.sleep_ms(beat)
+    # One full cycle: (start a wheel move, move the head, how many beats to hold)
+    moves = (
+        (spin_cw,     lambda: head.look(c - 60, c + 30), 2),
+        (spin_ccw,    lambda: head.look(c + 60, c + 30), 2),
+        (pop_forward, lambda: head.tilt(c - 40),         1),
+        (pop_back,    lambda: head.tilt(c + 40),         1),
+    )
+
+    # Loop the choreography until a voice command interrupts it.
+    interrupt = wonder_echo.CMD_NONE
+    while interrupt == wonder_echo.CMD_NONE:
+        for wheels, headmove, mult in moves:
+            wheels()
+            headmove()
+            interrupt = _dance_poll(beat * mult)
+            if interrupt != wonder_echo.CMD_NONE:
+                break
 
     stop()            # wheels off
     head.center()     # head back to rest
     head.release()    # servos limp
+
+    # If a real drive command (not "stop", not another "dance") interrupted
+    # the dance, run it now so "forward" mid-dance just starts driving.
+    # Never re-enter the dance here, or "dance" mid-dance would loop forever.
+    if interrupt not in (wonder_echo.CMD_STOP, wonder_echo.CMD_DANCE):
+        entry = ACTIONS.get(interrupt)
+        if entry is not None:
+            name, fn = entry
+            print('-> %s' % name)
+            fn()
 
 ACTIONS = {
     wonder_echo.CMD_FORWARD:  ('forward',  go_forward),
