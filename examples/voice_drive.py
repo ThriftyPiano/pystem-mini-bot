@@ -58,10 +58,48 @@ def stop():
     motor.stop(motor.PORT_B)
 
 def do_dance():
-    # Stop the wheels first so the robot doesn't drive off while the head
-    # dances (dance() blocks the poll loop for a few seconds).
-    stop()
-    head.dance()
+    # Whole-body dance: the wheels wiggle and spin while the head grooves.
+    # motor.run() is non-blocking (a background timer holds each wheel at its
+    # target velocity), so we kick off a wheel move and layer head moves on
+    # top, then change it up. Kept moderate on purpose: two motors plus two
+    # servos moving at once draws a lot of current, and big simultaneous
+    # slews can brown out the board -- so gentle acceleration and mostly
+    # in-place spins (short forward/back pops add flavor without wandering).
+    SPIN = 110   # deg/sec, lively in-place spin
+    POP  = 170   # deg/sec, short forward/back pop
+    ACC  = 600   # gentler accel -> smaller current spike than the 1000 default
+    beat = 260
+
+    def spin_cw():
+        motor.run(motor.PORT_A,  SPIN, acceleration=ACC)
+        motor.run(motor.PORT_B,  SPIN, acceleration=ACC)
+    def spin_ccw():
+        motor.run(motor.PORT_A, -SPIN, acceleration=ACC)
+        motor.run(motor.PORT_B, -SPIN, acceleration=ACC)
+    def pop_forward():
+        motor.run(motor.PORT_A,  POP, acceleration=ACC)
+        motor.run(motor.PORT_B, -POP, acceleration=ACC)
+    def pop_back():
+        motor.run(motor.PORT_A, -POP, acceleration=ACC)
+        motor.run(motor.PORT_B,  POP, acceleration=ACC)
+
+    c = 90  # head center
+    for _ in range(2):
+        # spin one way, head leads into the turn
+        spin_cw();  head.look(c - 60, c + 30)
+        time.sleep_ms(beat * 2)
+        # spin back the other way
+        spin_ccw(); head.look(c + 60, c + 30)
+        time.sleep_ms(beat * 2)
+        # little forward/back pops with head bobs
+        pop_forward(); head.tilt(c - 40)
+        time.sleep_ms(beat)
+        pop_back();    head.tilt(c + 40)
+        time.sleep_ms(beat)
+
+    stop()            # wheels off
+    head.center()     # head back to rest
+    head.release()    # servos limp
 
 ACTIONS = {
     wonder_echo.CMD_FORWARD:  ('forward',  go_forward),
