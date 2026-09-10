@@ -100,8 +100,12 @@ def _audio(mode, sd_pin, buf):
     return _i2s
 
 
-def microphone(ibuf=8192):
-    """16 kHz 16-bit mono I2S RX stream from the on-board mic."""
+def microphone(ibuf=32768):
+    """16 kHz 16-bit mono I2S RX stream from the on-board mic.
+
+    The I2S ring stores raw 32-bit stereo frames, so effective mono-16
+    backlog is ibuf/4: 32 KB buffers ~256 ms while the CPU is busy.
+    """
     return _audio(I2S.RX, 16, ibuf)
 
 

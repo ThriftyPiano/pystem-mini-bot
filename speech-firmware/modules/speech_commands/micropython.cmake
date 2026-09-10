@@ -28,8 +28,16 @@ target_sources(usermod_speech_commands INTERFACE ${SPEECH_COMMANDS_SRC})
 # Compile the recognition code (MFCC + NNoM inference) at maximum
 # optimization. Applied per-source so -Ofast/-ffast-math cannot leak into
 # the MicroPython core, where it would break float/NaN semantics.
+#
+# DIRECTORY ${CMAKE_SOURCE_DIR} matters: these sources are compiled as part
+# of the micropython.elf target, which lives in the project root directory
+# scope — without it the property only reaches an unused component-scope
+# compilation and the real objects silently build at -O0.
 set_source_files_properties(${SPEECH_COMMANDS_SRC}
-    PROPERTIES COMPILE_OPTIONS "-Ofast;-funroll-loops;-w")
+    DIRECTORY ${CMAKE_SOURCE_DIR}
+    PROPERTIES COMPILE_OPTIONS "-Ofast;-w")
+set_source_files_properties(${SPEECH_COMMANDS_SRC}
+    PROPERTIES COMPILE_OPTIONS "-Ofast;-w")
 
 # This module's directory comes first so its weights.h and nnom_port.h win
 # over same-named files in the NNoM example directory.

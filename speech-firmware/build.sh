@@ -69,6 +69,17 @@ open(p, 'w').write(s.replace('dependencies:\n', 'dependencies:\n' + pin, 1))
 EOF
 fi
 
+# Larger caches: the CNN streams its flash-resident weights every
+# inference; the default 16KB I-cache / 32KB D-cache starve it.
+SDKBOARD="$BUILD/micropython/ports/esp32/boards/ESP32_GENERIC_S3/sdkconfig.board"
+if ! grep -q "ESP32S3_DATA_CACHE_64KB" "$SDKBOARD"; then
+    cat >> "$SDKBOARD" <<'EOF'
+CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB=y
+CONFIG_ESP32S3_DATA_CACHE_64KB=y
+CONFIG_ESP32S3_DATA_CACHE_LINE_64B=y
+EOF
+fi
+
 # --- NNoM ---
 if [ ! -d "$BUILD/nnom" ]; then
     git clone https://github.com/majianjia/nnom.git "$BUILD/nnom"

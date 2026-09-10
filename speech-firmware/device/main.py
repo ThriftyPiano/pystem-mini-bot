@@ -21,8 +21,12 @@ def show(*lines):
     for i, s in enumerate(lines):
         lcd.text(font, str(s), 10, 10 + 40 * i, 0xFFFF)
 
-# One model inference per 224 ms of audio: 7168 / (16000 * 2) = 0.224
-buffer = bytearray(7168)
+# Recognition always covers the last ~1 s of audio (61-frame MFCC ring
+# buffer); this chunk is the slide step between evaluations. Inference
+# takes ~115 ms, under the 160 ms step (5120 / (16000 * 2) = 0.16; the
+# step must be a multiple of the 32 ms MFCC frame), so the pipeline runs
+# lossless in real time with ~6 evaluations per second.
+buffer = bytearray(5120)
 label = ''
 label_index = -1
 
