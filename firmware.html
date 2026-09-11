@@ -264,6 +264,7 @@
                     <a href="firmware.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💾 Firmware</a>
                     <a href="ide.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💻 IDE</a>
                     <a href="scratch.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🧩 Scratch</a>
+                    <a href="speech-commands.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🎤 Speech</a>
                 </div>
             </div>
         </nav>
@@ -350,6 +351,41 @@
                 </ol>
 
             </div>
+        </div>
+
+        <div class="content-section" id="sticks3-speech">
+            <h2>🎤 M5StickS3 Speech Commands Firmware</h2>
+            <p>The M5StickS3 can act as a voice-command controller for the Mini Bot. Its firmware is MicroPython v1.25 with an on-device speech-recognition module plus drivers for all StickS3 hardware (LCD, microphone, speaker, IMU, buttons). Train your own commands on the <a href="speech-commands.html">Speech</a> page.</p>
+
+            <div class="firmware-info">
+                <h3>🔧 StickS3 Firmware</h3>
+                <p><strong>speech-commands-sticks3.bin</strong></p>
+                <p>MicroPython v1.25.0 with the speech_commands recognition module, for M5StickS3 (ESP32-S3)</p>
+                <a href="speech-firmware/speech-commands-sticks3.bin" class="download-button" download>💾 Download Firmware</a>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Note</h4>
+                <p>Flashing replaces the factory UiFlow2 firmware on the StickS3 (you can restore it later with M5Burner). The StickS3 flashes at offset <code>0x0</code> with <code>--chip esp32s3</code> — different from the robot's ESP32.</p>
+            </div>
+
+            <ol>
+                <li><strong>Install esptool</strong> (same as above):
+                    <div class="code-block">pip install esptool</div>
+                </li>
+                <li><strong>Enter download mode:</strong>
+                    <br>Connect the StickS3 via USB-C, then press and hold the side button until the internal green LED flashes.
+                </li>
+                <li><strong>Flash firmware:</strong>
+                    <div class="code-block">esptool.py --chip esp32s3 --baud 460800 write_flash 0x0 speech-commands-sticks3.bin</div>
+                </li>
+                <li><strong>Boot:</strong>
+                    <br>Single-click the side button to restart into the new firmware.
+                </li>
+                <li><strong>Load a speech model:</strong>
+                    <br>Train a model on the <a href="speech-commands.html">Speech</a> page, then upload the downloaded <code>speech_model.py</code> (plus a <code>main.py</code> that acts on the commands) through the <a href="ide.html">IDE</a>.
+                </li>
+            </ol>
         </div>
 
         <div class="content-section">
