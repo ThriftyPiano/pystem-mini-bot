@@ -1,0 +1,12 @@
+Designator,Part,Manufacturer,Package,LCSC,Note
+U1,AP63205WU-7,Diodes Inc,TSOT-23-6,C2071056,"3.8-32V in, 5V/2A sync buck"
+L1,SWPA6045S6R8MT,Sunlord,6045,C57254,6.8uH 3A power inductor
+C1,CL21A106KAYNNNE,Samsung,0805,C15850,10uF 25V X5R
+C3,CL10B104KB8NNNC,Samsung,0603,C1591,100nF 50V X7R
+"C4,C5",CL31A226KAHNNNE,Samsung,1206,C12891,22uF 25V X5R
+C7,470uF 16V radial D8xH11.5 P3.5,generic,THT,,bulk for servo stalls
+R3,0603WAF1001T5E,UniOhm,0603,C21190,1k 1%
+D1,0603 green LED,generic,0603,,power indicator
+J1,2x8 pin header 2.54mm male RIGHT-ANGLE (90 deg),generic,THT,,"plugs into StickS3 HAT2 socket, stick lies flat"
+"J2,J3,J4,J5,J6,J7,J8,J10",1x3 pin header 2.54mm male vertical,generic,THT,,servo / sensor headers
+J11,DC barrel jack 5.5x2.1 horizontal (PJ-102A type),generic,THT,,"battery box plugs in, center = +6V"

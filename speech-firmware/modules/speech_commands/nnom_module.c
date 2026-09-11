@@ -1,6 +1,7 @@
 // MicroPython bindings for the keyword-spotting model, exposed as the
 // `speech_commands` module.
 #include "py/runtime.h"
+#include "py/mpthread.h"
 
 void kws_set_debug(int val);
 void kws_init(void* buffer);
@@ -27,8 +28,15 @@ static mp_obj_t init(mp_obj_t buffer) {
 static mp_obj_t predict(mp_obj_t audio_input, mp_obj_t bias, mp_obj_t gain) {
   mp_buffer_info_t bufinfo;
   mp_get_buffer_raise(audio_input, &bufinfo, MP_BUFFER_READ);
-  return mp_obj_new_int(kws_predict(bufinfo.buf, bufinfo.len,
-    mp_obj_get_int(bias), mp_obj_get_int(gain)));
+  int bias_i = mp_obj_get_int(bias);
+  int gain_i = mp_obj_get_int(gain);
+  // Inference takes ~120 ms of pure C with no Python objects touched, so
+  // drop the GIL: a `_thread` running e.g. motor control keeps executing
+  // (on the other core when it's free) instead of stalling until we return.
+  MP_THREAD_GIL_EXIT();
+  int32_t result = kws_predict(bufinfo.buf, bufinfo.len, bias_i, gain_i);
+  MP_THREAD_GIL_ENTER();
+  return mp_obj_new_int(result);
 }
 
 static mp_obj_t export_mfcc(mp_obj_t output) {
