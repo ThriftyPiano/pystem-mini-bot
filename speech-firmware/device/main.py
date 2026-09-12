@@ -18,11 +18,22 @@ import gc
 import time
 import sticks3
 import speech_model
+from machine import PWM
 import vga1_16x32 as font
 from machine import Pin, reset
 
 lcd = sticks3.display()
 mic = sticks3.microphone()
+
+# Robot control demo: the wheel servos of the Bot HAT live on G5/G4
+# (continuous rotation: 1.5ms pulse = stop, 2.0ms = forward at 50 Hz).
+wheel_a = PWM(Pin(5), freq=50, duty_ns=1500000)
+wheel_b = PWM(Pin(4), freq=50, duty_ns=1500000)
+
+def drive(forward):
+    ns = 2000000 if forward else 1500000
+    wheel_a.duty_ns(ns)
+    wheel_b.duty_ns(ns)
 
 def show(*lines):
     lcd.fill(0)
@@ -107,11 +118,17 @@ try:
         l, prob = heard
         heard = None
         label = l
-        print(l, prob)
-        show(l, prob)
-        # Dispatch commands here, e.g.:
-        # if l == 'go':
-        #     ...
+        # Voice-command dispatch: 'open' drives, 'close' stops.
+        if l == 'open':
+            drive(True)
+            state = 'GO'
+        elif l == 'close':
+            drive(False)
+            state = 'STOP'
+        else:
+            state = '?'
+        print('heard:', l, prob, '->', state)
+        show(state, l, prob)
     gc.collect()
 finally:
     # On Ctrl-C (or any exit) stop the speech thread so soft reset works
