@@ -100,8 +100,10 @@ _thread.start_new_thread(speech_worker_safe, ())
 # worst observed loop delay is tracked to show recognition isn't stalling
 # it (single-threaded, each inference would freeze this loop for ~120 ms).
 PERIOD_MS = 20
+DEBOUNCE_MS = 1000  # the ~1s window re-hits a word several times; act once
 worst = 0
 prev = time.ticks_ms()
+last_cmd = -DEBOUNCE_MS
 try:
   while True:
     time.sleep_ms(PERIOD_MS)
@@ -117,6 +119,9 @@ try:
     if heard:
         l, prob = heard
         heard = None
+        if time.ticks_diff(now, last_cmd) < DEBOUNCE_MS:
+            continue  # same utterance, already handled
+        last_cmd = now
         label = l
         # Voice-command dispatch: 'open' drives, 'close' stops.
         if l == 'open':
