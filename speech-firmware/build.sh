@@ -71,6 +71,45 @@ fi
 
 # Larger caches: the CNN streams its flash-resident weights every
 # inference; the default 16KB I-cache / 32KB D-cache starve it.
+# Let _thread tasks run on whichever core is free instead of being pinned
+# to the MicroPython core. With the GIL released during speech inference,
+# a control-loop thread then truly runs in parallel on the other core.
+MPTHREAD="$BUILD/micropython/ports/esp32/mpthreadport.c"
+if grep -q "&th->id, MP_TASK_COREID)" "$MPTHREAD"; then
+    sed -i.bak 's/&th->id, MP_TASK_COREID)/\&th->id, tskNO_AFFINITY)/' "$MPTHREAD"
+fi
+
+# Release the GIL while I2S read/write blocks on DMA: a _thread doing
+# mic.readinto() must not stall other Python threads while it waits for
+# audio. Only the FreeRTOS-blocking calls are wrapped; no Python state is
+# touched inside.
+python3 - "$BUILD/micropython/ports/esp32/machine_i2s.c" <<'PYEOF'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+if 'MP_THREAD_GIL_EXIT' not in s:
+    s = s.replace("""        esp_err_t ret = i2s_channel_read(
+            self->i2s_chan_handle,
+            self->transform_buffer,
+            num_bytes_requested_from_dma,
+            &num_bytes_received_from_dma,
+            delay);""",
+"""        MP_THREAD_GIL_EXIT();
+        esp_err_t ret = i2s_channel_read(
+            self->i2s_chan_handle,
+            self->transform_buffer,
+            num_bytes_requested_from_dma,
+            &num_bytes_received_from_dma,
+            delay);
+        MP_THREAD_GIL_ENTER();""")
+    s = s.replace("""    esp_err_t ret = i2s_channel_write(self->i2s_chan_handle, appbuf->buf, appbuf->len, &num_bytes_written, delay);""",
+"""    MP_THREAD_GIL_EXIT();
+    esp_err_t ret = i2s_channel_write(self->i2s_chan_handle, appbuf->buf, appbuf->len, &num_bytes_written, delay);
+    MP_THREAD_GIL_ENTER();""")
+    open(p, 'w').write(s)
+    print('machine_i2s.c: GIL release patch applied')
+PYEOF
+
 SDKBOARD="$BUILD/micropython/ports/esp32/boards/ESP32_GENERIC_S3/sdkconfig.board"
 if ! grep -q "ESP32S3_DATA_CACHE_64KB" "$SDKBOARD"; then
     cat >> "$SDKBOARD" <<'EOF'
