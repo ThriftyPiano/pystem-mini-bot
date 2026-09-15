@@ -5,6 +5,7 @@
 
 from machine import I2C, Pin
 import time
+from config import EXT_I2C
 
 # Default I2C address (alternate is 0x33)
 DEFAULT_ADDRESS = 0x34
@@ -31,11 +32,18 @@ class WonderEcho:
     """
     Driver for the Hiwonder WonderEcho voice module.
     """
-    def __init__(self, sda_pin=21, scl_pin=22, address=DEFAULT_ADDRESS, i2c=None):
+    def __init__(self, sda_pin=None, scl_pin=None, address=DEFAULT_ADDRESS, i2c=None):
         if i2c is None:
-            # Match the freq used by sdk_orientation.py so the two modules
-            # can share I2C bus 1 (sda=21, scl=22) without re-init churn.
-            self.i2c = I2C(1, sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
+            if EXT_I2C is None:
+                # The StickS3 robot has no external I2C bus and uses the
+                # built-in speech_commands module for voice input instead.
+                raise OSError("This board has no WonderEcho bus (config.EXT_I2C is None)")
+            # Same bus and freq as orientation.py's MPU-6050, so the two
+            # modules can share it without re-init churn.
+            self.i2c = I2C(EXT_I2C['id'],
+                           sda=Pin(EXT_I2C['sda'] if sda_pin is None else sda_pin),
+                           scl=Pin(EXT_I2C['scl'] if scl_pin is None else scl_pin),
+                           freq=EXT_I2C['freq'])
         else:
             self.i2c = i2c
         self.address = address

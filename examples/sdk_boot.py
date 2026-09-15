@@ -3,7 +3,12 @@
 from machine import Pin
 import time
 
-BUTTON_PIN = 27
+try:
+    from config import BUTTON_PIN
+except ImportError:
+    # config.py missing from the device: fall back to the Max V1 pin so
+    # the board still boots into main.py.
+    BUTTON_PIN = 27
 
 # Enable internal Pull-Down if your button connects to 3.3V
 # OR Pull-Up if your button connects to GND. 

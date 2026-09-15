@@ -62,7 +62,7 @@ def backlight_pwm(duty=512):
 
 
 def imu():
-    """Return a BMI270 driver (.acceleration in m/s^2, .gyro in rad/s)."""
+    """Return a BMI270 driver (.acceleration in m/s^2, .gyro in deg/s)."""
     import time
     import bmi270
     dev = bmi270.BMI270(i2c())
