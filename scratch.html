@@ -412,6 +412,96 @@
             return 'print(' + text + ')\n';
         };
 
+        // --- Speech commands (models trained on speech-commands.html) ---
+        // Sessions live in localStorage, same origin as the Speech page.
+        function speechSessions() {
+            try {
+                var idx = JSON.parse(localStorage.getItem('speech-sessions')) || {sessions: []};
+                return idx.sessions.filter(function(x) { return localStorage.getItem('speech-model:' + x.id); });
+            } catch (e) { return []; }
+        }
+        function speechLabelsOf(sessionId) {
+            try {
+                var m = JSON.parse(localStorage.getItem('speech-model:' + sessionId));
+                return (m.labels || []).filter(function(l) { return l !== '[OTHER]'; });
+            } catch (e) { return []; }
+        }
+        // Labels for the dropdown: those of the model picked in a
+        // "use speech model" block in this workspace, else all models' labels.
+        function speechLabelOptions() {
+            var ids = [];
+            try {
+                workspace.getBlocksByType('speech_use_model', false).forEach(function(b) { ids.push(b.getFieldValue('MODEL')); });
+            } catch (e) {}
+            if (ids.length === 0) ids = speechSessions().map(function(x) { return x.id; });
+            var seen = {}, opts = [];
+            ids.forEach(function(id) {
+                speechLabelsOf(id).forEach(function(l) { if (!seen[l]) { seen[l] = 1; opts.push([l, l]); } });
+            });
+            return opts.length ? opts : [['(train a model first)', '']];
+        }
+
+        Blockly.Blocks['speech_use_model'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("use speech model")
+                    .appendField(new Blockly.FieldDropdown(function() {
+                        var ss = speechSessions().map(function(x) { return [x.name, x.id]; });
+                        return ss.length ? ss : [['(train a model first)', '']];
+                    }), "MODEL")
+                    .appendField("and start listening");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(20);
+                this.setTooltip("Start recognizing the commands of a model trained on the Speech page. On the robot the model is the speech_model.py you uploaded.");
+            }
+        };
+        pythonGenerator.forBlock['speech_use_model'] = function(block) {
+            var id = block.getFieldValue('MODEL');
+            var name = (speechSessions().find(function(x) { return x.id === id; }) || {}).name || '';
+            return 'speech.start(model=' + JSON.stringify(name) + ')\n';
+        };
+
+        Blockly.Blocks['speech_wait'] = {
+            init: function() {
+                this.appendDummyInput().appendField("wait for a speech command");
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(20);
+                this.setTooltip("Pause until a command is heard");
+            }
+        };
+        pythonGenerator.forBlock['speech_wait'] = function(block) {
+            return 'speech.wait_for_command()\n';
+        };
+
+        Blockly.Blocks['speech_is'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("command is")
+                    .appendField(new Blockly.FieldDropdown(speechLabelOptions), "LABEL");
+                this.setOutput(true, "Boolean");
+                this.setColour(20);
+                this.setTooltip("True if the last command heard is this word");
+            }
+        };
+        pythonGenerator.forBlock['speech_is'] = function(block) {
+            var label = block.getFieldValue('LABEL');
+            return ['speech.last_command() == ' + JSON.stringify(label), pythonGenerator.ORDER_RELATIONAL];
+        };
+
+        Blockly.Blocks['speech_last'] = {
+            init: function() {
+                this.appendDummyInput().appendField("last speech command");
+                this.setOutput(true, "String");
+                this.setColour(20);
+                this.setTooltip("The most recent command heard");
+            }
+        };
+        pythonGenerator.forBlock['speech_last'] = function(block) {
+            return ['speech.last_command()', pythonGenerator.ORDER_FUNCTION_CALL];
+        };
+
         // ============================================
         // BLOCKLY TOOLBOX
         // ============================================
@@ -479,6 +569,17 @@
                     colour: 330,
                     contents: [
                         { kind: 'block', type: 'robot_print' }
+                    ]
+                },
+                {
+                    kind: 'category',
+                    name: 'Speech',
+                    colour: 20,
+                    contents: [
+                        { kind: 'block', type: 'speech_use_model' },
+                        { kind: 'block', type: 'speech_wait' },
+                        { kind: 'block', type: 'speech_is' },
+                        { kind: 'block', type: 'speech_last' }
                     ]
                 },
                 { kind: 'sep' },
@@ -575,6 +676,9 @@
             }
             if (code.indexOf('reflection(') !== -1) {
                 imports.push('from color_sensor import reflection');
+            }
+            if (code.indexOf('speech.') !== -1) {
+                imports.push('import speech');
             }
             return imports;
         }

@@ -209,7 +209,8 @@ input {
             <tr><td>Step 3: train the model, and check training accuracy.</td></tr>
             <tr><td>Step 4: add audio samples, and check predictions.</td></tr>
             <tr><td>Step 5: re-train the model with more audio samples.</td></tr>
-            <tr><td>Step 6: download speech_model.py, and upload it to your M5StickS3 with the <a href="ide.html">IDE</a> (needs the <a href="firmware.html#sticks3-speech">speech firmware</a>).</td></tr>
+            <tr><td>Step 6: download speech_model.py, and upload it to your M5StickS3 with the <a href="ide.html">IDE</a> (needs the <a href="firmware.html#sticks3-speech">speech firmware</a>) — or pick the model on the <a href="simulator.html">Simulator</a> page and talk to the virtual robot.</td></tr>
+            <tr><td>Tip: each model is a named session (bar below). Keep one per project; samples and the trained model are saved in this browser.</td></tr>
         </table>
         <table class="tips-box">
             <tr><td>💡 Tip: over 100 audio samples are needed to train a decent model.</td></tr>
@@ -219,6 +220,13 @@ input {
         </div>
         <div class="content-section">
         <h2>🎙️ Train</h2>
+        <div id="session-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="font-weight:600;">Model:</span>
+            <select id="session-select" onchange="switchSession(this.value)" style="font-size:1em;min-width:180px;"></select>
+            <button onclick="newSession()">New</button>
+            <button onclick="renameSession()">Rename</button>
+            <button onclick="deleteSession()">Delete</button>
+        </div>
         <table>
             <tr id="buttons">
                 <td>
@@ -229,6 +237,9 @@ input {
                 </td>
                 <td>
                     <button id="download" onclick="downloadModel()">Download Model</button>
+                </td>
+                <td>
+                    <span id="session-status" style="color:#666;"></span>
                 </td>
             </tr>
         </table>
@@ -483,12 +494,12 @@ function saveSample(sample) {
     if (sample.mfcc) {
         obj['mfcc'] = arrayBufferToBase64(sample.mfcc.buffer);
     }
-    localStorage.setItem(`ss-${sample.isoTime}`,
+    localStorage.setItem(sampleKey(sample.isoTime),
         JSON.stringify(obj));
 }
 
 function loadSample(key) {
-    if (!key.startsWith('ss-'))
+    if (!key.startsWith(sampleKeyPrefix()))
         return null;
     obj = JSON.parse(localStorage.getItem(key));
     var binaryStr = atob(obj.feature);
@@ -658,7 +669,7 @@ function removeSample(index) {
     $(`#sample_${index}`).remove();
     samples[index]['removed'] = true;
     refreshLabels();
-    localStorage.removeItem(`ss-${samples[index].isoTime}`);
+    localStorage.removeItem(sampleKey(samples[index].isoTime));
 }
 
 // Promise resolve function to stop an ongoing recording.
@@ -794,7 +805,7 @@ function loadSamplesFromStorage() {
 function downloadSamples() {
     $('#download-samples').prop('disabled', true);
     var ss = Object.keys(localStorage)
-        .filter(x => x.startsWith('ss-'))
+        .filter(x => x.startsWith(sampleKeyPrefix()))
         .map(x => JSON.parse(localStorage.getItem(x)))
         .filter(x => x.label && x.mfcc)
         .map(x => {
@@ -1033,7 +1044,8 @@ async function trainModel() {
     var finalAccuracy = info.history.acc[epochs - 1].toFixed(4);
     tf.dispose([x, y]);
     initQuantizedModel(model.layers[0].weights);
-    setMessage(`Training accuracy ${finalAccuracy}.`);
+    saveModelToSession(parseFloat(finalAccuracy), ss.length);
+    setMessage(`Training accuracy ${finalAccuracy}. Model saved to session "${activeSession().name}".`);
     $('#train').prop('disabled', false);
 }
 
@@ -1048,20 +1060,7 @@ function downloadModel() {
         return;
     }
     $('#download').prop('disabled', true);
-    var modelData = '';
-    modelData += charCode(modelLabels.length);
-    modelData += charCode(weightDecBit);
-    modelData += charCode(biasDecBit);
-    modelData += charCode(biasShift);
-    modelData += charCode(outputShift);
-    var weightLen = numFlattenFeatures * modelLabels.length;
-    for (var i = 0; i < weightLen; i++) {
-        modelData += charCode(getValue(modelWeight + i, 'i8'));
-    }
-    for (var i = 0; i < modelLabels.length; i++) {
-        modelData += charCode(getValue(modelBias + i, 'i8'));
-    }
-    modelData = btoa(modelData);
+    var modelData = quantizedModelBase64();
     var text = `import speech_commands as sp
 from ubinascii import a2b_base64, b2a_base64
 
@@ -1095,10 +1094,218 @@ def save(label):
     $('#download').prop('disabled', false);
 }
 
+// ============================================================
+// Model sessions: a named set of samples plus its trained model, all in
+// localStorage (same origin as the simulator and Scratch pages, which read
+// the store directly).
+//   speech-sessions          {active, sessions:[{id, name, created, updated}]}
+//   ss:<id>:<isoTime>        one sample (label, feature, mfcc)
+//   speech-model:<id>        trained model: labels, quantized bytes (the
+//                            exact payload of speech_model.py) and the float
+//                            weights to rebuild the TF.js classifier
+// ============================================================
+var SESSIONS_KEY = 'speech-sessions';
+var sessionsIndex = null;
+
+function loadSessionsIndex() {
+    try {
+        sessionsIndex = JSON.parse(localStorage.getItem(SESSIONS_KEY)) || {active: null, sessions: []};
+    } catch (e) {
+        sessionsIndex = {active: null, sessions: []};
+    }
+    return sessionsIndex;
+}
+
+function saveSessionsIndex() {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessionsIndex));
+}
+
+function activeSession() {
+    return sessionsIndex.sessions.find(s => s.id === sessionsIndex.active) || null;
+}
+
+function sampleKeyPrefix(id) {
+    return 'ss:' + (id || sessionsIndex.active) + ':';
+}
+
+function sampleKey(isoTime) {
+    return sampleKeyPrefix() + isoTime;
+}
+
+function modelKey(id) {
+    return 'speech-model:' + (id || sessionsIndex.active);
+}
+
+function newSessionId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function renderSessionSelect() {
+    var opts = sessionsIndex.sessions.map(s =>
+        `<option value="${s.id}" ${s.id === sessionsIndex.active ? 'selected' : ''}>${$('<div>').text(s.name).html()}</option>`);
+    $('#session-select').html(opts.join(''));
+    var m = loadModelFromSession();
+    $('#session-status').text(m
+        ? `model trained ${new Date(m.trainedAt).toLocaleString()} · ${m.labels.length - 1} commands · accuracy ${m.accuracy}`
+        : 'no trained model yet');
+}
+
+function clearSamplesTable() {
+    $('#samples tr[id^="sample_"]').remove();
+    samples = [];
+    labels = [];
+    modelLabels = null;
+    if (model) {
+        model.dispose();
+        model = null;
+    }
+}
+
+function initSessions() {
+    loadSessionsIndex();
+    if (sessionsIndex.sessions.length === 0) {
+        var s = {id: newSessionId(), name: 'Default', created: Date.now(), updated: Date.now()};
+        sessionsIndex.sessions.push(s);
+        sessionsIndex.active = s.id;
+        saveSessionsIndex();
+    }
+    if (!activeSession()) {
+        sessionsIndex.active = sessionsIndex.sessions[0].id;
+        saveSessionsIndex();
+    }
+    switchSession(sessionsIndex.active);
+}
+
+function switchSession(id) {
+    if (!sessionsIndex.sessions.find(s => s.id === id))
+        return;
+    sessionsIndex.active = id;
+    saveSessionsIndex();
+    clearSamplesTable();
+    loadSamplesFromStorage();
+    restoreModelFromSession();
+    renderSessionSelect();
+    setMessage('');
+}
+
+function newSession(name) {
+    name = name || prompt('Name for the new model session:', 'My robot commands');
+    if (!name)
+        return null;
+    var s = {id: newSessionId(), name: name.trim(), created: Date.now(), updated: Date.now()};
+    sessionsIndex.sessions.push(s);
+    saveSessionsIndex();
+    switchSession(s.id);
+    return s;
+}
+
+function renameSession() {
+    var s = activeSession();
+    var name = prompt('Rename session:', s.name);
+    if (!name)
+        return;
+    s.name = name.trim();
+    s.updated = Date.now();
+    saveSessionsIndex();
+    renderSessionSelect();
+}
+
+
+function deleteSession() {
+    var s = activeSession();
+    if (!confirm(`Delete session "${s.name}" and all of its samples and its trained model?`))
+        return;
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(sampleKeyPrefix(s.id)))
+            localStorage.removeItem(key);
+    });
+    localStorage.removeItem(modelKey(s.id));
+    sessionsIndex.sessions = sessionsIndex.sessions.filter(x => x.id !== s.id);
+    sessionsIndex.active = null;
+    saveSessionsIndex();
+    initSessions();
+}
+
+// The quantized classifier as speech_model.py embeds it:
+// [num_labels, weight_dec_bit, bias_dec_bit, bias_shift, output_shift,
+//  int8 weights (X4Q7 order), int8 biases], base64.
+function quantizedModelBase64() {
+    var modelData = '';
+    modelData += charCode(modelLabels.length);
+    modelData += charCode(weightDecBit);
+    modelData += charCode(biasDecBit);
+    modelData += charCode(biasShift);
+    modelData += charCode(outputShift);
+    var weightLen = numFlattenFeatures * modelLabels.length;
+    for (var i = 0; i < weightLen; i++) {
+        modelData += charCode(getValue(modelWeight + i, 'i8'));
+    }
+    for (var i = 0; i < modelLabels.length; i++) {
+        modelData += charCode(getValue(modelBias + i, 'i8'));
+    }
+    return btoa(modelData);
+}
+
+function saveModelToSession(accuracy, sampleCount) {
+    var w = model.layers[0].weights;
+    var payload = {
+        labels: [...modelLabels],
+        weightDecBit, biasDecBit, biasShift, outputShift,
+        data: quantizedModelBase64(),
+        floatWeights: arrayBufferToBase64(new Float32Array(w[0].val.dataSync()).buffer),
+        floatBias: arrayBufferToBase64(new Float32Array(w[1].val.dataSync()).buffer),
+        accuracy: accuracy,
+        sampleCount: sampleCount,
+        trainedAt: Date.now()
+    };
+    localStorage.setItem(modelKey(), JSON.stringify(payload));
+    var s = activeSession();
+    s.updated = Date.now();
+    saveSessionsIndex();
+    renderSessionSelect();
+}
+
+function loadModelFromSession(id) {
+    try {
+        return JSON.parse(localStorage.getItem(modelKey(id)));
+    } catch (e) {
+        return null;
+    }
+}
+
+function base64ToFloat32(b64) {
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++)
+        bytes[i] = bin.charCodeAt(i);
+    return new Float32Array(bytes.buffer);
+}
+
+// Rebuild the TF.js classifier (and the WASM copy) from the stored floats
+// so predictions, downloads and re-training work after a reload.
+function restoreModelFromSession() {
+    var m = loadModelFromSession();
+    if (!m || !m.floatWeights)
+        return false;
+    var n = m.labels.length;
+    modelLabels = [...m.labels];
+    model = tf.sequential();
+    model.add(tf.layers.dense({inputShape: [numFlattenFeatures], units: n}));
+    model.add(tf.layers.softmax());
+    model.compile({optimizer: tf.train.adam(), loss: 'categoricalCrossentropy', metrics: ['accuracy']});
+    model.layers[0].setWeights([
+        tf.tensor2d(base64ToFloat32(m.floatWeights), [numFlattenFeatures, n]),
+        tf.tensor1d(base64ToFloat32(m.floatBias))
+    ]);
+    initQuantizedModel(model.layers[0].weights);
+    return true;
+}
+
+
 function clearCache() {
     $('#clear-cache').prop('disabled', true);
     [...Object.keys(localStorage)].forEach(key => {
-        if (!key.startsWith('ss-'))
+        if (!key.startsWith(sampleKeyPrefix()))
             return;
         localStorage.removeItem(key);
     });
@@ -1213,7 +1420,7 @@ function handleMessage(e) {
         loss: 'categoricalCrossentropy',
         metrics: ['accuracy']
     });
-    loadSamplesFromStorage();
+    initSessions();
     window.addEventListener("message", handleMessage);
 })();
         </script>

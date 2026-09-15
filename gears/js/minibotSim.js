@@ -20,6 +20,33 @@ var $builtinmodule = function(name) {
     return Sk.builtin.none.none$;
   });
 
+  // Speech commands recognised by speech-commands/runtime.js on the page
+  // (window.minibotSpeech, set up by index.html when a model is chosen).
+  function speech() { return window.minibotSpeech || null; }
+  mod.speech_command = new Sk.builtin.func(function() {
+    var q = window.minibotSpeechQueue || [];
+    return new Sk.builtin.str(q.length ? q.shift() : '');
+  });
+  mod.speech_labels = new Sk.builtin.func(function() {
+    var sp = speech();
+    return Sk.ffi.remapToPy(sp ? sp.labels() : []);
+  });
+  mod.speech_start = new Sk.builtin.func(function() {
+    var sp = speech();
+    if (!sp) return Sk.builtin.bool.false$;
+    sp.start();
+    return Sk.builtin.bool.true$;
+  });
+  mod.speech_stop = new Sk.builtin.func(function() {
+    var sp = speech();
+    if (sp) sp.stop();
+    return Sk.builtin.none.none$;
+  });
+  mod.speech_is_listening = new Sk.builtin.func(function() {
+    var sp = speech();
+    return sp && sp.isListening() ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
+  });
+
   // machine.Pin writes: console line + the page's LED indicator
   mod.pin_changed = new Sk.builtin.func(function(pin, value) {
     var p = Sk.ffi.remapToJs(pin), v = Sk.ffi.remapToJs(value);

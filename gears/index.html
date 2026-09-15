@@ -106,6 +106,7 @@
         <canvas id="renderCanvas" touch-action="none"></canvas>
         <div class="runSim"><span class="icon-play"></span></div>
         <div id="minibotLed" title="Built-in LED (machine.Pin(2))"><span class="dot"></span> LED</div>
+        <div id="minibotHeard" style="position:absolute;left:10px;bottom:10px;z-index:5;background:rgba(0,0,0,0.55);color:#fff;padding:6px 10px;border-radius:6px;font:13px sans-serif;display:none;">🎤 <span class="word">…</span></div>
         <div class="world"><span class="icon-globe"></span></div>
         <div class="reset"><span class="icon-reset"></span></div>
         <div class="sensors"><span class="icon-sensors"></span></div>
@@ -360,6 +361,75 @@
       }
     }
 
+    // ---- Speech commands: the device's WASM recogniser, driven by the mic ----
+    // simulator.html picks a model (a speech-model:<id> payload from the
+    // Speech page's localStorage) and sends 'minibot-speech-model'; the
+    // Python module speech.py reads recognised words from minibotSpeechQueue.
+    window.minibotSpeechQueue = [];
+    var minibotSpeechLoading = null;
+    function loadScriptOnce(src) {
+      return new Promise(function(resolve, reject) {
+        var el = document.createElement('script');
+        el.src = src;
+        el.onload = resolve;
+        el.onerror = function() { reject(new Error('failed to load ' + src)); };
+        document.head.appendChild(el);
+      });
+    }
+    function minibotSpeechRuntime() {
+      if (!minibotSpeechLoading) {
+        minibotSpeechLoading = loadScriptOnce('../speech-commands/mfcc.js')
+          .then(function() { return loadScriptOnce('../speech-commands/runtime.js'); })
+          .then(function() { return SpeechRuntime.ready(); });
+      }
+      return minibotSpeechLoading;
+    }
+    function minibotHeard(word, prob) {
+      window.minibotSpeechQueue.push(word);
+      simPanel.consoleWrite('[heard] ' + word + (prob !== undefined ? ' (' + prob.toFixed(2) + ')' : '') + '\n');
+      $('#minibotHeard .word').text(word);
+      if (window.parent != window) {
+        window.parent.postMessage({type: 'minibot-heard', word: word, prob: prob}, window.location.origin);
+      }
+    }
+    async function minibotSpeechSetModel(payload) {
+      await minibotSpeechRuntime();
+      var labels = SpeechRuntime.loadModel(payload);
+      window.minibotSpeech = {
+        labels: function() { return labels.slice(); },
+        isListening: function() { return SpeechRuntime.isListening(); },
+        start: function() {
+          if (SpeechRuntime.isListening()) return;
+          $('#minibotHeard').show().find('.word').text('listening…');
+          SpeechRuntime.start({
+            onCommand: minibotHeard,
+            onResult: function(r) {
+              if (r.label !== '[OTHER]' && r.prob >= 0.3) {
+                $('#minibotHeard .word').text(r.label + ' ' + r.prob.toFixed(2));
+              }
+            }
+          }).catch(function(e) {
+            simPanel.consoleWriteErrors('microphone: ' + e.message);
+            $('#minibotHeard').hide();
+          });
+          if (window.parent != window) {
+            window.parent.postMessage({type: 'minibot-listening', listening: true}, window.location.origin);
+          }
+        },
+        stop: function() {
+          SpeechRuntime.stop();
+          $('#minibotHeard').hide();
+          if (window.parent != window) {
+            window.parent.postMessage({type: 'minibot-listening', listening: false}, window.location.origin);
+          }
+        },
+        // tests: feed audio instead of using the microphone
+        inject: function(samples) { return SpeechRuntime.injectAudio(samples, {onCommand: minibotHeard}); }
+      };
+      simPanel.consoleWrite('[speech] model loaded: ' + labels.filter(function(l) { return l != '[OTHER]'; }).join(', ') + '\n');
+      return labels;
+    }
+
     // Messages from the embedding page (simulator.html)
     window.addEventListener('message', function(e) {
       if (e.origin != window.location.origin) { return; }
@@ -372,6 +442,16 @@
         simPanel.stopSim();   // also stops the wheels; harmless when nothing is running
       } else if (msg.type == 'minibot-voice') {
         minibotSay(msg.word);
+      } else if (msg.type == 'minibot-speech-model') {
+        minibotSpeechSetModel(msg.payload).then(function(labels) {
+          e.source.postMessage({type: 'minibot-speech-ready', labels: labels}, window.location.origin);
+        }).catch(function(err) {
+          simPanel.consoleWriteErrors('speech model: ' + err.message);
+        });
+      } else if (msg.type == 'minibot-speech-listen') {
+        if (window.minibotSpeech) {
+          if (msg.listening) { window.minibotSpeech.start(); } else { window.minibotSpeech.stop(); }
+        }
       } else if (msg.type == 'minibot-get-code') {
         filesManager.updateCurrentFile();
         e.source.postMessage({type: 'minibot-code', code: filesManager.files['main.py'] || ''}, window.location.origin);

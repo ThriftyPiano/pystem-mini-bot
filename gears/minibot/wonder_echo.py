@@ -32,7 +32,9 @@ class WonderEcho:
         print("WonderEcho (simulated): type a command in the Voice box")
 
     def read_command(self):
-        word = minibot_sim.voice_command()
+        # Typed words first, then whatever the speech recogniser heard, so a
+        # trained model with labels like 'forward' / 'stop' drives voice_drive.py.
+        word = minibot_sim.voice_command() or minibot_sim.speech_command()
         if not word:
             return CMD_NONE
         return COMMAND_WORDS.get(word.strip().lower(), CMD_NONE)

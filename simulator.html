@@ -16,6 +16,9 @@
         #simbar .powered { color: #666; font-size: 13px; margin-left: 4px; }
         #simbar .powered a { color: #667eea; text-decoration: none; }
         #simbar .powered a:hover { text-decoration: underline; }
+        #simbar .speech { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+        #simbar .speech select { font-size: 13px; padding: 4px; }
+        #simbar .heard { color: #333; min-width: 90px; font-weight: 600; }
         #simframe { flex: 1; border: 0; width: 100%; min-height: 480px; }
     </style>
 </head>
@@ -39,6 +42,12 @@
         <button id="btn-run">▶ Run</button>
         <button id="btn-stop" class="secondary">■ Stop</button>
         <span class="powered">Powered by <a href="https://github.com/QuirkyCort/gears" target="_blank" rel="noopener">GEARS</a></span>
+        <span class="speech">
+            <span style="margin-left:18px;">🎤 Speech model:</span>
+            <select id="speech-model"><option value="">(none)</option></select>
+            <button id="btn-listen" class="secondary" disabled>Listen</button>
+            <span id="speech-heard" class="heard"></span>
+        </span>
     </div>
     <iframe id="simframe" src="gears/index.html?embed=1&robotJSON=robots/minibot.json" allow="fullscreen"></iframe>
 
@@ -62,20 +71,75 @@ print("Line sensor reads", reflection('C'))
 motor_pair.stop(motor_pair.PAIR_1)
 `;
         let ready = false;
-        let pending = null;
-        function send(msg) { frame.contentWindow.postMessage(msg, window.location.origin); }
+        let pending = [];   // messages queued until the iframe reports minibot-ready
+        function send(msg) {
+            if (ready) frame.contentWindow.postMessage(msg, window.location.origin);
+            else pending.push(msg);
+        }
         window.addEventListener('message', function(e) {
             if (e.origin != window.location.origin) return;
             if (e.data && e.data.type == 'minibot-ready') {
                 ready = true;
-                if (pending) { send(pending); pending = null; }
+                pending.forEach(m => frame.contentWindow.postMessage(m, window.location.origin));
+                pending = [];
             }
         });
         function load(code, run) {
-            const msg = {type: 'minibot-load', code: code, run: !!run};
-            if (ready) send(msg); else pending = msg;
+            send({type: 'minibot-load', code: code, run: !!run});
         }
         document.getElementById('btn-load-demo').onclick = () => load(DEMO, false);
+
+        // ---- speech models trained on speech-commands.html (same-origin localStorage) ----
+        const modelSelect = document.getElementById('speech-model');
+        const listenBtn = document.getElementById('btn-listen');
+        const heard = document.getElementById('speech-heard');
+        let listening = false;
+        function speechSessions() {
+            try {
+                const idx = JSON.parse(localStorage.getItem('speech-sessions')) || {sessions: []};
+                return idx.sessions.filter(s => localStorage.getItem('speech-model:' + s.id));
+            } catch (e) { return []; }
+        }
+        function refreshModels() {
+            const current = modelSelect.value;
+            modelSelect.innerHTML = '<option value="">(none)</option>' +
+                speechSessions().map(s => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+            modelSelect.value = current;
+            if (modelSelect.value !== current) modelSelect.value = '';
+        }
+        refreshModels();
+        modelSelect.addEventListener('focus', refreshModels);
+        modelSelect.addEventListener('change', () => {
+            listenBtn.disabled = true;
+            heard.textContent = '';
+            if (listening) { send({type: 'minibot-speech-listen', listening: false}); }
+            const id = modelSelect.value;
+            if (!id) return;
+            try {
+                const payload = JSON.parse(localStorage.getItem('speech-model:' + id));
+                send({type: 'minibot-speech-model', payload: payload});
+                heard.textContent = 'loading…';
+            } catch (e) {
+                heard.textContent = 'bad model';
+            }
+        });
+        listenBtn.addEventListener('click', () => {
+            send({type: 'minibot-speech-listen', listening: !listening});
+        });
+        window.addEventListener('message', function(e) {
+            if (e.origin != window.location.origin || !e.data) return;
+            if (e.data.type == 'minibot-speech-ready') {
+                listenBtn.disabled = false;
+                heard.textContent = e.data.labels.filter(l => l != '[OTHER]').join(' · ');
+            } else if (e.data.type == 'minibot-listening') {
+                listening = !!e.data.listening;
+                listenBtn.textContent = listening ? '■ Stop listening' : 'Listen';
+                listenBtn.classList.toggle('secondary', !listening);
+                if (listening) heard.textContent = 'listening…';
+            } else if (e.data.type == 'minibot-heard') {
+                heard.textContent = 'heard: ' + e.data.word;
+            }
+        });
         document.getElementById('btn-run').onclick = () => send({type: 'minibot-run'});
         document.getElementById('btn-stop').onclick = () => send({type: 'minibot-stop'});
 

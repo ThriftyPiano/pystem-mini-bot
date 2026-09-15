@@ -28,6 +28,7 @@ var skulpt = new function() {
     './wonder_echo.py': 'minibot/wonder_echo.py',
     './minibot_sim.js': 'js/minibotSim.js',
     './machine.py': 'minibot/machine.py',
+    './speech.py': 'minibot/speech.py',
   };
   this.preloadedLibs = {};
 
