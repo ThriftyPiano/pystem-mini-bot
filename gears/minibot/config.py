@@ -42,12 +42,13 @@ HEAD_CONFIG = {
 }
 
 # Same keys as the on-device MOTOR_CONFIG. The geometry matches
-# robots/minibot.json (measured from the Onshape assembly) so motor_pair's
+# robots/minibot.json (measured from the Onshape assembly: 5.6 cm rubber
+# discs whose contact patches are 8.2 cm apart) so motor_pair's
 # distance/turn maths agrees with the physics it is driving.
 MOTOR_CONFIG = {
     'pulses_per_revolution': 40,
     'wheel_diameter_cm': 5.6,
-    'wheel_distance_cm': 10.0,
+    'wheel_distance_cm': 8.2,
     'max_speed_dps': 540,
     'default_speed_dps': 360,
     'position_tolerance': 20,
