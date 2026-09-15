@@ -18,9 +18,13 @@ The World Builder therefore has no model library; everything else works.
   `motor.py`, `orientation.py`, `color_sensor.py`, `head.py`,
   `wonder_echo.py`. Same public API as `../examples/sdk_*.py`, implemented on
   GEARS's `simPython` bridge. `motor_pair.py` is **not** duplicated: the
-  simulator loads `../examples/sdk_motor_pair.py` itself.
-- `js/minibotSim.js` — Skulpt module `minibot_sim` (voice-command queue fed
-  by the 🎤 box, head-angle reporting).
+  simulator loads `../examples/sdk_motor_pair.py` itself. `machine.py` is a
+  minimal MicroPython `machine` (virtual `Pin` shown on the page's LED
+  indicator and console; inert `PWM`/`ADC`/`I2C`; `Timer` callbacks are not
+  possible in Skulpt) so beginner programs such as `led_blink.py` run.
+- `js/minibotSim.js` — Skulpt module `minibot_sim` (voice-command queue —
+  no UI for it yet, fed via the `minibot-voice` message — head-angle and
+  pin-change reporting).
 - `js/skulpt.js` — the modules above are registered in `externalLibs`, and
   Skulpt's `time` module gains MicroPython's `ticks_ms / ticks_diff /
   sleep_ms` so on-device code runs unchanged.
@@ -33,9 +37,14 @@ The World Builder therefore has no model library; everything else works.
 - `robots/minibot.glb` — the Onshape export, re-rooted into the GEARS body
   frame (x right, y up, z forward, cm, origin at the body centre). Regenerate
   from a fresh export with the script in the commit that added it.
-- `index.html` — the 🎤 voice box and a `postMessage` API used by
-  `../simulator.html` (`minibot-load / run / stop / voice / get-code`,
-  `minibot-ready`).
+- `index.html` — the LED indicator, `?embed=1` (hides
+  GEARS's header, tabs and menus so only the simulator view shows), and a
+  `postMessage` API used by `../simulator.html` (`minibot-load / run / stop /
+  voice / get-code`, `minibot-ready`).
+- `js/main.js` — the "What's New" popup no longer auto-shows.
+- `js/simPanel.js` — `stopSim()` also stops both wheels (upstream leaves a
+  `run-forever` drive spinning after Python is interrupted). In embed mode
+  the ruler, virtual joystick and hub-button widgets are hidden.
 
 ## Updating GEARS
 

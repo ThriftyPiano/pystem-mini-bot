@@ -36,6 +36,16 @@
 </head>
 
 <body>
+  <!-- PySTEM: ?embed=1 hides GEARS's own chrome so only the simulator view shows -->
+  <style>
+    body.minibotEmbed header, body.minibotEmbed nav { display: none !important; }
+    body.minibotEmbed main { padding: 0; }
+    /* ruler, virtual joystick and hub-button widgets are EV3-specific clutter for the Mini Bot */
+    body.minibotEmbed .ruler, body.minibotEmbed .joystick, body.minibotEmbed .hubButtons { display: none !important; }
+    #minibotLed { position: absolute; right: 10px; bottom: 10px; z-index: 5; background: rgba(0,0,0,0.55); color: #fff; padding: 6px 10px; border-radius: 6px; font: 13px sans-serif; display: flex; align-items: center; gap: 6px; }
+    #minibotLed .dot { width: 12px; height: 12px; border-radius: 50%; background: #333; box-shadow: inset 0 0 2px #000; }
+    #minibotLed.on .dot { background: #4cff4c; box-shadow: 0 0 8px #4cff4c; }
+  </style>
   <header>
     <img class="gearsIcon" src="favicon-32.png">
     <div>GearsBot</div>
@@ -95,11 +105,7 @@
       <div class="panel" aria-labelledby="navSim" id="simPanel">
         <canvas id="renderCanvas" touch-action="none"></canvas>
         <div class="runSim"><span class="icon-play"></span></div>
-        <!-- PySTEM: simulated WonderEcho input, read by minibot/wonder_echo.py via minibot_sim -->
-        <div id="minibotVoice" style="position:absolute;left:10px;bottom:10px;z-index:5;background:rgba(0,0,0,0.55);color:#fff;padding:6px 8px;border-radius:6px;font:13px sans-serif;">
-          🎤 <input id="minibotVoiceInput" type="text" placeholder="voice command: forward, left, stop…" style="width:220px;font-size:13px;">
-          <button id="minibotVoiceSend" style="font-size:13px;">Say</button>
-        </div>
+        <div id="minibotLed" title="Built-in LED (machine.Pin(2))"><span class="dot"></span> LED</div>
         <div class="world"><span class="icon-globe"></span></div>
         <div class="reset"><span class="icon-reset"></span></div>
         <div class="sensors"><span class="icon-sensors"></span></div>
@@ -303,7 +309,22 @@
     loadWhenReady();
 
     // ---- PySTEM Mini Bot glue -------------------------------------------
+    if (readGET('embed')) {
+      document.body.classList.add('minibotEmbed');
+      try {
+        main.tabClicked('navSim');
+      } catch (e) {
+        // Blockly's dropdown hide() throws when its workspace was never
+        // shown; the tab switch itself has already happened.
+      }
+    }
+    window.minibotPinChanged = function(pin, value) {
+      if (pin == 2) {
+        $('#minibotLed').toggleClass('on', !!value);
+      }
+    };
     // Queue of words for minibot/wonder_echo.py (see js/minibotSim.js).
+    // No UI for it yet; fed via the 'minibot-voice' message.
     window.minibotVoiceQueue = [];
     function minibotSay(word) {
       word = (word || '').trim();
@@ -312,13 +333,6 @@
         simPanel.consoleWrite('[voice] ' + word + '\n');
       }
     }
-    $('#minibotVoiceSend').click(function() {
-      minibotSay($('#minibotVoiceInput').val());
-      $('#minibotVoiceInput').val('').focus();
-    });
-    $('#minibotVoiceInput').keydown(function(e) {
-      if (e.key == 'Enter') { $('#minibotVoiceSend').click(); }
-    });
 
     // Load a program into the Python editor as main.py (Python mode, so the
     // Blockly generator won't overwrite it) and optionally run it.
@@ -355,7 +369,7 @@
       } else if (msg.type == 'minibot-run') {
         if (!skulpt.running) { simPanel.runSim(); }
       } else if (msg.type == 'minibot-stop') {
-        if (skulpt.running) { simPanel.stopSim(); }
+        simPanel.stopSim();   // also stops the wheels; harmless when nothing is running
       } else if (msg.type == 'minibot-voice') {
         minibotSay(msg.word);
       } else if (msg.type == 'minibot-get-code') {

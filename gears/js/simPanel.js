@@ -1201,6 +1201,18 @@ var simPanel = new function() {
     skulpt.hardInterrupt = true;
     self.setRunIcon('run');
 
+    // PySTEM: interrupting Python leaves wheels in run-forever spinning;
+    // stop the drive too (the on-robot equivalent of Ctrl-C is a stopped
+    // robot, and that is what students expect from a Stop button).
+    if (typeof robot != 'undefined') {
+      for (let w of [robot.leftWheel, robot.rightWheel]) {
+        if (w && typeof w.stop == 'function') {
+          w.speed_sp = 0;
+          w.stop();
+        }
+      }
+    }
+
     if (typeof babylon.world.stopSim == 'function') {
       babylon.world.stopSim();
     }

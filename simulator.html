@@ -8,11 +8,14 @@
     <style>
         html, body { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
         body { display: flex; flex-direction: column; }
-        .universal-navbar a { margin: 0 12px; }
+        /* match the doc pages (index/assembly/firmware/speech): 16px base, line-height 1.6 -> 48px bar */
+        .universal-navbar { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; line-height: 1.6; }
         #simbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border-bottom: 1px solid #ddd; font-size: 14px; flex-wrap: wrap; }
         #simbar button { padding: 6px 12px; border: 1px solid #667eea; background: #667eea; color: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
         #simbar button.secondary { background: #fff; color: #667eea; }
-        #simbar .hint { color: #666; margin-left: auto; }
+        #simbar .powered { color: #666; font-size: 13px; margin-left: 4px; }
+        #simbar .powered a { color: #667eea; text-decoration: none; }
+        #simbar .powered a:hover { text-decoration: underline; }
         #simframe { flex: 1; border: 0; width: 100%; min-height: 480px; }
     </style>
 </head>
@@ -38,9 +41,9 @@
         <button id="btn-load-demo" class="secondary">Load demo program</button>
         <button id="btn-run">▶ Run</button>
         <button id="btn-stop" class="secondary">■ Stop</button>
-        <span class="hint">Same <code>motor</code> / <code>motor_pair</code> / <code>color_sensor</code> / <code>orientation</code> API as the robot. Edit the code in the Python tab, or send it from the <a href="ide.html">IDE</a> with "Run in Simulator".</span>
+        <span class="powered">Powered by <a href="https://github.com/QuirkyCort/gears" target="_blank" rel="noopener">GEARS</a></span>
     </div>
-    <iframe id="simframe" src="gears/index.html?robotJSON=robots/minibot.json" allow="fullscreen"></iframe>
+    <iframe id="simframe" src="gears/index.html?embed=1&robotJSON=robots/minibot.json" allow="fullscreen"></iframe>
 
     <script>
         // Powered by GEARS (https://github.com/QuirkyCort/gears, GPL-3.0), vendored under gears/

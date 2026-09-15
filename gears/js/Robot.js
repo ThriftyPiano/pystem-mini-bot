@@ -606,6 +606,14 @@ function Robot() {
       if (options.modelHidesBody) {
         body.visibility = 0;
       }
+      // The loader computed the imported nodes' world matrices before they
+      // were parented to the body; force a recompute so the model starts
+      // at the body's position instead of the scene origin.
+      top.computeWorldMatrix(true);
+      top.getChildTransformNodes().forEach(function(n) { n.computeWorldMatrix(true); });
+      for (let m of meshes) {
+        m.computeWorldMatrix(true);
+      }
       self.model = top;
     }, null, function(scene, message) {
       console.log('Robot model failed to load: ' + message);

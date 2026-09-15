@@ -20,5 +20,17 @@ var $builtinmodule = function(name) {
     return Sk.builtin.none.none$;
   });
 
+  // machine.Pin writes: console line + the page's LED indicator
+  mod.pin_changed = new Sk.builtin.func(function(pin, value) {
+    var p = Sk.ffi.remapToJs(pin), v = Sk.ffi.remapToJs(value);
+    if (typeof simPanel != 'undefined') {
+      simPanel.consoleWrite('[pin ' + p + '] ' + (v ? 'HIGH' : 'LOW') + '\n');
+    }
+    if (typeof window.minibotPinChanged == 'function') {
+      window.minibotPinChanged(p, v);
+    }
+    return Sk.builtin.none.none$;
+  });
+
   return mod;
 };
