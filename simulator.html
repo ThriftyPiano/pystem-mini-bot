@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySTEM Mini Bot - Simulator</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <style>
+        html, body { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+        body { display: flex; flex-direction: column; }
+        .universal-navbar a { margin: 0 12px; }
+        #simbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border-bottom: 1px solid #ddd; font-size: 14px; flex-wrap: wrap; }
+        #simbar button { padding: 6px 12px; border: 1px solid #667eea; background: #667eea; color: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        #simbar button.secondary { background: #fff; color: #667eea; }
+        #simbar .hint { color: #666; margin-left: auto; }
+        #simframe { flex: 1; border: 0; width: 100%; min-height: 480px; }
+    </style>
+</head>
+<body>
+        <nav class="universal-navbar" style="width:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0 8px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:0;">
+            <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;position:relative;">
+                <a href="https://discord.gg/W5c48TxVz5" target="_blank" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;background:#5865F2;padding:8px 16px;border-radius:6px;display:flex;align-items:center;gap:8px;position:absolute;left:0;">
+                    <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg" alt="Discord" style="height:20px;width:20px;vertical-align:middle;"> Join Discord
+                </a>
+                <div style="display:flex;flex:1;justify-content:center;gap:32px;align-items:center;">
+                    <a href="index.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🏠 Home</a>
+                    <a href="assembly.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🔧 Assembly</a>
+                    <a href="firmware.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💾 Firmware</a>
+                    <a href="ide.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💻 IDE</a>
+                    <a href="scratch.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🧩 Scratch</a>
+                    <a href="speech-commands.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🎤 Speech</a>
+                    <a href="simulator.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🕹️ Simulator</a>
+                </div>
+            </div>
+        </nav>
+    <div id="simbar">
+        <span style="font-weight:600;">🕹️ Virtual Mini Bot</span>
+        <button id="btn-load-demo" class="secondary">Load demo program</button>
+        <button id="btn-run">▶ Run</button>
+        <button id="btn-stop" class="secondary">■ Stop</button>
+        <span class="hint">Same <code>motor</code> / <code>motor_pair</code> / <code>color_sensor</code> / <code>orientation</code> API as the robot. Edit the code in the Python tab, or send it from the <a href="ide.html">IDE</a> with "Run in Simulator".</span>
+    </div>
+    <iframe id="simframe" src="gears/index.html?robotJSON=robots/minibot.json" allow="fullscreen"></iframe>
+
+    <script>
+        // Powered by GEARS (https://github.com/QuirkyCort/gears, GPL-3.0), vendored under gears/
+        // with the Mini Bot SDK shim (gears/minibot/) and robot model (gears/robots/).
+        const frame = document.getElementById('simframe');
+        const DEMO = `# Virtual Mini Bot demo: drive a square, then follow the line sensor.
+import motor
+import motor_pair
+import time
+from color_sensor import reflection
+
+motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)
+
+for i in range(4):
+    motor_pair.move_for_degrees(motor_pair.PAIR_1, 720, 0, velocity=360)
+    motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 90, 180, -180)
+
+print("Line sensor reads", reflection('C'))
+motor_pair.stop(motor_pair.PAIR_1)
+`;
+        let ready = false;
+        let pending = null;
+        function send(msg) { frame.contentWindow.postMessage(msg, window.location.origin); }
+        window.addEventListener('message', function(e) {
+            if (e.origin != window.location.origin) return;
+            if (e.data && e.data.type == 'minibot-ready') {
+                ready = true;
+                if (pending) { send(pending); pending = null; }
+            }
+        });
+        function load(code, run) {
+            const msg = {type: 'minibot-load', code: code, run: !!run};
+            if (ready) send(msg); else pending = msg;
+        }
+        document.getElementById('btn-load-demo').onclick = () => load(DEMO, false);
+        document.getElementById('btn-run').onclick = () => send({type: 'minibot-run'});
+        document.getElementById('btn-stop').onclick = () => send({type: 'minibot-stop'});
+
+        // Code handed over from ide.html ("Run in Simulator")
+        try {
+            const handoff = localStorage.getItem('minibot-sim-code');
+            if (handoff) {
+                localStorage.removeItem('minibot-sim-code');
+                load(handoff, false);
+            }
+        } catch (e) {}
+    </script>
+</body>
+</html>

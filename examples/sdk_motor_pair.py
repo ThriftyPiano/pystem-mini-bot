@@ -177,11 +177,17 @@ class MotorPair:
         motor.run(self.left_port, int(velocity))
         motor.run(self.right_port, int(-velocity))
         
-        # Monitor position and apply corrections until target reached
+        # Monitor position and apply corrections until target reached.
+        # "Reached" means at or past the target in the direction of travel,
+        # not merely within a window around it: a fast wheel can step over a
+        # +/-20 deg window between two reads (a low-frame-rate simulator, or
+        # the encoder at top speed), and a window-only test then never fires.
+        left_dir = 1 if target_left_position >= start_left_position else -1
+        right_dir = 1 if target_right_position >= start_right_position else -1
         while True:
             # Check if both motors have reached their targets
-            left_reached = abs(left_motor.position - target_left_position) <= 20
-            right_reached = abs(right_motor.position - target_right_position) <= 20
+            left_reached = (left_motor.position - target_left_position) * left_dir >= -20
+            right_reached = (right_motor.position - target_right_position) * right_dir >= -20
             
             if left_reached or right_reached:
                 break

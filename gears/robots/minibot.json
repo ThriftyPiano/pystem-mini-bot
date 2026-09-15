@@ -1,0 +1,57 @@
+{
+  "name": "minibot",
+  "shortDescription": "PySTEM Mini Bot",
+  "longDescription": "PySTEM Mini Bot (StickS3 build): two encoder wheels, ball caster, downward line sensor, internal IMU.",
+  "longerDescription": "<li>Wheel diameter: 5.6 cm</li><li>Wheel spacing: 10 cm</li><li>Port A: left wheel</li><li>Port B: right wheel</li><li>Port C (in1): line sensor</li><li>in2: gyro</li>",
+  "thumbnail": "",
+  "_comment": "Dimensions measured from the Onshape assembly. GEARS body frame: x right, y up, z forward, cm. The box is the physics body (narrower than the real chassis so the wheels clear it: track = bodyWidth + wheelWidth + 2*wheelToBodyOffset = 10.0); the Onshape mesh (modelURL) is drawn over it.",
+  "bodyHeight": 5.3,
+  "bodyWidth": 7.27,
+  "bodyLength": 12.9,
+  "wheels": true,
+  "wheelDiameter": 5.6,
+  "wheelWidth": 2.33,
+  "wheelToBodyOffset": 0.2,
+  "bodyEdgeToWheelCenterY": 1.8,
+  "bodyEdgeToWheelCenterZ": 3.62,
+  "caster": true,
+  "casterDiameter": 1.2,
+  "casterOffsetZ": 0.9,
+  "bodyMass": 1000,
+  "wheelMass": 200,
+  "casterMass": 0,
+  "wheelFriction": 10,
+  "bodyFriction": 0,
+  "casterFriction": 0,
+  "color": "#3f3f3f",
+  "imageType": "all",
+  "imageURL": "",
+  "modelURL": "robots/minibot.glb",
+  "modelHidesBody": true,
+  "components": [
+    {
+      "type": "ColorSensor",
+      "position": [
+        0,
+        -1.85,
+        4.67
+      ],
+      "rotation": [
+        1.5707963267948966,
+        0,
+        0
+      ],
+      "options": null,
+      "_comment": "Real sensor sits 1 cm above the floor, but GEARS's sensor body is a 2x2x3 cm physics box pointing down; centred 1.8 cm up so it clears the ground instead of lifting the front wheels."
+    },
+    {
+      "type": "GyroSensor",
+      "position": [
+        -3.0,
+        0.9,
+        -4.7
+      ],
+      "options": null
+    }
+  ]
+}

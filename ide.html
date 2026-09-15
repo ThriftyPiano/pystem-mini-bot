@@ -346,6 +346,7 @@
                     <a href="ide.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">💻 IDE</a>
                     <a href="scratch.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🧩 Scratch</a>
                     <a href="speech-commands.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🎤 Speech</a>
+                    <a href="simulator.html" style="color:white;font-weight:600;text-decoration:none;font-size:1.1em;">🕹️ Simulator</a>
                 </div>
             </div>
         </nav>
@@ -355,6 +356,8 @@
         <button id="btn-disconnect">Disconnect</button>
         <button id="btn-upload-code">Write to Robot</button>
         <button id="btn-download-code">Read from Robot</button>
+        <span style="font-weight: bold; margin: 0 12px 0 24px; font-size: 12px;">Simulator</span>
+        <button id="btn-simulate">Run in Simulator</button>
     </div>
     <div id="main-content">
         <div id="left-sidebar">
@@ -462,6 +465,18 @@
             const disconnectBtn = document.getElementById('btn-disconnect');
             const uploadBtn = document.getElementById('btn-upload-code');
             const downloadBtn = document.getElementById('btn-download-code');
+
+            // Hand the editor contents to simulator.html (same origin) via localStorage.
+            document.getElementById('btn-simulate').addEventListener('click', function() {
+                if (!editor) { alert('Editor not ready yet.'); return; }
+                try {
+                    localStorage.setItem('minibot-sim-code', editor.getValue());
+                } catch (e) {
+                    alert('Could not hand the code to the simulator: ' + e);
+                    return;
+                }
+                window.open('simulator.html', 'minibot-simulator');
+            });
 
             // Update button states
             function updateButtonStates() {

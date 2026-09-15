@@ -1,0 +1,2980 @@
+[{
+  "type": "when_started",
+  "message0": "#blk-when_started#",
+  "nextStatement": null,
+  "colour": 65,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "sleep",
+  "message0": "#blk-sleep_for# %1 %2",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "seconds",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "#blk-seconds#",
+          "SECONDS"
+        ],
+        [
+          "#blk-milliseconds#",
+          "MILLISECONDS"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 65,
+  "tooltip": "#blk-sleep_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "stop",
+  "message0": "#blk-stop_moving_and# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "stop_action",
+      "options": [
+        [
+          "#blk-brake#",
+          "BRAKE"
+        ],
+        [
+          "#blk-coast#",
+          "COAST"
+        ],
+        [
+          "#blk-hold#",
+          "HOLD"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-stop_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "stop_motor",
+  "message0": "#blk-stop_motor_on_port# %1 #blk-and# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "stop_action",
+      "options": [
+        [
+          "#blk-brake#",
+          "BRAKE"
+        ],
+        [
+          "#blk-coast#",
+          "COAST"
+        ],
+        [
+          "#blk-hold#",
+          "HOLD"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-stop_motor_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "move_steering",
+  "message0": "#blk-move_steering_with_direction# %1 #blk-and_speed# %2 %3",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "steering",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "speed",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-move_steering_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "move_steering_for",
+  "message0": "#blk-move_steering_with_direction# %1 #blk-and_speed# %2 %3 %4 #blk-for# %5 %6",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "steering",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "speed",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "input_value",
+      "name": "duration",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units2",
+      "options": [
+        [
+          "#blk-rotations#",
+          "ROTATIONS"
+        ],
+        [
+          "#blk-degrees#",
+          "DEGREES"
+        ],
+        [
+          "#blk-seconds#",
+          "SECONDS"
+        ],
+        [
+          "#blk-milliseconds#",
+          "MILLISECONDS"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-move_steering_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "exit",
+  "message0": "#blk-exit_program#",
+  "previousStatement": null,
+  "colour": 65,
+  "tooltip": "#blk-exit_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "position",
+  "message0": "#blk-position_of_motor_on_port# %1 #blk-in_degrees#",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    }
+  ],
+  "output": "Number",
+  "colour": 230,
+  "tooltip": "#blk-position_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "speed",
+  "message0": "#blk-speed_of_motor_on_port# %1 #blk-in_degrees# / s",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    }
+  ],
+  "output": "Number",
+  "colour": 230,
+  "tooltip": "#blk-speed_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "reset_motor",
+  "message0": "#blk-reset_position_of_motor_on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A + B (#blk-both_wheels#)",
+          "BOTH"
+        ],
+        [
+          "A (#blk-left_wheel#)",
+          "A"
+        ],
+        [
+          "B (#blk-right_wheel#)",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-reset_motor_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "move_tank",
+  "message0": "#blk-move_tank_with_left_speed# %1 #blk-and_right_speed# %2 %3",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "left",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "right",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-move_tank_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "move_tank_for",
+  "message0": "#blk-move_tank_with_left_speed#  %1 #blk-and_right_speed# %2 %3 %4 #blk-for# %5 %6",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "left",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "right",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "input_value",
+      "name": "duration",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units2",
+      "options": [
+        [
+          "#blk-rotations#",
+          "ROTATIONS"
+        ],
+        [
+          "#blk-degrees#",
+          "DEGREES"
+        ],
+        [
+          "#blk-seconds#",
+          "SECONDS"
+        ],
+        [
+          "#blk-milliseconds#",
+          "MILLISECONDS"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-move_tank_for_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "color_sensor",
+  "message0": "#blk-color_sensor# %1 #blk-on_port# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        [
+          "#blk-reflected_light_intensity#",
+          "INTENSITY"
+        ],
+        [
+          "#blk-color#",
+          "COLOR"
+        ],
+        [
+          "#blk-color_name#",
+          "COLOR_NAME"
+        ],
+        [
+          "#blk-red#",
+          "RED"
+        ],
+        [
+          "#blk-green#",
+          "GREEN"
+        ],
+        [
+          "#blk-blue#",
+          "BLUE"
+        ],
+        [
+          "#blk-rgb#",
+          "RGB"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "output": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Color-Sensor"
+},
+{
+  "type": "ultrasonic_sensor",
+  "message0": "#blk-ultrasonic_distance_on_port# %1 #blk-in# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "cm",
+          "CM"
+        ],
+        [
+          "mm",
+          "MM"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "output": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Ultrasonic-Sensor"
+},
+{
+  "type": "laser_sensor",
+  "message0": "#blk-laser_distance_on_port# %1 #blk-in# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "units",
+      "options": [
+        [
+          "cm",
+          "CM"
+        ],
+        [
+          "mm",
+          "MM"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "output": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Laser-Range-Sensor"
+},
+{
+  "type": "lidar_sensor",
+  "message0": "#blk-lidar_distance_on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "output": null,
+  "colour": 160,
+  "tooltip": "Returns a list of distances in cm",
+  "helpUrl": ""
+},
+{
+  "type": "gyro_sensor",
+  "message0": "#blk-gyro# %1 #blk-on_port# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        [
+          "#blk-angle#",
+          "ANGLE"
+        ],
+        [
+          "#blk-rate#",
+          "RATE"
+        ],
+        [
+          "#blk-pitchAngle#",
+          "PITCH_ANGLE"
+        ],
+        [
+          "#blk-pitchRate#",
+          "PITCH_RATE"
+        ],
+        [
+          "#blk-rollAngle#",
+          "ROLL_ANGLE"
+        ],
+        [
+          "#blk-rollRate#",
+          "ROLL_RATE"
+        ],
+        [
+          "#blk-heading#",
+          "HEADING"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "output": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Gyro-Sensor"
+},
+{
+  "type": "reset_gyro",
+  "message0": "#blk-reset_gyro_on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 160,
+  "tooltip": "#blk-reset_gyro_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Gyro-Sensor"
+},
+{
+  "type": "run_motor",
+  "message0": "#blk-run_motor_on_port# %1 #blk-at# %2 %3",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    },
+    {
+      "type": "input_value",
+      "name": "speed",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "unit",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-run_motor_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "run_motor_for",
+  "message0": "#blk-run_motor_on_port# %1 #blk-at# %2 %3 %4 #blk-for# %5 %6 %7",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    },
+    {
+      "type": "input_value",
+      "name": "speed",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "unit",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "input_value",
+      "name": "duration",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "unit2",
+      "options": [
+        [
+          "#blk-rotations#",
+          "ROTATIONS"
+        ],
+        [
+          "#blk-degrees#",
+          "DEGREES"
+        ],
+        [
+          "#blk-seconds#",
+          "SECONDS"
+        ],
+        [
+          "#blk-milliseconds#",
+          "MILLISECONDS"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "block",
+      "options": [
+        [
+          "#blk-and_wait#",
+          "BLOCK"
+        ],
+        [
+          "#blk-and_dont_wait#",
+          "NO_BLOCK"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-run_motor_for_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "run_motor_to",
+  "message0": "#blk-run_motor_on_port# %1 #blk-at# %2 %3 %4 #blk-to_position# %5 #blk-degrees# %6",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    },
+    {
+      "type": "input_value",
+      "name": "speed",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "unit",
+      "options": [
+        [
+          "%",
+          "PERCENT"
+        ],
+        [
+          "#blk-degrees# / s",
+          "DEGREES"
+        ],
+        [
+          "#blk-rotations# / s",
+          "ROTATIONS"
+        ]
+      ]
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "input_value",
+      "name": "degrees",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "block",
+      "options": [
+        [
+          "#blk-and_wait#",
+          "BLOCK"
+        ],
+        [
+          "#blk-and_dont_wait#",
+          "NO_BLOCK"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-run_motor_to_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "say",
+  "message0": "#blk-say# %1 %2",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "text"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "block",
+      "options": [
+        [
+          "#blk-and_dont_wait#",
+          "NO_BLOCK"
+        ],
+        [
+          "#blk-and_wait#",
+          "BLOCK"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-say_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "beep",
+  "message0": "#blk-beep# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "block",
+      "options": [
+        [
+          "#blk-and_dont_wait#",
+          "NO_BLOCK"
+        ],
+        [
+          "#blk-and_wait#",
+          "BLOCK"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-beep_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "play_tone",
+  "message0": "#blk-play_tone_at# %1 Hz #blk-for# %2 #blk-seconds# %3",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "frequency",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "duration",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "block",
+      "options": [
+        [
+          "#blk-and_dont_wait#",
+          "NO_BLOCK"
+        ],
+        [
+          "#blk-and_wait#",
+          "BLOCK"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-play_tone_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "time",
+  "message0": "#blk-time#",
+  "output": null,
+  "colour": 65,
+  "tooltip": "#blk-time_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "gps_sensor",
+  "message0": "gps %1 #blk-on_port# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        [
+          "x",
+          "X"
+        ],
+        [
+          "y",
+          "Y"
+        ],
+        [
+          "#blk-altitude#",
+          "ALTITUDE"
+        ],
+        [
+          "#blk-position#",
+          "POSITION"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "output": null,
+  "colour": 160,
+  "tooltip": "#blk-gps_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/GPS-Sensor"
+},
+{
+  "type": "penDown",
+  "message0": "#blk-pen_down# #blk-on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Pen"
+},
+{
+  "type": "penUp",
+  "message0": "#blk-pen_up# #blk-on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Pen"
+},
+{
+  "type": "penSetColor",
+  "message0": "#blk-pen_color# #blk-red# %1 #blk-green# %2 #blk-blue# %3 #blk-on_port# %4",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "red",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "green",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "blue",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Pen"
+},
+{
+  "type": "penSetWidth",
+  "message0": "#blk-pen_width# %1 #blk-on_port# %2",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "width",
+      "check": "Number"
+    },
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Pen"
+},
+{
+  "type": "touch_state",
+  "message0": "#blk-touch_sensor# #blk-on_port# %1 %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "state",
+      "options": [
+        [
+          "#blk-is_pressed#",
+          "PRESSED"
+        ],
+        [
+          "#blk-is_released#",
+          "RELEASED"
+        ]
+      ]
+    }
+  ],
+  "output": "Boolean",
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Touch-Sensor"
+},
+{
+  "type": "wait_for_state",
+  "message0": "#blk-wait_until_touch_sensor# #blk-on_port# %1 %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "state",
+      "options": [
+        [
+          "#blk-is_pressed#",
+          "PRESSED"
+        ],
+        [
+          "#blk-is_released#",
+          "RELEASED"
+        ],
+        [
+          "#blk-is_bumped#",
+          "BUMPED"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Touch-Sensor"
+},
+{
+  "type": "radio_send",
+  "message0": "#blk-send_message# %1 #blk-via_mailbox# %2 %3",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "robot",
+      "options": [
+        [
+          "#blk-robot# 0",
+          "0"
+        ],
+        [
+          "#blk-robot# 1",
+          "1"
+        ],
+        [
+          "#blk-robot# 2",
+          "2"
+        ],
+        [
+          "#blk-robot# 3",
+          "3"
+        ],
+        [
+          "#blk-team_mates#",
+          "TEAM"
+        ],
+        [
+          "#blk-all#",
+          "ALL"
+        ]
+      ]
+    },
+    {
+      "type": "field_input",
+      "name": "mailbox",
+      "text": "default"
+    },
+    {
+      "type": "input_value",
+      "name": "value"
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 330,
+  "tooltip": "#blk-radio_send_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Radio"
+},
+{
+  "type": "radio_available",
+  "message0": "#blk-messages_available# %1",
+  "args0": [
+    {
+      "type": "field_input",
+      "name": "mailbox",
+      "text": "default"
+    }
+  ],
+  "output": null,
+  "colour": 330,
+  "tooltip": "#blk-radio_available_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Radio"
+},
+{
+  "type": "radio_read",
+  "message0": "#blk-read_message# %1",
+  "args0": [
+    {
+      "type": "field_input",
+      "name": "mailbox",
+      "text": "default"
+    }
+  ],
+  "output": null,
+  "colour": 330,
+  "tooltip": "#blk-radio_read_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Radio"
+},
+{
+  "type": "radio_read_content",
+  "message0": "#blk-read_content# %1",
+  "args0": [
+    {
+      "type": "field_input",
+      "name": "mailbox",
+      "text": "default"
+    }
+  ],
+  "output": null,
+  "colour": 330,
+  "tooltip": "#blk-radio_read_content_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Radio"
+},
+{
+  "type": "radio_empty",
+  "message0": "#blk-empty_mailbox# %1",
+  "args0": [
+    {
+      "type": "field_input",
+      "name": "mailbox",
+      "text": "default"
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 330,
+  "tooltip": "#blk-radio_empty_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Radio"
+},
+{
+  "type": "object_tracker",
+  "message0": "#blk-object_tracker# %1 #blk-of# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        [
+          "x",
+          "X"
+        ],
+        [
+          "y",
+          "Y"
+        ],
+        [
+          "#blk-altitude#",
+          "ALTITUDE"
+        ],
+        [
+          "#blk-position#",
+          "POSITION"
+        ],
+        [
+          "vx",
+          "VX"
+        ],
+        [
+          "vy",
+          "VY"
+        ],
+        [
+          "#blk-valtitude#",
+          "VALTITUDE"
+        ],
+        [
+          "#blk-velocity#",
+          "VELOCITY"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "robot",
+      "options": [
+        [
+          "#blk-robot# 0",
+          "0"
+        ],
+        [
+          "#blk-robot# 1",
+          "1"
+        ],
+        [
+          "#blk-robot# 2",
+          "2"
+        ],
+        [
+          "#blk-robot# 3",
+          "3"
+        ],
+        [
+          "#blk-team_mates#",
+          "TEAM"
+        ],
+        [
+          "#blk-opponent_1#",
+          "OPPONENT1"
+        ],
+        [
+          "#blk-opponent_2#",
+          "OPPONENT2"
+        ],
+        [
+          "#blk-self#",
+          "SELF"
+        ],
+        [
+          "#blk-ball#",
+          "BALL"
+        ]
+      ]
+    }
+  ],
+  "output": null,
+  "colour": 160,
+  "tooltip": "#blk-object_tracker_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "set_movement_motors",
+  "message0": "#blk-set_movement_motors# %1 #blk-and# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "left_port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "right_port",
+      "options": [
+        [
+          "A",
+          "A"
+        ],
+        [
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C"
+        ],
+        [
+          "D",
+          "D"
+        ],
+        [
+          "E",
+          "E"
+        ],
+        [
+          "F",
+          "F"
+        ],
+        [
+          "G",
+          "G"
+        ],
+        [
+          "H",
+          "H"
+        ],
+        [
+          "I",
+          "I"
+        ],
+        [
+          "J",
+          "J"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "#blk-set_movement_motors_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "wait_until_button",
+  "message0": "#blk-wait_until# %1 #blk-button# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "button",
+      "options": [
+        [
+          "#blk-center#",
+          "CENTER"
+        ],
+        [
+          "#blk-left#",
+          "LEFT"
+        ],
+        [
+          "#blk-right#",
+          "RIGHT"
+        ],
+        [
+          "#blk-up#",
+          "UP"
+        ],
+        [
+          "#blk-down#",
+          "DOWN"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "state",
+      "options": [
+        [
+          "#blk-is_pressed#",
+          "PRESSED"
+        ],
+        [
+          "#blk-is_released#",
+          "RELEASED"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "button_state",
+  "message0": "%1 #blk-button# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "button",
+      "options": [
+        [
+          "#blk-center#",
+          "CENTER"
+        ],
+        [
+          "#blk-left#",
+          "LEFT"
+        ],
+        [
+          "#blk-right#",
+          "RIGHT"
+        ],
+        [
+          "#blk-up#",
+          "UP"
+        ],
+        [
+          "#blk-down#",
+          "DOWN"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "state",
+      "options": [
+        [
+          "#blk-is_pressed#",
+          "PRESSED"
+        ],
+        [
+          "#blk-is_released#",
+          "RELEASED"
+        ]
+      ]
+    }
+  ],
+  "output": "Boolean",
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "color",
+  "message0": "%1 #blk-as# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "color",
+      "options": [
+        [
+          "#blk-black#",
+          "BLACK"
+        ],
+        [
+          "#blk-blue#",
+          "BLUE"
+        ],
+        [
+          "#blk-green#",
+          "GREEN"
+        ],
+        [
+          "#blk-yellow#",
+          "YELLOW"
+        ],
+        [
+          "#blk-red#",
+          "RED"
+        ],
+        [
+          "#blk-white#",
+          "WHITE"
+        ],
+        [
+          "#blk-brown#",
+          "BROWN"
+        ]
+      ]
+    },
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        [
+          "#blk-color_number#",
+          "NUMBER"
+        ],
+        [
+          "#blk-color_name#",
+          "NAME"
+        ]
+      ]
+    }
+  ],
+  "output": "Number",
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "wait_until",
+  "message0": "#blk-wait_until# %1",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "value",
+      "check": "Boolean"
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 65,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "tw_fwd",
+  "message0": "#blk-tw_fwd#",
+  "args0": [],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "tw_rev",
+  "message0": "#blk-tw_rev#",
+  "args0": [],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "tw_left",
+  "message0": "#blk-tw_left#",
+  "args0": [],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "tw_right",
+  "message0": "#blk-tw_right#",
+  "args0": [],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 230,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "tw_color",
+  "message0": "#blk-color_sensor_sees# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "color",
+      "options": [
+        [
+          "#blk-black#",
+          "BLACK"
+        ],
+        [
+          "#blk-blue#",
+          "BLUE"
+        ],
+        [
+          "#blk-green#",
+          "GREEN"
+        ],
+        [
+          "#blk-yellow#",
+          "YELLOW"
+        ],
+        [
+          "#blk-red#",
+          "RED"
+        ],
+        [
+          "#blk-white#",
+          "WHITE"
+        ],
+        [
+          "#blk-brown#",
+          "BROWN"
+        ]
+      ]
+    }
+  ],
+  "output": "Boolean",
+  "colour": 160,
+  "tooltip": "",
+  "helpUrl": ""
+},
+{
+  "type": "comment",
+  "message0": "#blk-comment# %1",
+  "args0": [
+    {
+      "type": "field_multilinetext",
+      "name": "value",
+      "text": "Your comment here"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": "#000000",
+  "tooltip": "#blk-comment_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "camera_capture_image",
+  "message0": "#blk-camera_capture_image# #blk-on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 160,
+  "tooltip": "#blk-camera_capture_image_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Camera-Sensor"
+},
+{
+  "type": "camera_get_rgb",
+  "message0": "#blk-camera_get_rgb# #blk-on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "output": "Array",
+  "colour": 160,
+  "tooltip": "#blk-camera_get_rgb_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Camera-Sensor"
+},
+{
+  "type": "camera_get_hsv",
+  "message0": "#blk-camera_get_hsv# #blk-on_port# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    }
+  ],
+  "output": "Array",
+  "colour": 160,
+  "tooltip": "#blk-camera_get_hsv_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Camera-Sensor"
+},
+{
+  "type": "camera_find_blobs",
+  "message0": "#blk-camera_find_blobs# #blk-on_port# %1 #blk-matching_H# %2 %3 #blk-S# %4 %5 #blk-V# %6 %7 #blk-and_at_least# %8 #blk-pixels#",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "port",
+      "options": [
+        [
+          "Auto",
+          "AUTO"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ],
+        [
+          "6",
+          "6"
+        ],
+        [
+          "7",
+          "7"
+        ],
+        [
+          "8",
+          "8"
+        ],
+        [
+          "9",
+          "9"
+        ],
+        [
+          "10",
+          "10"
+        ]
+      ]
+    },
+    {
+      "type": "input_value",
+      "name": "minH",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "maxH",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "minS",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "maxS",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "minV",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "maxV",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "pixels_threshold",
+      "check": "Number"
+    }
+  ],
+  "output": "Array",
+  "colour": 160,
+  "tooltip": "#blk-camera_find_blobs_tooltip#",
+  "helpUrl": "https://github.com/QuirkyCort/gears/wiki/Camera-Sensor"
+},
+{
+  "type": "plotter_init",
+  "message0": "#blk-plotter_init# %1 #blk-minY# %2 #blk-maxX# %3 #blk-maxY# %4",
+  "args0": [
+    {
+      "type": "field_input",
+      "name": "minX",
+      "text": "-400"
+    },
+    {
+      "type": "field_input",
+      "name": "minY",
+      "text": "-400"
+    },
+    {
+      "type": "field_input",
+      "name": "maxX",
+      "text": "400"
+    },
+    {
+      "type": "field_input",
+      "name": "maxY",
+      "text": "400"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_init_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_showHide",
+  "message0": "#blk-plotter_showHide# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        ["Show", "SHOW"],
+        ["Hide", "HIDE"]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_showHide_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_clear",
+  "message0": "#blk-plotter_clear#",
+  "args0": [],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_clear_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_setColor",
+  "message0": "#blk-plotter_setColor# %1",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "color",
+      "options": [
+        ["Black", "black"],
+        ["Red", "red"],
+        ["Green", "green"],
+        ["Blue", "blue"],
+        ["Orange", "orange"]
+      ]
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_setColor_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_setPointSize",
+  "message0": "#blk-plotter_setPointSize# %1",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "size",
+      "check": "Number"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_setPointSize_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_drawPoint",
+  "message0": "#blk-plotter_drawPoint# %1 %2",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "x",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "y",
+      "check": "Number"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_drawPoint_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_drawLine",
+  "message0": "#blk-plotter_drawLine# %1 %2 #blk-to# %3 %4",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "x1",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "y1",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "x2",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "y2",
+      "check": "Number"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_drawLine_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_drawTriangle",
+  "message0": "#blk-plotter_drawTriangle# %1 %2 #blk-and_dir# %3",
+  "args0": [
+    {
+      "type": "input_value",
+      "name": "x",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "y",
+      "check": "Number"
+    },
+    {
+      "type": "input_value",
+      "name": "dir",
+      "check": "Number"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_drawTriangle_tooltip#",
+  "helpUrl": ""
+},
+{
+  "type": "plotter_drawGrid",
+  "message0": "#blk-plotter_drawGrid# %1 #blk-and_size# %2",
+  "args0": [
+    {
+      "type": "field_dropdown",
+      "name": "type",
+      "options": [
+        ["Cartesian", "CARTESIAN"],
+        ["Polar", "POLAR"]
+      ]
+    },
+    {
+      "type": "field_input",
+      "name": "size",
+      "text": "100"
+    }
+  ],
+  "inputsInline": true,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 20,
+  "tooltip": "#blk-plotter_drawGrid_tooltip#",
+  "helpUrl": ""
+}
+]

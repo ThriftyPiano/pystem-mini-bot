@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="favicon-32.png" sizes="32x32">
+  <link rel="icon" href="favicon-128.png" sizes="128x128">
+  <link rel="icon" href="favicon-167.png" sizes="167x167">
+  <link rel="icon" href="favicon-192.png" sizes="192x192">
+
+  <link rel="stylesheet" href="css/main.css?v=9584d2b6">
+  <link rel="stylesheet" href="css/widgets.css?v=7d85fcde">
+
+  <script src="jquery/jquery-3.5.1.slim.min.js"></script>
+
+  <script src="ace-1.11.2/ace.js"></script>
+  <script src="ace-1.11.2/ext-language_tools.js"></script>
+
+  <script src="skulpt/0.11.0/skulpt.min.js"></script>
+  <script src="skulpt/0.11.0/skulpt-stdlib.js"></script>
+
+  <script src="ammo/ammo-20210414.wasm.js"></script>
+
+  <script src="babylon/4.2.1/babylon.js"></script>
+  <script src="babylon/4.2.1/babylonjs.loaders.min.js"></script>
+  <script src="pep/0.4.3/pep.min.js"></script>
+
+  <script src="jszip/3.5.0/jszip.min.js"></script>
+
+  <script src="js/msg.js?v=b817bde7"></script>
+  <script src="js/common/widgets.js?v=8de59276"></script>
+
+  <title>GearsBot</title>
+</head>
+
+<body>
+  <header>
+    <img class="gearsIcon" src="favicon-32.png">
+    <div>GearsBot</div>
+    <input type="text" id="projectName" placeholder="Project Name">
+    <div class="language"><span class="icon-globe"></span> &#x25BE;</div>
+  </header>
+
+  <main>
+    <nav>
+      <ul class="panelTabs">
+        <li id="navBlocks" class="active">Blocks</li>
+        <li id="navPython" class="pythonMain">
+          <span>
+            Python
+          </span>
+        </li>
+        <li id="navSim">Simulator</li>
+      </ul>
+      <div class="menuBar">
+        <div class="menuItem fileMenu">File</div>
+        <div class="menuItem pythonMenu">Python</div>
+        <div class="menuItem robotMenu">Robot</div>
+        <div class="menuItem worldsMenu">Worlds</div>
+        <div class="menuItem helpMenu">Help</div>
+      </div>
+      <!-- <div class="news">
+        News!
+      </div> -->
+      </div>
+      <div class="panelControlsArea">
+        <div class="panelControls active" aria-labelledby="navBlocks">
+          <div class="saveBlockly hide">Save Now</div>
+        </div>
+        <div class="panelControls " aria-labelledby="navPython">
+          <div class="savePython hide">Save Now</div>
+        </div>
+      </div>
+    </nav>
+    <div class="panels">
+
+      <div class="blocklyEditor panel active" aria-labelledby="navBlocks">
+        <div id="blocklyDiv" style="height: 100%; width: 100%;"></div>
+        <div id="blocklyHiddenDiv" style="height: 100%; width: 100%; position: absolute; top: -10000px;"></div>
+        <div id="blocklyPages"><span class="currentPage">Main</span></div>
+      </div>
+
+      <div class="panel" aria-labelledby="navPython">
+        <div class="python">
+          <div id="pythonCode"></div>
+          <div id="filesRow">
+            <div id="filesList"></div>
+            <div id="addNewFile"><span class="icon-plus"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" aria-labelledby="navSim" id="simPanel">
+        <canvas id="renderCanvas" touch-action="none"></canvas>
+        <div class="runSim"><span class="icon-play"></span></div>
+        <!-- PySTEM: simulated WonderEcho input, read by minibot/wonder_echo.py via minibot_sim -->
+        <div id="minibotVoice" style="position:absolute;left:10px;bottom:10px;z-index:5;background:rgba(0,0,0,0.55);color:#fff;padding:6px 8px;border-radius:6px;font:13px sans-serif;">
+          🎤 <input id="minibotVoiceInput" type="text" placeholder="voice command: forward, left, stop…" style="width:220px;font-size:13px;">
+          <button id="minibotVoiceSend" style="font-size:13px;">Say</button>
+        </div>
+        <div class="world"><span class="icon-globe"></span></div>
+        <div class="reset"><span class="icon-reset"></span></div>
+        <div class="sensors"><span class="icon-sensors"></span></div>
+        <div class="sensorReadings hide"></div>
+        <div class="cameraSelector closed">
+          <div class="camera">
+            <span class="icon-cameraFollow"></span>
+          </div>
+          <div class="cameraOptions cameraFollow">
+            <span class="icon-cameraFollow"></span>
+          </div>
+          <div class="cameraOptions cameraTop">
+            <span class="icon-cameraTop"></span>
+          </div>
+          <div class="cameraOptions cameraArc">
+            <span class="icon-cameraArc"></span>
+          </div>
+          <div class="cameraOptions resetCamera">
+            <span class="icon-reset"></span>
+          </div>
+        </div>
+
+        <div class="worldInfo hide"></div>
+        <div class="ruler closed">
+          <div class="icon">
+            <span class="icon-ruler"></span>
+          </div>
+          <div class="measurements">
+            <table>
+              <tr>
+                <td class="x">X:</td>
+                <td class="y">Y:</td>
+                <td class="alt">Alt:</td>
+              </tr>
+              <tr>
+                <td class="dist" colspan="2">Distance:</td>
+                <td class="angle">Angle:</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="joystick closed" tabindex=0>
+          <div class="icon">
+            <span class="icon-joystick"></span>
+          </div>
+          <div class="keyboard">
+            <span class="icon-keyboard"></span>
+          </div>
+          <div class="virtualJoystick">
+            <span class="icon-virtualJoystickIndicator"></span>
+            <span class="icon-virtualJoystick"></span>
+          </div>
+        </div>
+        <div class="hubButtons closed">
+          <div class="icon">
+            <span class="icon-buttons"></span>
+          </div>
+          <div class="controls">
+            <span class="icon-buttonsBackspace"></span>
+            <span class="icon-buttonsUp"></span>
+            <span class="icon-buttonsDown"></span>
+            <span class="icon-buttonsLeft"></span>
+            <span class="icon-buttonsRight"></span>
+            <span class="icon-buttonsEnter"></span>
+          </div>
+        </div>
+
+        <div class="fps"></div>
+
+        <div id="plotter" class="hide">
+          <canvas id="plotterCanvas" width="300" height="300"></canvas>
+          <div class="close">X</div>
+          <div class="position"></div>
+        </div>
+
+        <div class="console">
+          <div class="chevron"></div>
+          <div title="Clear Console"  class="clear">&#x239a;</div>
+          <pre class="content"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- <script src="blockly-12.3.0/blockly_compressed.js"></script>
+  <script src="blockly-12.3.0/blocks_compressed.js"></script>
+  <script src="blockly-12.3.0/python_compressed.js"></script> -->
+
+  <script src="blockly-12.5.1/blockly_compressed.js"></script>
+  <script src="blockly-12.5.1/blocks_compressed.js"></script>
+  <script src="blockly-12.5.1/python_compressed.js"></script>
+  <script src="blockly_plugins/field-multilineinput-6.0.2.js"></script>
+  <script>registerFieldMultilineInput()</script>
+  <!-- <script src="blockly_plugins/workspace-minimap-0.3.2.js"></script> -->
+  <script src="blockly_plugins/toolbox-search-3.1.8.js"></script>
+
+  <script src="js/ev3dev2_generator.js?v=2adb0f52"></script>
+  <script src="js/pybricks_generator.js?v=ce20f4ee"></script>
+  <script src="js/blockly.js?v=eb6bb4b1"></script>
+  <script src="js/skulpt.js?v=d46743be"></script>
+  <script src="js/worlds/World_Base.js?v=9f07f537"></script>
+  <script src="js/worlds/world_Grid.js?v=3ed03b45"></script>
+  <script src="js/worlds/world_LineFollowing.js?v=8e36de6c"></script>
+  <script src="js/worlds/world_Gyro.js?v=15f87e04"></script>
+  <script src="js/worlds/world_Paintball.js?v=04201b61"></script>
+  <script src="js/worlds/world_Sumo.js?v=e7b48574"></script>
+  <script src="js/worlds/world_FireRescue.js?v=e72671e3"></script>
+  <script src="js/worlds/world_Maze.js?v=6571b2a6"></script>
+  <script src="js/worlds/world_Missions.js?v=3d1cd9e0"></script>
+  <script src="js/worlds/world_Custom.js?v=a56a2eb0"></script>
+  <script src="js/worlds/world_Football.js?v=ab1b9783"></script>
+  <script src="js/worlds/world_Arena.js?v=c1828281"></script>
+  <script src="js/robotComponents.js?v=9dd8b611"></script>
+  <script src="js/robotTemplates.js?v=8f469b71"></script>
+  <script src="js/Wheel.js?v=bb27211a"></script>
+  <script src="js/Robot.js?v=d9b6ce3a"></script>
+  <script>
+    var robots = [];
+
+    var robot = new Robot();
+    robot.options = {};
+    Object.assign(robot.options, robotTemplates[0]);
+    robot.player = 'single';
+    robots.push(robot);
+  </script>
+  <script src="js/babylon.js?v=6061094f"></script>
+  <script src="js/blocklyPanel.js?v=8ee6b939"></script>
+  <script src="js/gearsbot_completer.js"></script>
+  <script src="js/pythonPanel.js?v=3e0c224d"></script>
+  <script src="js/filesManager.js?v=c95715e3"></script>
+  <script src="js/simPanel.js?v=159f4157"></script>
+  <script src="js/main.js?v=104a42b5"></script>
+
+  <script>
+    // Init classes
+    blockly.init();
+
+    function loadWorldFromGET() {
+      let worldJSON = readGET('worldJSON');
+      if (worldJSON) {
+        simPanel.loadWorldURL(decodeURIComponent(worldJSON));
+      }
+    }
+
+    function loadRobotFromGET() {
+      let robotJSON = readGET('robotJSON');
+      if (robotJSON) {
+        main.loadRobotURL(decodeURIComponent(robotJSON));
+      }
+    }
+
+    function loadFilterFromGET() {
+      let filterBlocksJSON = readGET('filterBlocksJSON');
+      if (filterBlocksJSON) {
+        blockly.loadToolboxFilterURL(decodeURIComponent(filterBlocksJSON));
+      }
+    }
+
+    function loadScript(scriptName) {
+      var script = document.createElement('script');
+      script.src = scriptName;
+
+      document.documentElement.firstChild.appendChild(script);
+
+      return new Promise(resolve => {
+        script.onload = function() {
+          resolve();
+        }
+      })
+    }
+
+    function loadWorldScriptFromGET() {
+      let scripts= readGET('worldScripts');
+
+      if (!scripts) {
+        return new Promise(resolve => {
+          resolve();
+        })
+      }
+
+      let scriptsPromises = [];
+      for (let script of scripts.split(',')) {
+        scriptsPromises.push(loadScript('js/worlds/extra/' + script + '.js?v=' + Date.now()));
+      }
+
+      return Promise.all(scriptsPromises);
+    }
+
+    // Load world if specified
+    async function loadWhenReady() {
+      if (typeof babylon.scene != 'undefined' && babylon.scene.isReady()) {
+        await loadWorldScriptFromGET();
+        loadWorldFromGET();
+        loadRobotFromGET();
+        loadFilterFromGET();
+      } else {
+        setTimeout(loadWhenReady, 100);
+      }
+    }
+
+    loadWhenReady();
+
+    // ---- PySTEM Mini Bot glue -------------------------------------------
+    // Queue of words for minibot/wonder_echo.py (see js/minibotSim.js).
+    window.minibotVoiceQueue = [];
+    function minibotSay(word) {
+      word = (word || '').trim();
+      if (word) {
+        window.minibotVoiceQueue.push(word);
+        simPanel.consoleWrite('[voice] ' + word + '\n');
+      }
+    }
+    $('#minibotVoiceSend').click(function() {
+      minibotSay($('#minibotVoiceInput').val());
+      $('#minibotVoiceInput').val('').focus();
+    });
+    $('#minibotVoiceInput').keydown(function(e) {
+      if (e.key == 'Enter') { $('#minibotVoiceSend').click(); }
+    });
+
+    // Load a program into the Python editor as main.py (Python mode, so the
+    // Blockly generator won't overwrite it) and optionally run it.
+    function minibotLoadProgram(code, run) {
+      pythonPanel.ignoreChange++;
+      filesManager.modified = true;
+      filesManager.files = {};
+      filesManager.$filesList.find('.file').remove();
+      filesManager.add('main.py', code);
+      filesManager.select('main.py');
+      pythonPanel.editor.setValue(code, 1);
+      filesManager.updateCurrentFile();
+      filesManager.saveLocalStorage();
+      pythonPanel.ignoreChange--;
+      try {
+        main.tabClicked('navSim');
+      } catch (e) {
+        // Blockly's dropdown hide() throws if its workspace was never shown
+        // (e.g. the page loads straight into the Simulator tab); harmless.
+        console.warn('tabClicked:', e);
+      }
+      if (run) {
+        if (skulpt.running) { simPanel.stopSim(); }
+        simPanel.runSim();
+      }
+    }
+
+    // Messages from the embedding page (simulator.html)
+    window.addEventListener('message', function(e) {
+      if (e.origin != window.location.origin) { return; }
+      let msg = e.data || {};
+      if (msg.type == 'minibot-load') {
+        minibotLoadProgram(msg.code || '', !!msg.run);
+      } else if (msg.type == 'minibot-run') {
+        if (!skulpt.running) { simPanel.runSim(); }
+      } else if (msg.type == 'minibot-stop') {
+        if (skulpt.running) { simPanel.stopSim(); }
+      } else if (msg.type == 'minibot-voice') {
+        minibotSay(msg.word);
+      } else if (msg.type == 'minibot-get-code') {
+        filesManager.updateCurrentFile();
+        e.source.postMessage({type: 'minibot-code', code: filesManager.files['main.py'] || ''}, window.location.origin);
+      }
+    });
+
+    // Tell the embedding page (if any) once the scene and robot are up.
+    async function minibotAnnounceReady() {
+      while (typeof babylon.scene == 'undefined' || !babylon.scene.isReady() || typeof robot.body == 'undefined') {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      if (window.parent != window) {
+        window.parent.postMessage({type: 'minibot-ready'}, window.location.origin);
+      }
+    }
+    minibotAnnounceReady();
+  </script>
+</body>
+</html>
