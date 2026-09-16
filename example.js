@@ -26,7 +26,9 @@ const exampleManager = {
         // Load all example files
         for (const filename of this.exampleFiles) {
             try {
-                const response = await fetch(`examples/${filename}`);
+                // Revalidate every load: GitHub Pages serves these with a 10-minute
+                // max-age, and a stale SDK file in the IDE is confusing.
+                const response = await fetch(`examples/${filename}`, {cache: 'no-cache'});
                 if (response.ok) {
                     this.examples[filename] = await response.text();
                 } else {
