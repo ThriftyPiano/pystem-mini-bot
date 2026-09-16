@@ -33,7 +33,10 @@ class RobotController {
             this.port = await navigator.serial.requestPort({
                 filters: [
                     { usbVendorId: 0x1A86, usbProductId: 0x7523 }, // CH340 series
-                    { usbVendorId: 0x303A, usbProductId: 0x832B }, // M5 StickS3 (Espressif native USB)
+                    // M5 StickS3 (Espressif native USB). Vendor only: the product ID
+                    // depends on the firmware — 0x832B under UiFlow2, 0x4001 under
+                    // MicroPython's TinyUSB CDC (the speech firmware).
+                    { usbVendorId: 0x303A },
                 ]
             });
             
