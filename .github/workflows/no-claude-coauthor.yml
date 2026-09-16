@@ -1,0 +1,38 @@
+name: No Claude co-author trailer
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject commits with a Claude co-author trailer
+        env:
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -eu
+          if [ -n "$BASE" ]; then
+            range="$BASE..HEAD"
+          elif [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+               && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            range="$BEFORE..HEAD"
+          else
+            range="HEAD"   # new branch or force push: check the whole history
+          fi
+          echo "Checking $range"
+          bad=$(git log --format='commit %H %s%n%(trailers:key=Co-Authored-By,valueonly)' "$range" \
+                | awk '/^commit [0-9a-f]* /{c=substr($0,8); next} tolower($0) ~ /claude/{print c}' \
+                | sort -u)
+          if [ -n "$bad" ]; then
+            echo "::error::These commits carry a Co-Authored-By: Claude trailer (repo policy: none allowed):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "OK: no Claude co-author trailers in $range"
