@@ -23,6 +23,7 @@
     <script src="terminal.js?version=1.1"></script>
     <!-- Example Manager -->
     <script src="example.js?version=1.2"></script>
+    <script src="speech-commands/model_py.js"></script>
     <!-- Monaco MicroPython Auto-completion -->
     <script src="monaco-micropython-v2.js?version=1.1"></script>
     <style>
@@ -364,6 +365,9 @@
         <button id="btn-disconnect">Disconnect</button>
         <button id="btn-upload-code">Write to Robot</button>
         <button id="btn-download-code">Read from Robot</button>
+        <span style="font-weight: bold; margin: 0 6px 0 24px; font-size: 12px;">🎤 Speech model</span>
+        <select id="speech-model" title="Models trained on the Speech page"><option value="">(none)</option></select>
+        <button id="btn-upload-model" title="Write the selected model to the robot as speech_model.py">Write Model to Robot</button>
         <span style="font-weight: bold; margin: 0 12px 0 24px; font-size: 12px;">Simulator</span>
         <button id="btn-simulate">Run in Simulator</button>
     </div>
@@ -487,6 +491,8 @@
             const uploadBtn = document.getElementById('btn-upload-code');
             const downloadBtn = document.getElementById('btn-download-code');
             const uploadSdkBtn = document.getElementById('btn-upload-sdk');
+            const modelSelect = document.getElementById('speech-model');
+            const uploadModelBtn = document.getElementById('btn-upload-model');
 
             // Hand the editor contents to simulator.html (same origin) via localStorage.
             document.getElementById('btn-simulate').addEventListener('click', function() {
@@ -508,6 +514,7 @@
                 uploadBtn.disabled = !isConnected;
                 downloadBtn.disabled = !isConnected;
                 uploadSdkBtn.disabled = !isConnected;
+                uploadModelBtn.disabled = !isConnected || !modelSelect.value;
                 
                 connectBtn.textContent = isConnected ? 'Connected' : 'Connect';
                 connectBtn.style.background = isConnected ? '#4CAF50' : '';
@@ -599,6 +606,44 @@
                 } finally {
                     uploadBtn.disabled = false;
                     uploadBtn.textContent = 'Write to Robot';
+                    updateButtonStates();
+                }
+            });
+
+            // Speech model picker: the sessions trained on the Speech page
+            // (read from localStorage), written to the robot as speech_model.py.
+            function refreshModels() {
+                const current = modelSelect.value;
+                modelSelect.innerHTML = '<option value="">(none)</option>' +
+                    SpeechModels.sessions().map(s => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+                modelSelect.value = current;
+                if (modelSelect.value !== current) modelSelect.value = '';
+                updateButtonStates();
+            }
+            refreshModels();
+            modelSelect.addEventListener('focus', refreshModels);
+            modelSelect.addEventListener('change', updateButtonStates);
+            window.addEventListener('storage', (e) => {
+                if (e.key === null || e.key === 'speech-sessions' || e.key.startsWith('speech-model:')) refreshModels();
+            });
+            uploadModelBtn.addEventListener('click', async function() {
+                const id = modelSelect.value;
+                const payload = id && SpeechModels.payload(id);
+                if (!payload || !payload.data || !payload.labels) {
+                    alert('Select a trained speech model first (train one on the Speech page).');
+                    return;
+                }
+                const name = modelSelect.options[modelSelect.selectedIndex].textContent;
+                try {
+                    uploadModelBtn.disabled = true;
+                    uploadModelBtn.textContent = 'Writing…';
+                    await robotUploadCode(SpeechModels.toPython(payload));
+                    alert(`Model "${name}" written to the robot as speech_model.py.`);
+                } catch (error) {
+                    console.error('Model upload failed:', error);
+                    alert('Failed to write the speech model: ' + error.message);
+                } finally {
+                    uploadModelBtn.textContent = 'Write Model to Robot';
                     updateButtonStates();
                 }
             });

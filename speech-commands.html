@@ -17,6 +17,7 @@
         <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0"></script>
         <script src="speech-commands/mfcc.js"></script>
+    <script src="speech-commands/model_py.js"></script>
         <style>
 .universal-navbar {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
@@ -102,6 +103,9 @@ button:disabled {
     background: #b0b0c0;
     cursor: not-allowed;
     box-shadow: none;
+}
+#session-bar button {
+    padding: 10px 14px;   /* keep the whole row on one line */
 }
 #samples button {
     padding: 5px 10px;
@@ -226,23 +230,14 @@ input {
             <button onclick="newSession()">New</button>
             <button onclick="renameSession()">Rename</button>
             <button onclick="deleteSession()">Delete</button>
+            <span style="width:12px;"></span>
+            <button id="add-sample" onclick="addSample(false)">Add Audio Sample</button>
+            <button id="train" onclick="trainModel()">Train Model</button>
+            <span style="width:12px;"></span>
+            <button onclick="exportSession()" title="Save this model's samples, trained model and speech_model.py to a file">Export</button>
+            <button onclick="$('#import-file').click()" title="Load a model exported on another machine as a new session">Import</button>
+            <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
         </div>
-        <table>
-            <tr id="buttons">
-                <td>
-                    <button id="add-sample" onclick="addSample(false)">Add Audio Sample</button>
-                </td>
-                <td>
-                    <button id="train" onclick="trainModel()">Train Model</button>
-                </td>
-                <td>
-                    <button id="download" onclick="downloadModel()">Download Model</button>
-                </td>
-                <td>
-                    <span id="session-status" style="color:#666;"></span>
-                </td>
-            </tr>
-        </table>
         <p id="message">Model training is based on TensorFlow.js in browser. You audio samples are not saved to any server.</p>
         <table id="samples" class="grid">
             <tr id="samples-header">
@@ -1054,45 +1049,79 @@ function charCode(b) {
     return String.fromCharCode(b);
 }
 
-function downloadModel() {
-    if (!model) {
-        setMessage('Train the model first.');
-        return;
-    }
-    $('#download').prop('disabled', true);
-    var modelData = quantizedModelBase64();
-    var text = `import speech_commands as sp
-from ubinascii import a2b_base64, b2a_base64
+// ---- Export / Import: one JSON file per session, carrying everything
+// that lives under the session's localStorage keys plus the generated
+// speech_model.py, so a model can move between machines.
+var EXPORT_FORMAT = 'pystem-speech-session';
 
-data = a2b_base64('${modelData}')
-sp.init(data)
-labels = ${JSON.stringify(modelLabels)}
-feature = bytearray(732)
-
-def predict(audio):
-    result = sp.predict(audio, 0, 0)
-    return (labels[result // 1000], result % 1000)
-
-def snapshot():
-    global feature
-    sp.export_mfcc(feature)
-
-def save(label):
-    with open('samples.txt', 'ab') as f:
-        f.write(b'{"label": "')
-        f.write(label.encode())
-        f.write(b'", "mfcc": "')
-        f.write(b2a_base64(feature)[:-1])
-        f.write(b'"},\\n')
-`;
-    var blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+function exportSession() {
+    var s = activeSession();
+    var sampleObjs = Object.keys(localStorage).sort()
+        .filter(k => k.startsWith(sampleKeyPrefix(s.id)))
+        .map(k => JSON.parse(localStorage.getItem(k)));
+    var m = loadModelFromSession(s.id);
+    var bundle = {
+        format: EXPORT_FORMAT,
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        name: s.name,
+        samples: sampleObjs,
+        model: m,
+        speechModelPy: m ? SpeechModels.toPython(m) : null
+    };
+    var blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
     var url = URL.createObjectURL(blob);
-    var a = $(`<a download="speech_model.py">Click to download speech_model.py.</a>`);
-    a.attr('href', url);
-    setMessage('');
-    $('#message').append(a);
-    $('#download').prop('disabled', false);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = s.name.replace(/[^\w.-]+/g, '_') + '.speech.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    setMessage(`Exported "${$('<div>').text(s.name).html()}": ${sampleObjs.length} samples` +
+               (m ? ', trained model' : ', no trained model') + '.');
 }
+
+function importSessionFromText(text) {
+    var bundle = JSON.parse(text);
+    if (!bundle || bundle.format !== EXPORT_FORMAT || !Array.isArray(bundle.samples))
+        throw new Error('not a PySTEM speech model export');
+    // Never overwrite: always a new session, name made unique.
+    var base = (bundle.name || 'Imported').trim() || 'Imported';
+    var name = base, n = 2;
+    while (sessionsIndex.sessions.some(x => x.name === name))
+        name = `${base} (${n++})`;
+    var s = {id: newSessionId(), name: name, created: Date.now(), updated: Date.now()};
+    var prefix = sampleKeyPrefix(s.id);
+    bundle.samples.forEach(obj => {
+        if (obj && obj.isoTime && obj.feature)
+            localStorage.setItem(prefix + obj.isoTime, JSON.stringify(obj));
+    });
+    if (bundle.model && bundle.model.labels && bundle.model.data)
+        localStorage.setItem(modelKey(s.id), JSON.stringify(bundle.model));
+    sessionsIndex.sessions.push(s);
+    saveSessionsIndex();
+    switchSession(s.id);
+    setMessage(`Imported "${$('<div>').text(name).html()}": ${bundle.samples.length} samples` +
+               (bundle.model ? ', trained model ready to use.' : ', no trained model.'));
+    return s;
+}
+
+$('#import-file').change(e => {
+    var file = e.target.files[0];
+    if (!file)
+        return;
+    var reader = new FileReader();
+    reader.onload = e2 => {
+        try {
+            importSessionFromText(e2.target.result);
+        } catch (err) {
+            setMessage('Import failed: ' + err.message);
+        }
+        e.target.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
+});
 
 // ============================================================
 // Model sessions: a named set of samples plus its trained model, all in
@@ -1144,10 +1173,6 @@ function renderSessionSelect() {
     var opts = sessionsIndex.sessions.map(s =>
         `<option value="${s.id}" ${s.id === sessionsIndex.active ? 'selected' : ''}>${$('<div>').text(s.name).html()}</option>`);
     $('#session-select').html(opts.join(''));
-    var m = loadModelFromSession();
-    $('#session-status').text(m
-        ? `model trained ${new Date(m.trainedAt).toLocaleString()} · ${m.labels.length - 1} commands · accuracy ${m.accuracy}`
-        : 'no trained model yet');
 }
 
 function clearSamplesTable() {
