@@ -4,11 +4,31 @@ from machine import Pin
 import time
 
 try:
-    from config import BUTTON_PIN
+    from config import BOARD, BUTTON_PIN
 except ImportError:
     # config.py missing from the device: fall back to the Max V1 pin so
     # the board still boots into main.py.
+    BOARD = 'maxv1'
     BUTTON_PIN = 27
+
+# On the StickS3 the prompt also goes on the built-in LCD (portrait,
+# 135x240, frozen 16x32 font = 8 characters per line).
+lcd = None
+if BOARD == 'sticks3':
+    try:
+        import sticks3
+        import vga1_16x32 as font
+        lcd = sticks3.display()
+    except Exception as e:
+        print("LCD unavailable:", e)
+
+def show(*lines):
+    if lcd is None:
+        return
+    lcd.fill(0)
+    for i, s in enumerate(lines):
+        x = max(0, (135 - len(s) * font.WIDTH) // 2)
+        lcd.text(font, s, x, 40 + 45 * i, 0xFFFF)
 
 # Enable internal Pull-Down if your button connects to 3.3V
 # OR Pull-Up if your button connects to GND. 
@@ -39,9 +59,11 @@ def button_pressed_callback(pin):
 button.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=button_pressed_callback)
 
 print("Waiting for start button...")
+show("Press", "top", "button", "to start")
 
 while not button_pressed:
     time.sleep(0.1)
 
 # Clean up the interrupt so it doesn't interfere with main.py
 button.irq(handler=None)
+show("Starting")
