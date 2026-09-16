@@ -20,8 +20,8 @@ const exampleManager = {
 
     async init() {
         // Show loading message
-        const examplesList = document.getElementById('examples-list');
-        examplesList.innerHTML = '<div class="loading-message">Loading examples...</div>';
+        document.getElementById('examples-list').innerHTML = '<div class="loading-message">Loading examples...</div>';
+        document.getElementById('sdk-list').innerHTML = '<div class="loading-message">Loading SDK...</div>';
         
         // Load all example files
         for (const filename of this.exampleFiles) {
@@ -41,22 +41,29 @@ const exampleManager = {
         this.renderExamplesList();
     },
 
+    isSdkFile(filename) {
+        return filename.startsWith('sdk_');
+    },
+
     renderExamplesList() {
-        const examplesList = document.getElementById('examples-list');
-        const loadedExamples = Object.keys(this.examples);
-        
-        if (loadedExamples.length === 0) {
-            examplesList.innerHTML = '<div class="no-examples">No examples available</div>';
+        const loaded = Object.keys(this.examples).sort();
+        this.renderList('examples-list', loaded.filter(f => !this.isSdkFile(f)), 'No examples available');
+        this.renderList('sdk-list', loaded.filter(f => this.isSdkFile(f)), 'No SDK files available');
+    },
+
+    renderList(elementId, filenames, emptyMessage) {
+        const list = document.getElementById(elementId);
+        if (filenames.length === 0) {
+            list.innerHTML = `<div class="no-examples">${emptyMessage}</div>`;
             return;
         }
-        
-        examplesList.innerHTML = '';
-        loadedExamples.sort().forEach(filename => {
-            const exampleItem = document.createElement('div');
-            exampleItem.className = 'example-item';
-            exampleItem.textContent = filename;
-            exampleItem.onclick = () => this.loadExample(filename);
-            examplesList.appendChild(exampleItem);
+        list.innerHTML = '';
+        filenames.forEach(filename => {
+            const item = document.createElement('div');
+            item.className = 'example-item';
+            item.textContent = filename;
+            item.onclick = () => this.loadExample(filename);
+            list.appendChild(item);
         });
     },
 
