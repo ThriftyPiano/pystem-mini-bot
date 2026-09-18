@@ -15,8 +15,11 @@ import design  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "sticks3-bot-hat.kicad_sch")
-SYM_DIR = os.path.expanduser(
-    "~/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols")
+SYM_DIR = next(d for d in [
+    os.environ.get("KICAD_SYMBOL_DIR", ""),
+    os.path.expanduser("~/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols"),
+    "/usr/share/kicad/symbols",                 # Linux / kicad docker image
+] if d and os.path.isdir(d))
 
 PROJECT = "sticks3-bot-hat"
 

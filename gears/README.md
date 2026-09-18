@@ -15,7 +15,8 @@ The World Builder therefore has no model library; everything else works.
 ## PySTEM additions (grep for "PySTEM" to find them)
 
 - `minibot/` — simulator builds of the robot SDK modules: `config.py`,
-  `motor.py`, `orientation.py`, `color_sensor.py`, `head.py`,
+  `motor.py`, `orientation.py`, `color_sensor.py`, `distance_sensor.py`
+  (GEARS `UltrasonicSensor` on `in3`, cm -> mm, miss -> -1), `head.py`,
   `wonder_echo.py`, `speech.py` (reads words recognised by
   `../speech-commands/runtime.js`; `wonder_echo` also accepts them, so
   `voice_drive.py` runs on a trained model). Same public API as `../examples/sdk_*.py`, implemented on
@@ -34,7 +35,8 @@ The World Builder therefore has no model library; everything else works.
 - `robots/minibot.json` — the Mini Bot: dimensions measured from the
   Onshape assembly (wheel Ø 5.6 cm, 8.2 cm track tread-to-tread, caster 4.95 cm
   behind the axle, line sensor 1.84 cm ahead of it). `in1` = colour sensor, `in2` =
-  gyro; `outA`/`outB` = left/right wheel.
+  gyro, `in3` = forward ultrasonic (the HC-SR04 on the HAT's DIST header,
+  port D); `outA`/`outB` = left/right wheel.
 - `robots/minibot.glb` — the Onshape export, re-rooted into the GEARS body
   frame (x right, y up, z forward, cm, origin at the body centre) and
   recoloured like the real robot (black wheels and battery box, green PCB,

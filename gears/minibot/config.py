@@ -24,9 +24,11 @@ MOTOR_REVERSED = {'A': False, 'B': True}
 HEAD_SERVOS = {'pan': None, 'tilt': None}
 
 # Sensors get GEARS port names in the order they appear in
-# robots/minibot.json: in1 = downward colour sensor, in2 = gyro.
+# robots/minibot.json: in1 = downward colour sensor, in2 = gyro,
+# in3 = forward-facing ultrasonic (the HC-SR04 on the HAT's DIST header).
 COLOR_SENSOR_PINS = {'C': 'in1'}
 GYRO_PORT = 'in2'
+DISTANCE_SENSOR_PINS = {'D': 'in3'}
 
 BUTTON_PIN = None
 EXT_I2C = None

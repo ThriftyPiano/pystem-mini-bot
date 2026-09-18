@@ -1,8 +1,8 @@
 {
   "name": "minibot",
   "shortDescription": "PySTEM Mini Bot",
-  "longDescription": "PySTEM Mini Bot (StickS3 build): two encoder wheels, ball caster, downward line sensor, internal IMU.",
-  "longerDescription": "<li>Wheel diameter: 5.6 cm</li><li>Wheel spacing: 8.2 cm (tread to tread)</li><li>Port A: left wheel</li><li>Port B: right wheel</li><li>Port C (in1): line sensor</li><li>in2: gyro</li>",
+  "longDescription": "PySTEM Mini Bot (StickS3 build): two encoder wheels, ball caster, downward line sensor, forward ultrasonic distance sensor, internal IMU.",
+  "longerDescription": "<li>Wheel diameter: 5.6 cm</li><li>Wheel spacing: 8.2 cm (tread to tread)</li><li>Port A: left wheel</li><li>Port B: right wheel</li><li>Port C (in1): line sensor</li><li>in2: gyro</li><li>Port D (in3): ultrasonic distance sensor</li>",
   "thumbnail": "",
   "_comment": "Dimensions measured from the Onshape assembly. GEARS body frame: x right, y up, z forward, cm. The box is the physics body (narrower than the real chassis so the wheels clear it); the wheels are the 0.8 cm rubber discs at their measured positions (track = bodyWidth + wheelWidth + 2*wheelToBodyOffset = 8.16 cm, tread to tread) \u2014 the hubs outboard of them exist only in the drawn model (modelURL).",
   "bodyHeight": 5.3,
@@ -52,6 +52,23 @@
         -4.7
       ],
       "options": null
+    },
+    {
+      "type": "UltrasonicSensor",
+      "position": [
+        0,
+        1.2,
+        7.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "options": {
+        "rayLength": 400
+      },
+      "_comment": "HC-SR04 on the HAT's DIST header (port D / in3), looking forward from the front of the chassis. rayLength = the sensor's 4 m rated range; distance_sensor.py maps a miss to -1."
     }
   ],
   "_modelURL_comment": "Bump ?v= whenever minibot.glb is rebuilt so browsers do not keep the cached old model (Babylon ignores the query when picking the loader)."

@@ -10,6 +10,14 @@
 # module carries its own), the Grove port, and the boot button (the stick
 # has its own buttons). design_v1_buck.py preserves the full v1.
 #
+# v4: sensor headers follow the LM393 sensor modules' pin order (VCC GND D0
+# A0) so a straight Dupont cable works: ENC = V G D0, COLOR = V G - A0
+# (4 pins, D0 position unused). COLOR B became DIST: a 4-pin HC-SR04 header
+# (5V TRIG ECHO GND) fed from the buck's 5 V, ECHO through a 1k/2k divider
+# (R4/R5) so the 5 V echo pulse lands at 3.3 V on G8. TRIG uses G2, which
+# was free. M2.5 mounting holes became M3. The power LED moved right of the
+# DIST header. Board size unchanged.
+#
 # HAT2 bus pinout (M5StickS3 docs — odd pins GND/5V column, even pins GPIO):
 #   1 GND    | 2  G5      9  G8   | 10 G43
 #   3 EXT_5V | 4  G4      11 BAT  | 12 G44
@@ -21,7 +29,8 @@
 #   G5=SERVO_A (left wheel)   G4=SERVO_B (right wheel)
 #   G6=HEAD_PAN               G7=HEAD_TILT
 #   G43=ENC_A                 G44=ENC_B
-#   G1=COLOR_A (ADC1_CH0)  G8=COLOR_B (ADC1_CH7); IMU/I2C dropped — the stick has a BMI270 inside
+#   G1=COLOR (ADC1_CH0)       G8=ECHO (HC-SR04, via divider)   G2=TRIG
+#   IMU/I2C dropped — the stick has a BMI270 inside
 
 BOARD_L = 50.0   # left edge, mm (KiCad page coords)
 BOARD_T = 50.0   # top edge
@@ -32,7 +41,8 @@ NETS = [
     "GND", "VSERVO", "+5V", "+3V3",
     "SW_NODE", "BST", "LED_K",
     "SERVO_A", "SERVO_B", "PAN", "TILT",
-    "ENC_A", "ENC_B", "COLOR_A", "COLOR_B",
+    "ENC_A", "ENC_B", "COLOR",
+    "TRIG", "ECHO_5V", "ECHO",   # HC-SR04: ECHO_5V is the sensor side of the divider
 ]
 
 STD_FP = "std"      # KiCad bundled library
@@ -46,9 +56,9 @@ COMPONENTS = {
            STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_2x08_P2.54mm_Horizontal",
            (57.5, 55.5, 90),
            {"1": "GND", "2": "SERVO_A", "3": None, "4": "SERVO_B",
-            "5": None, "6": "PAN", "7": "COLOR_A", "8": "TILT",
-            "9": "COLOR_B", "10": "ENC_A", "11": None, "12": "ENC_B",
-            "13": "+3V3", "14": None, "15": "+5V", "16": None},
+            "5": None, "6": "PAN", "7": "COLOR", "8": "TILT",
+            "9": "ECHO", "10": "ENC_A", "11": None, "12": "ENC_B",
+            "13": "+3V3", "14": "TRIG", "15": "+5V", "16": None},
            "StickS3"),
 
     # --- Servo headers (S | V+ | G), 6 V battery rail ------------------
@@ -69,23 +79,32 @@ COMPONENTS = {
            (83.7, 76.2, 90),
            {"1": "TILT", "2": "VSERVO", "3": "GND"}, "TILT"),
 
-    # --- Sensor headers (S | 3V3 | G) — 3V3 only, S3 pins not 5V-tolerant
+    # --- Sensor headers, pin order = LM393 module order (VCC GND D0 A0) ---
+    # ENC/COLOR are 3V3 only (S3 pins not 5V-tolerant). DIST is the HC-SR04
+    # (VCC TRIG ECHO GND), 5 V from the buck, ECHO divided down by R4/R5.
     "J6": ("Connector_Generic", "Conn_01x03", "ENC_A",
            STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x03_P2.54mm_Vertical",
            (57.3, 71.0, 90),
-           {"1": "ENC_A", "2": "+3V3", "3": "GND"}, "ENC A"),
+           {"1": "+3V3", "2": "GND", "3": "ENC_A"}, "ENC A"),
     "J7": ("Connector_Generic", "Conn_01x03", "ENC_B",
            STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x03_P2.54mm_Vertical",
            (66.1, 71.0, 90),
-           {"1": "ENC_B", "2": "+3V3", "3": "GND"}, "ENC B"),
-    "J8": ("Connector_Generic", "Conn_01x03", "COLOR_A",
-           STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x03_P2.54mm_Vertical",
+           {"1": "+3V3", "2": "GND", "3": "ENC_B"}, "ENC B"),
+    "J8": ("Connector_Generic", "Conn_01x04", "COLOR",
+           STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x04_P2.54mm_Vertical",
            (74.9, 71.0, 90),
-           {"1": "COLOR_A", "2": "+3V3", "3": "GND"}, "COLOR A"),
-    "J10": ("Connector_Generic", "Conn_01x03", "COLOR_B",
-           STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x03_P2.54mm_Vertical",
-           (83.7, 71.0, 90),
-           {"1": "COLOR_B", "2": "+3V3", "3": "GND"}, "COLOR B"),
+           {"1": "+3V3", "2": "GND", "3": None, "4": "COLOR"}, "COLOR"),
+    "J10": ("Connector_Generic", "Conn_01x04", "DIST",
+            STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_1x04_P2.54mm_Vertical",
+            (86.24, 71.0, 90),
+            {"1": "+5V", "2": "TRIG", "3": "ECHO_5V", "4": "GND"}, "DIST"),
+    # HC-SR04 ECHO level shift: 5 V * 2k / (1k + 2k) = 3.3 V at G8
+    "R4": ("Device", "R", "1k",
+           STD_FP, "Resistor_SMD", "R_0603_1608Metric",
+           (91.5, 74.4, 270), {"1": "ECHO_5V", "2": "ECHO"}, None),
+    "R5": ("Device", "R", "2k",
+           STD_FP, "Resistor_SMD", "R_0603_1608Metric",
+           (93.86, 74.4, 270), {"1": "ECHO", "2": "GND"}, None),
 
     # --- Power input: 4xAA box (own switch) with 5.5x2.1 barrel plug ----
     "J11": ("Connector", "Barrel_Jack", "DC_6V_5525",
@@ -127,12 +146,12 @@ COMPONENTS = {
     # --- Power LED -------------------------------------------------------
     "R3": ("Device", "R", "22k",
            STD_FP, "Resistor_SMD", "R_0603_1608Metric",
-           (92.7, 71.3, 90), {"1": "+5V", "2": "LED_K"}, None),
+           (96.6, 71.3, 270), {"1": "+5V", "2": "LED_K"}, None),
     # R3 = 22k keeps the LED at ~0.14 mA: a faint power indicator, not a
     # searchlight. 1k (~3 mA) was far too bright on the first JLCPCB batch.
     "D1": ("Device", "LED", "GREEN",
            STD_FP, "LED_SMD", "LED_0603_1608Metric",
-           (92.7, 74.4, 90), {"1": "GND", "2": "LED_K"}, None),
+           (96.6, 74.4, 90), {"1": "GND", "2": "LED_K"}, None),
 
     # --- Mounting holes -------------------------------------------------
     "H1": ("Mechanical", "MountingHole", "M3",
@@ -157,8 +176,11 @@ BOM = [
     ("C4,C5", "CL31A226KAHNNNE", "Samsung", "1206", "C12891", "22uF 25V X5R"),
     ("C7",  "470uF 16V radial D8xH11.5 P3.5", "generic", "THT", "", "bulk for servo stalls"),
     ("R3",  "0603WAF2202T5E", "UniOhm", "0603", "C4190", "22k 1% (~0.14 mA: dim power LED)"),
+    ("R4",  "0603WAF1001T5E", "UniOhm", "0603", "C21190", "1k 1% (HC-SR04 ECHO divider, series)"),
+    ("R5",  "0603WAF2001T5E", "UniOhm", "0603", "C4109", "2k 1% (HC-SR04 ECHO divider, to GND)"),
     ("D1",  "0603 green LED", "generic", "0603", "", "power indicator"),
     ("J1",  "2x8 pin header 2.54mm male RIGHT-ANGLE (90 deg)", "generic", "THT", "", "plugs into StickS3 HAT2 socket, stick lies flat"),
-    ("J2,J3,J4,J5,J6,J7,J8,J10", "1x3 pin header 2.54mm male vertical", "generic", "THT", "", "servo / sensor headers"),
+    ("J2,J3,J4,J5,J6,J7", "1x3 pin header 2.54mm male vertical", "generic", "THT", "", "servo / encoder headers"),
+    ("J8,J10", "1x4 pin header 2.54mm male vertical", "generic", "THT", "", "COLOR (V G - A0) / DIST (HC-SR04) headers"),
     ("J11", "DC barrel jack 5.5x2.1 horizontal (PJ-102A type)", "generic", "THT", "", "battery box plugs in, center = +6V"),
 ]

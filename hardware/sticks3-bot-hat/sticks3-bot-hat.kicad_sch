@@ -2,7 +2,7 @@
   (version 20250114)
   (generator "eeschema")
   (generator_version "9.0")
-  (uuid "f274bf87-c989-4735-ab94-4471d4535f51")
+  (uuid "76cba402-eb9b-48ec-82b7-eefdaa9b8bf7")
   (paper "A2")
   (title_block
     (title "PySTEM Mini Bot - StickS3 HAT")
@@ -751,6 +751,362 @@
 					)
 				)
 				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector_Generic:Conn_01x04"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "J"
+			(at 0 5.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x04"
+			(at 0 -7.62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Conn_01x04_1_1"
+			(rectangle
+				(start -1.27 3.81)
+				(end 1.27 -6.35)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 2.667)
+				(end 0 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -4.953)
+				(end 0 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -5.08 0)
+				(length 3.81)
+				(name "Pin_4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1673,146 +2029,6 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "Device:R"
-		(pin_numbers
-			(hide yes)
-		)
-		(pin_names
-			(offset 0)
-		)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(duplicate_pin_numbers_are_jumpers no)
-		(property "Reference" "R"
-			(at 2.032 0 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "R"
-			(at 0 0 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -1.778 0 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 0 0 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "R res resistor"
-			(at 0 0 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "R_*"
-			(at 0 0 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(symbol "R_0_1"
-			(rectangle
-				(start -1.016 -2.54)
-				(end 1.016 2.54)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-		)
-		(symbol "R_1_1"
-			(pin passive line
-				(at 0 3.81 270)
-				(length 1.27)
-				(name ""
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "1"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at 0 -3.81 90)
-				(length 1.27)
-				(name ""
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "2"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-		)
-		(embedded_fonts no)
-	)
 (symbol "Device:LED"
 		(pin_numbers
 			(hide yes)
@@ -2237,30 +2453,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "4ae7759f-814c-4c12-97b6-04c54e144538")
+    (uuid "e8bcbb7d-ddbf-456a-ba79-babbcf9b21ef")
     (property "Reference" "C1" (at 40.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "10uF/25V" (at 40.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 40.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "cbcdf7bc-284b-4207-967b-1de4bcb813ca"))
-    (pin "2" (uuid "4b2a7601-ced4-4ed4-8eae-d89ecc49bb3b"))
+    (pin "1" (uuid "14656974-f9ec-4720-8dfc-3aaab67b37a1"))
+    (pin "2" (uuid "cd1db733-1214-4d7c-bbc1-4ba45c1f6ba0"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "C1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "C1") (unit 1))))
   )
   (global_label "VSERVO"
     (shape input)
     (at 40.0 36.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "2a5daeb6-a7ad-4909-8aee-a0261bf88b12")
+    (uuid "ea283294-028e-453f-b64e-592925b2d524")
   )
   (global_label "GND"
     (shape input)
     (at 40.0 43.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "ad8bbf71-f109-4719-8fb3-1209216b70b0")
+    (uuid "c51ec83f-2519-41d2-bc36-579d6ccb01ff")
   )
   (symbol
     (lib_id "Device:C")
@@ -2270,30 +2486,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "d60aaa4b-38b0-4ab1-b6a4-981f46c904b9")
+    (uuid "afa34dc0-6ebc-4bbe-a91e-a10ad735107c")
     (property "Reference" "C3" (at 90.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "100nF" (at 90.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 90.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ffb85f0e-9c08-48dc-a3fe-2060de4c6a78"))
-    (pin "2" (uuid "1cd8a7b2-388f-4591-aba9-7a10e3810215"))
+    (pin "1" (uuid "c1b420cd-c943-459b-8960-285fc6d2fc96"))
+    (pin "2" (uuid "55b1327f-ec8b-467a-9fe9-9bfa8e3ca058"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "C3") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "C3") (unit 1))))
   )
   (global_label "BST"
     (shape input)
     (at 90.0 36.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "05624cc7-e198-47b4-b680-e99942d0ad59")
+    (uuid "457fc8a7-5bde-49be-93ed-dc7228608fec")
   )
   (global_label "SW_NODE"
     (shape input)
     (at 90.0 43.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "838cafb0-ac8d-492d-a862-b985812e7a25")
+    (uuid "2951304d-7e90-4a80-a845-64b79366797d")
   )
   (symbol
     (lib_id "Device:C")
@@ -2303,30 +2519,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "96a9b8d2-f3f2-494b-9c04-15f8cbfecd88")
+    (uuid "a04b3e8d-2b9a-4a00-a484-1fb315b36e41")
     (property "Reference" "C4" (at 140.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "22uF/25V" (at 140.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Capacitor_SMD:C_1206_3216Metric" (at 140.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ee8b9e3e-8765-423b-b681-17665b66a8e9"))
-    (pin "2" (uuid "ab588883-8f0d-4705-b494-bd282227aa23"))
+    (pin "1" (uuid "05971ff3-0a89-4654-af3f-f26981011678"))
+    (pin "2" (uuid "47a11c45-b059-4483-b981-7745359ec05e"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "C4") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "C4") (unit 1))))
   )
   (global_label "+5V"
     (shape input)
     (at 140.0 36.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "eca34a28-e6d4-41d8-985c-479c7000ed30")
+    (uuid "675115f2-ab16-402b-9e8a-fcaace8157db")
   )
   (global_label "GND"
     (shape input)
     (at 140.0 43.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "58dba0d4-2a7c-4811-9655-53d0a9370627")
+    (uuid "5e196991-c8f7-45d9-95e2-4bc35958de3f")
   )
   (symbol
     (lib_id "Device:C")
@@ -2336,30 +2552,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "48992998-977f-4981-a3b9-f608ece9e29f")
+    (uuid "d174c2c2-126b-4ead-8326-95e2ef53f233")
     (property "Reference" "C5" (at 190.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "22uF/25V" (at 190.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Capacitor_SMD:C_1206_3216Metric" (at 190.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "567018ee-7aab-42e8-88de-b672d4ef4e82"))
-    (pin "2" (uuid "afa1a659-9464-4431-bf75-026593ceb3ac"))
+    (pin "1" (uuid "80698da3-d28b-412f-bc1d-f3c32729b139"))
+    (pin "2" (uuid "9fe06ce6-81dc-4a43-862d-46450f4d3e3d"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "C5") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "C5") (unit 1))))
   )
   (global_label "+5V"
     (shape input)
     (at 190.0 36.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "cece9cb8-63d1-4919-bb4b-715bd5f6564c")
+    (uuid "d531f1fc-c6e5-47e3-8c69-f582ff228c59")
   )
   (global_label "GND"
     (shape input)
     (at 190.0 43.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "5b3028e8-0280-4ec2-8a1e-d08e9de834cd")
+    (uuid "22454176-ec0e-4391-bcbc-3f4575d51c9f")
   )
   (symbol
     (lib_id "Device:C_Polarized")
@@ -2369,30 +2585,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "17ab8357-d333-4fdc-87af-fa0e7d8f591b")
+    (uuid "2cdc0ad9-95fc-490c-a12d-3816729bfd63")
     (property "Reference" "C7" (at 240.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "470uF/16V" (at 240.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm" (at 240.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "c9fe6d90-b4a6-4ee5-8c3b-7823f9ec7b1c"))
-    (pin "2" (uuid "be710df4-3aa4-4ec4-b797-be09ce1daf35"))
+    (pin "1" (uuid "0c779c0e-1c3e-465d-9cc8-a776d356c2a3"))
+    (pin "2" (uuid "94b798c5-cc08-42e3-95c2-92b68cad300a"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "C7") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "C7") (unit 1))))
   )
   (global_label "VSERVO"
     (shape input)
     (at 240.0 36.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "31624bb2-271f-4a74-a0c7-15f44165874c")
+    (uuid "d4da2e82-ba63-45a7-b1f5-5c63e479c5a3")
   )
   (global_label "GND"
     (shape input)
     (at 240.0 43.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "e4f111ca-a227-4feb-a53f-7b8be0266996")
+    (uuid "9bb87952-1672-49a2-a9ee-fbaef11e1b71")
   )
   (symbol
     (lib_id "Device:LED")
@@ -2402,30 +2618,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "05cf87b2-e2cf-4b79-800c-230cec825960")
+    (uuid "0ffab04e-4521-4e5b-a689-2ab0acca6f49")
     (property "Reference" "D1" (at 290.0 36.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "GREEN" (at 290.0 43.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "LED_SMD:LED_0603_1608Metric" (at 290.0 40.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "6460ae8b-9939-4881-aacd-3e4db4d4b9af"))
-    (pin "2" (uuid "ea4e0e5c-aa85-4fac-8229-617066767478"))
+    (pin "1" (uuid "8656e657-578e-478f-a419-875aa7b1703c"))
+    (pin "2" (uuid "867f0c3e-0a41-40c8-a87f-6c9d3e3f27d7"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "D1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "D1") (unit 1))))
   )
   (global_label "GND"
     (shape input)
     (at 286.19 40.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "0bbdde39-545e-4e1b-b913-806eda07c2b0")
+    (uuid "6311c708-b0b8-4998-858e-dc2ac1899ea8")
   )
   (global_label "LED_K"
     (shape input)
     (at 293.81 40.0 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "ef032684-3f6d-42d4-b4ea-3410a018e88b")
+    (uuid "8c271a0b-1474-4cc2-a44a-a31f6ad118e5")
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
@@ -2435,7 +2651,7 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "6e7c5013-5915-48f5-bcf4-f990397bac2c")
+    (uuid "42ef329f-e681-438a-9330-1dcf47f45fc6")
     (property "Reference" "H1" (at 40.0 81.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "M3" (at 40.0 88.5 0)
@@ -2445,7 +2661,7 @@
 
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "H1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "H1") (unit 1))))
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
@@ -2455,7 +2671,7 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "a2d78a0f-0407-4499-8540-678f6b6bff02")
+    (uuid "7fac1dfd-5683-4c52-8f65-3b65734b2178")
     (property "Reference" "H2" (at 90.0 81.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "M3" (at 90.0 88.5 0)
@@ -2465,7 +2681,7 @@
 
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "H2") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "H2") (unit 1))))
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
@@ -2475,7 +2691,7 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "48de5e5b-ac8e-4273-9178-be412970c927")
+    (uuid "ed1fa295-438f-4c4a-92b7-65e345e0b1c5")
     (property "Reference" "H3" (at 140.0 81.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "M3" (at 140.0 88.5 0)
@@ -2485,7 +2701,7 @@
 
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "H3") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "H3") (unit 1))))
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
@@ -2495,7 +2711,7 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "4bed1a99-d260-4941-a5c7-47ca8f25bde8")
+    (uuid "6f0a9c31-041a-4194-9db2-2364fcf253e0")
     (property "Reference" "H4" (at 190.0 81.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "M3" (at 190.0 88.5 0)
@@ -2505,7 +2721,7 @@
 
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "H4") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "H4") (unit 1))))
   )
   (symbol
     (lib_id "Connector_Generic:Conn_02x08_Odd_Even")
@@ -2515,143 +2731,155 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "e0e9961f-bbaf-40b9-a6ae-4ee642d54628")
+    (uuid "031d3635-e4f1-4482-beec-d5647c20f936")
     (property "Reference" "J1" (at 240.0 81.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "HAT2_StickS3" (at 240.0 88.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Horizontal" (at 240.0 85.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ac5ececc-37c1-4e74-92a4-b62062494488"))
-    (pin "2" (uuid "fef1c815-dbe8-4b9d-8008-c14fa9e4b978"))
-    (pin "3" (uuid "5b11706b-c7e1-4bf4-a13f-5fc6279eebf3"))
-    (pin "4" (uuid "decf06a8-0210-41af-af9d-b095f2fa085c"))
-    (pin "5" (uuid "62df72b5-0a9e-4326-ae93-27096dffb8f4"))
-    (pin "6" (uuid "0d1f1457-be75-4705-a4c8-570972e4d8e9"))
-    (pin "7" (uuid "ea1f91ab-3c7c-4bce-918e-89d8df3a7546"))
-    (pin "8" (uuid "f28bdefa-9509-45ea-b344-667c4b972d98"))
-    (pin "9" (uuid "79a76b8e-2464-441d-8137-3eb8ec4af3c9"))
-    (pin "10" (uuid "3fb115ba-0f2c-4266-8a57-806ad83c5212"))
-    (pin "11" (uuid "674b8d71-6e89-4bbd-9959-8ca2de18f1e3"))
-    (pin "12" (uuid "4be19321-051c-41e7-af38-8fa5ec15359e"))
-    (pin "13" (uuid "c46c5a54-6085-464a-b202-f283e785a2ee"))
-    (pin "14" (uuid "048517d4-26c3-4704-9211-943639aa0878"))
-    (pin "15" (uuid "e3f4faed-08f4-41ee-839d-19107f8f8dc4"))
-    (pin "16" (uuid "af874151-9656-4ca7-b596-bd7ed7fafc6e"))
+    (pin "1" (uuid "68b65bf3-e1f3-4ead-8de5-532a915ddab9"))
+    (pin "2" (uuid "ca7e24c1-48a8-4c63-b5ad-b634bfa90a52"))
+    (pin "3" (uuid "9ccc03de-45d7-4714-8bc2-4cacd0b78e14"))
+    (pin "4" (uuid "8da3611d-3db9-41f1-b03c-8ea74690a657"))
+    (pin "5" (uuid "0a887186-2bcf-4214-a913-10619a2060b9"))
+    (pin "6" (uuid "f4448eb1-39b0-4dec-aabb-13da668aa1c5"))
+    (pin "7" (uuid "4d67fd7a-177f-4bed-9ae3-79672a99840a"))
+    (pin "8" (uuid "60e47abe-3c15-4499-83ca-86b194d0cb28"))
+    (pin "9" (uuid "3f6ca17a-f50e-4535-839e-3374399c4e65"))
+    (pin "10" (uuid "4c029102-0c6a-4f72-9b07-dc4a361a9b58"))
+    (pin "11" (uuid "ef364fea-b6f5-4efa-aa7e-9e30a14de2dd"))
+    (pin "12" (uuid "7690020e-298a-47ea-a120-7afb3f9b4358"))
+    (pin "13" (uuid "36c02f78-cd89-45f8-9d43-159be71e5179"))
+    (pin "14" (uuid "8fab09e0-e1c5-4443-b5fe-8c6466b48af1"))
+    (pin "15" (uuid "b0967399-5f5d-4df5-a819-4dc64ff81979"))
+    (pin "16" (uuid "f583a8f9-0a0e-4ca6-ad30-c24fa44d7241"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J1") (unit 1))))
   )
   (global_label "GND"
     (shape input)
     (at 234.92 77.38 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "47031b35-13c8-4bb5-9ddf-0c01151842d4")
+    (uuid "f8cf78ba-4330-4db7-9c19-b2e76cb93407")
   )
   (global_label "SERVO_A"
     (shape input)
     (at 247.62 77.38 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "8ccaaa47-e602-4678-82d2-c0a619f1741f")
+    (uuid "9272c171-1f04-4d34-a797-d6a97d068c0a")
   )
-  (no_connect (at 234.92 79.92) (uuid "e42505f3-636a-4831-8c62-4f07d5af828f"))
+  (no_connect (at 234.92 79.92) (uuid "11b0ec97-3b3d-4d15-9afd-63a3e2b2b438"))
   (global_label "SERVO_B"
     (shape input)
     (at 247.62 79.92 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "f04fe313-88a2-4f6d-b212-1f358679c60b")
+    (uuid "3a2e9474-abce-4754-b9c5-f1952b8e8cf9")
   )
-  (no_connect (at 234.92 82.46) (uuid "3bb01eee-ff8f-45d9-bc0b-a66d7ac82fd6"))
+  (no_connect (at 234.92 82.46) (uuid "7b34ba0c-60c8-4281-806b-0170331ababb"))
   (global_label "PAN"
     (shape input)
     (at 247.62 82.46 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "1588d299-af03-446c-b82e-dea55b78363f")
+    (uuid "5e6dd18f-8e8b-4ba5-b2f6-ce6206f4dde9")
   )
-  (global_label "COLOR_A"
+  (global_label "COLOR"
     (shape input)
     (at 234.92 85.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "401b4729-0d34-4f48-814b-1f4e8468e1f5")
+    (uuid "412ff510-1d66-4836-86e4-c45c7cf87fd2")
   )
   (global_label "TILT"
     (shape input)
     (at 247.62 85.0 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "54d8a59c-4d67-433e-b765-25a87c27dac0")
+    (uuid "2b571a94-1e6c-44a9-924f-db2a669fcbc5")
   )
-  (global_label "COLOR_B"
+  (global_label "ECHO"
     (shape input)
     (at 234.92 87.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "f08845ef-f065-437a-af25-709686e6f323")
+    (uuid "a9f47ea0-b067-4bf9-ad3c-17b8c4a65cbe")
   )
   (global_label "ENC_A"
     (shape input)
     (at 247.62 87.54 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "c07275d4-cd4a-49e8-8a48-576c2743bcef")
+    (uuid "fb73d4b6-7085-4597-a25f-84bf366f7721")
   )
-  (no_connect (at 234.92 90.08) (uuid "90784e50-3e45-4b9c-9cfe-bb32af97da4d"))
+  (no_connect (at 234.92 90.08) (uuid "a02441c1-c51a-4da6-a646-3dbc88ac42af"))
   (global_label "ENC_B"
     (shape input)
     (at 247.62 90.08 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "8e3b4dbe-87a1-451c-9118-ae7e0e422491")
+    (uuid "523548cd-5d18-4f43-bfb1-2a512958c380")
   )
   (global_label "+3V3"
     (shape input)
     (at 234.92 92.62 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "b362987a-8f13-416a-8428-7960a674aa79")
+    (uuid "b913dee0-c4cd-44b9-a4c1-ea0ec50e2853")
   )
-  (no_connect (at 247.62 92.62) (uuid "be348e35-7aa5-4cf5-a836-5a73e4fdf47f"))
+  (global_label "TRIG"
+    (shape input)
+    (at 247.62 92.62 0)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "9528315b-13d8-457e-a106-adb6bb72cada")
+  )
   (global_label "+5V"
     (shape input)
     (at 234.92 95.16 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "1f9f7c63-261c-4328-ae5f-5e05c154a624")
+    (uuid "9868bea9-8a21-4d9f-b9d2-5d2620ec92fc")
   )
-  (no_connect (at 247.62 95.16) (uuid "c3858a44-9819-44b3-82d7-ba216d10e027"))
+  (no_connect (at 247.62 95.16) (uuid "7de867f7-ec65-40a9-96c1-535fc09b25ad"))
   (symbol
-    (lib_id "Connector_Generic:Conn_01x03")
+    (lib_id "Connector_Generic:Conn_01x04")
     (at 290.0 85.0 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "15e91835-311b-4c9b-9677-c336988b1668")
+    (uuid "23521cf2-d24b-4025-b12b-19a265c2d4ec")
     (property "Reference" "J10" (at 290.0 81.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Value" "COLOR_B" (at 290.0 88.5 0)
+    (property "Value" "DIST" (at 290.0 88.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 290.0 85.0 0)
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" (at 290.0 85.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "56fcd81b-a68e-4131-9e2a-b311b7a93cd8"))
-    (pin "2" (uuid "8a66e462-b788-4540-9569-d0531985feba"))
-    (pin "3" (uuid "76d6c630-760b-41af-b4b4-ce64a3582426"))
+    (pin "1" (uuid "86395297-5338-448c-af5e-a31c0d1b2fb1"))
+    (pin "2" (uuid "16526ca4-67f4-4b9e-b3c0-e45bdb128388"))
+    (pin "3" (uuid "c15f752e-d553-4d2b-b37e-a326d33a28ab"))
+    (pin "4" (uuid "db605b90-2192-4e9f-bbfc-e79e415d38cb"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J10") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J10") (unit 1))))
   )
-  (global_label "COLOR_B"
+  (global_label "+5V"
     (shape input)
     (at 284.92 82.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "0636c204-77c5-46f5-9787-7d9a359d9782")
+    (uuid "b4dbef68-f69e-4228-9e5f-a7d77e316791")
   )
-  (global_label "+3V3"
+  (global_label "TRIG"
     (shape input)
     (at 284.92 85.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "4ab3c2eb-8326-4885-9e36-b3d3507485ab")
+    (uuid "6fe17359-4401-44e1-8f0b-626778defff2")
   )
-  (global_label "GND"
+  (global_label "ECHO_5V"
     (shape input)
     (at 284.92 87.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "4dc43a35-b2ac-478c-88bc-1ddce2d57796")
+    (uuid "8d70a781-d012-46c6-a769-98e161279d31")
+  )
+  (global_label "GND"
+    (shape input)
+    (at 284.92 90.08 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "5b02738d-8cbe-4331-93ce-84afaa82fff3")
   )
   (symbol
     (lib_id "Connector:Barrel_Jack")
@@ -2661,30 +2889,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "8aa6c6ce-e16f-4d85-8e58-ee28a4af0892")
+    (uuid "47763582-aef7-4fe2-a8c5-48fd65973d92")
     (property "Reference" "J11" (at 40.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "DC_6V_5525" (at 40.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_BarrelJack:BarrelJack_Horizontal" (at 40.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "7443d40a-d4cb-41ec-96cb-2a2bfaae5bad"))
-    (pin "2" (uuid "3de12318-86ae-4946-bc16-27eb5fa7933b"))
+    (pin "1" (uuid "4859b1b8-5134-434d-8aef-b09045f2790b"))
+    (pin "2" (uuid "d8ab0a5b-7064-48e8-802d-50c3247c8655"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J11") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J11") (unit 1))))
   )
   (global_label "VSERVO"
     (shape input)
     (at 47.62 127.46 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "b655f81e-b7c3-4f28-88ad-255b2ab8d37d")
+    (uuid "e9c87de3-2a16-4a38-8784-59ef8771ac0a")
   )
   (global_label "GND"
     (shape input)
     (at 47.62 132.54 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "20519aac-6c4f-480c-9754-e6b7ece63a1c")
+    (uuid "07170c7d-1b05-4f47-bbf8-a898dd5d8a62")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2694,37 +2922,37 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "a11ca3ae-3e1c-41b3-81d0-6e954750b474")
+    (uuid "f26eb212-e52f-4e42-914c-50172ac7777f")
     (property "Reference" "J2" (at 90.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "SERVO_A" (at 90.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 90.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "a5098971-16d8-4620-8d0d-c9bcf0dae6ba"))
-    (pin "2" (uuid "ccbc22b0-0949-41c1-ad7d-f2175ab199df"))
-    (pin "3" (uuid "a3d65567-b31c-4c9a-ba65-55d50856ecc7"))
+    (pin "1" (uuid "8a21511c-a954-48f4-be42-3a70cc543458"))
+    (pin "2" (uuid "61452c27-1efa-4115-86c4-7c167398e171"))
+    (pin "3" (uuid "ed22ff2d-f856-439a-9035-9bd9065f2410"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J2") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J2") (unit 1))))
   )
   (global_label "SERVO_A"
     (shape input)
     (at 84.92 127.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "a4a9f04e-bab4-49d8-b65c-8354925954a3")
+    (uuid "9e66a21f-e414-47ac-8a52-b927c972ee93")
   )
   (global_label "VSERVO"
     (shape input)
     (at 84.92 130.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "862b561d-92e6-4be4-8578-5067cf075e24")
+    (uuid "687e9139-dec7-4b8b-aaa0-1716621b4632")
   )
   (global_label "GND"
     (shape input)
     (at 84.92 132.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "d89c4c33-18c3-4b0f-b919-983c0b4e75c3")
+    (uuid "cd7c33c7-3779-4953-9052-a7d85f490072")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2734,37 +2962,37 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "9507dd53-97dc-4a4b-b52d-ea96fe0706d4")
+    (uuid "f501415e-77b7-4d81-84d4-5ff49fdce2ed")
     (property "Reference" "J3" (at 140.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "SERVO_B" (at 140.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 140.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "d6c1ff50-a6de-4652-ae0e-b9768a6192d9"))
-    (pin "2" (uuid "1499726d-210c-4912-b9f7-f9e36d4da158"))
-    (pin "3" (uuid "c149647c-d3fc-4989-be34-5b7cb7cb3122"))
+    (pin "1" (uuid "231f7118-4107-4b1b-8622-2068c7673a32"))
+    (pin "2" (uuid "09b06a69-9341-424b-a9b6-47e046c6d588"))
+    (pin "3" (uuid "cd3908b5-0ed0-482d-b7e7-ddb8ded2f4ee"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J3") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J3") (unit 1))))
   )
   (global_label "SERVO_B"
     (shape input)
     (at 134.92 127.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "66601068-c6d7-460c-9ac8-d89a981a84a4")
+    (uuid "009eee34-fb86-4df2-bd29-439bf921eba1")
   )
   (global_label "VSERVO"
     (shape input)
     (at 134.92 130.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "4465a28f-8fb0-4756-9aaa-023b5fda610a")
+    (uuid "9c4d86f4-4682-468f-ab93-86d07c4adc10")
   )
   (global_label "GND"
     (shape input)
     (at 134.92 132.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "ec450667-ec7f-47d5-8053-6f72928af4f2")
+    (uuid "3bb6723c-7879-4def-b1c7-344f2c4e639f")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2774,37 +3002,37 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "4342bf31-b493-4d9d-aba5-c59fcd8d4d2d")
+    (uuid "88fa2b78-d275-4ada-ad9a-3216f8b9e2df")
     (property "Reference" "J4" (at 190.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "HEAD_PAN" (at 190.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 190.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ac1cab1b-a525-41bf-aad0-0e2f4191e5e8"))
-    (pin "2" (uuid "19f1fc02-07a5-47ff-99e4-4293fb1d4b10"))
-    (pin "3" (uuid "167f2e00-05a1-4293-9b48-c464531f01e2"))
+    (pin "1" (uuid "0efeb56a-6dfa-4c8c-a36c-bec865080ba4"))
+    (pin "2" (uuid "727461bb-8a60-4099-a0c6-ac543495e2e7"))
+    (pin "3" (uuid "976325ed-749c-4696-a61b-d0e04709ea76"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J4") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J4") (unit 1))))
   )
   (global_label "PAN"
     (shape input)
     (at 184.92 127.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "cff38e0d-7f5f-4001-9d21-7b00add9716d")
+    (uuid "634f762e-4ff2-4b47-9bcf-15e348f76673")
   )
   (global_label "VSERVO"
     (shape input)
     (at 184.92 130.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "aa2e601a-e68b-402f-9a7a-274d7cde7ef2")
+    (uuid "652e2d9e-21ec-4a68-9808-163f755a6e89")
   )
   (global_label "GND"
     (shape input)
     (at 184.92 132.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "517622c7-ffad-431c-8245-c363a338c681")
+    (uuid "339fce2c-bc68-4903-afff-02e536105106")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2814,37 +3042,37 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "9c52c181-e99c-4e56-b383-daf266dc2219")
+    (uuid "2630d026-9039-442e-a4e9-f931c4968e66")
     (property "Reference" "J5" (at 240.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "HEAD_TILT" (at 240.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 240.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "b1274723-a977-4ca0-a148-2d7428be06f0"))
-    (pin "2" (uuid "b48d0f96-803c-468b-b069-14ab3c6010d6"))
-    (pin "3" (uuid "41645c55-320d-41fc-940d-e3fe49fff7b8"))
+    (pin "1" (uuid "155c16e7-e61c-41a2-a0b8-2129ce1550a6"))
+    (pin "2" (uuid "6988b320-7f2e-4610-9f0b-e0aeed144c8a"))
+    (pin "3" (uuid "5c20ba19-7c0e-4ff5-b245-df7ca400f7c0"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J5") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J5") (unit 1))))
   )
   (global_label "TILT"
     (shape input)
     (at 234.92 127.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "d5ff1622-fd95-4e5f-9c3a-4fc98cfcdbe9")
+    (uuid "ddd8a00b-9e25-4407-876d-621c5fe554a0")
   )
   (global_label "VSERVO"
     (shape input)
     (at 234.92 130.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "950a5c27-e7a9-444c-bf80-b31438fb31d8")
+    (uuid "3012917f-9e16-43b9-9b34-3975ef9e3663")
   )
   (global_label "GND"
     (shape input)
     (at 234.92 132.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "bdb9fc43-f49d-4bbd-8baa-a195ca602820")
+    (uuid "9bea7289-360e-4443-85f2-bac0354147e0")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2854,37 +3082,37 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "6386185e-e492-40e5-8f6a-48e78266bf9b")
+    (uuid "a1543382-3b25-4c4e-b17f-2c06b0aeb4c1")
     (property "Reference" "J6" (at 290.0 126.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "ENC_A" (at 290.0 133.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 290.0 130.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "f907df54-213d-421f-bab4-b9009d3d9afd"))
-    (pin "2" (uuid "254607e6-2950-4452-a97e-3bc33ccca7e7"))
-    (pin "3" (uuid "a8230188-7fde-43de-9d12-d870d1e532a7"))
+    (pin "1" (uuid "16da4002-131c-4045-8a79-f52980750ff7"))
+    (pin "2" (uuid "5a0c69fb-e472-46bd-95f4-653ca3752c55"))
+    (pin "3" (uuid "bafba778-26af-48cf-9ad0-7cc8d7a6e9b4"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J6") (unit 1))))
-  )
-  (global_label "ENC_A"
-    (shape input)
-    (at 284.92 127.46 180)
-    (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "066f6f34-8951-481f-9383-d8e7ad0d6002")
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J6") (unit 1))))
   )
   (global_label "+3V3"
     (shape input)
-    (at 284.92 130.0 180)
+    (at 284.92 127.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "d154b04f-662d-4fa7-aa03-da248995b090")
+    (uuid "bf3d170c-e5f5-4525-afdc-6ce866a94e7b")
   )
   (global_label "GND"
     (shape input)
+    (at 284.92 130.0 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "bd82f404-713b-425b-9e47-673d8a439dea")
+  )
+  (global_label "ENC_A"
+    (shape input)
     (at 284.92 132.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "bc772f3a-d525-4dc4-a921-aa0460ba8f43")
+    (uuid "1cd2cda6-4792-4733-ad1e-1b0cfbd118d8")
   )
   (symbol
     (lib_id "Connector_Generic:Conn_01x03")
@@ -2894,77 +3122,79 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "32529342-34cc-4179-8c60-bf74adb1837e")
+    (uuid "fcc29aee-b687-42a2-aa0b-b1c054f24e41")
     (property "Reference" "J7" (at 40.0 171.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "ENC_B" (at 40.0 178.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 40.0 175.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "2728f9d6-ad1a-4054-ab4f-b7d917263fd3"))
-    (pin "2" (uuid "76b31bc1-c377-4fb7-8dbd-57d8c79d7452"))
-    (pin "3" (uuid "fed57a55-8ffb-483e-beb3-0ec452abe984"))
+    (pin "1" (uuid "de71b2d1-4370-455b-ab26-c4e106604b98"))
+    (pin "2" (uuid "1e562b89-bef7-44db-9515-bf019e8c401c"))
+    (pin "3" (uuid "f50368a6-3953-4b4a-8095-9d2e12454332"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J7") (unit 1))))
-  )
-  (global_label "ENC_B"
-    (shape input)
-    (at 34.92 172.46 180)
-    (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "fc498deb-5a8a-43bf-a520-922e633915aa")
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J7") (unit 1))))
   )
   (global_label "+3V3"
     (shape input)
-    (at 34.92 175.0 180)
+    (at 34.92 172.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "10110d97-e3fc-4f6b-93e3-c86f03751e40")
+    (uuid "06fc0a6f-b530-4f21-90f6-965738d98523")
   )
   (global_label "GND"
     (shape input)
+    (at 34.92 175.0 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "6701cbea-a7d5-42e9-8313-c1ee2201928c")
+  )
+  (global_label "ENC_B"
+    (shape input)
     (at 34.92 177.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "e5943b72-72f6-4966-bd7e-761c909f10eb")
+    (uuid "5a4be951-3e0a-4e06-b194-f3bfbcf30aaa")
   )
   (symbol
-    (lib_id "Connector_Generic:Conn_01x03")
+    (lib_id "Connector_Generic:Conn_01x04")
     (at 90.0 175.0 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "20ee1e14-57c6-4c0c-b851-8a172a6a79c6")
+    (uuid "1fe70047-4d0f-45b9-b81a-181d7f0abdb1")
     (property "Reference" "J8" (at 90.0 171.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Value" "COLOR_A" (at 90.0 178.5 0)
+    (property "Value" "COLOR" (at 90.0 178.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (at 90.0 175.0 0)
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" (at 90.0 175.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "f1dee853-95ad-478a-a0d2-9d11b5bd2e1a"))
-    (pin "2" (uuid "f6d4b192-4e2d-420a-a8a7-2e08435cce95"))
-    (pin "3" (uuid "149b6638-389f-4a5a-a6d8-c5b169fe3f18"))
+    (pin "1" (uuid "7d4092ca-278b-4893-b535-79b0179b518a"))
+    (pin "2" (uuid "2e9539aa-b307-49a0-9b5f-88c3d279b9d0"))
+    (pin "3" (uuid "53c2e9da-498f-47a7-b6e2-218ad5784f39"))
+    (pin "4" (uuid "8bb6eb49-7c99-4df7-a0f1-52a2a60c8ac2"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "J8") (unit 1))))
-  )
-  (global_label "COLOR_A"
-    (shape input)
-    (at 84.92 172.46 180)
-    (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "1257d55f-a71a-41ea-a88c-be0d7d406f67")
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J8") (unit 1))))
   )
   (global_label "+3V3"
     (shape input)
-    (at 84.92 175.0 180)
+    (at 84.92 172.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "e3de3772-2ce4-4b59-b72f-75e6efa2ad47")
+    (uuid "ed4f5228-8e63-407f-8392-aff977f83e30")
   )
   (global_label "GND"
     (shape input)
-    (at 84.92 177.54 180)
+    (at 84.92 175.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "5e0f1788-2624-44dc-a90f-7df81515f62a")
+    (uuid "c24fd328-b339-43a3-ba3e-1c91dc80e427")
+  )
+  (no_connect (at 84.92 177.54) (uuid "e147a79d-32e3-4646-a3d4-dd01048a9300"))
+  (global_label "COLOR"
+    (shape input)
+    (at 84.92 180.08 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "aed91e65-ced9-4aa9-ba67-400742fab81b")
   )
   (symbol
     (lib_id "Device:L")
@@ -2974,30 +3204,30 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "55e61885-ce44-4322-ba92-673d9f32fcf8")
+    (uuid "675d9b2b-2cad-4f53-9fd6-dec7013029c3")
     (property "Reference" "L1" (at 140.0 171.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "6.8uH" (at 140.0 178.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Inductor_SMD:L_Bourns_SRN6045TA" (at 140.0 175.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "e2e05ea6-11a7-4b66-99e3-54273163d591"))
-    (pin "2" (uuid "e9d73aff-5909-4cd6-a627-34213a2d8b43"))
+    (pin "1" (uuid "e505e7ee-a03e-418d-800d-2408e7bc3f51"))
+    (pin "2" (uuid "e1f8cb0e-c881-46ec-9239-58ca64809fa5"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "L1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "L1") (unit 1))))
   )
   (global_label "SW_NODE"
     (shape input)
     (at 140.0 171.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "37eb1f9a-a5a4-4cd5-8d26-ce485dbba15b")
+    (uuid "eb7c477a-64d9-494f-a094-91cc2798cb34")
   )
   (global_label "+5V"
     (shape input)
     (at 140.0 178.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "aae20ff1-a01c-4a57-bd1d-a34ae99c9621")
+    (uuid "587d2cc8-742c-408b-a79b-0232fc4e5ec8")
   )
   (symbol
     (lib_id "Device:R")
@@ -3007,91 +3237,157 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "bf6a4e7a-9543-48a2-8d68-291c075e41dc")
+    (uuid "9cf72134-7966-4554-9cd0-5aa70958e4c5")
     (property "Reference" "R3" (at 190.0 171.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "22k" (at 190.0 178.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 190.0 175.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "65d4715d-5de2-4be5-9097-c589c7a317a9"))
-    (pin "2" (uuid "72b721f0-6e62-4dea-b17a-fa67ae3ce058"))
+    (pin "1" (uuid "462527a7-8a62-4323-9c5f-656ec981ff0e"))
+    (pin "2" (uuid "5afd9f63-8ea4-42f2-b20c-bd3c2334fb3b"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "R3") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "R3") (unit 1))))
   )
   (global_label "+5V"
     (shape input)
     (at 190.0 171.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "3bf4243a-4ef4-4cac-9df3-33563a25a1e0")
+    (uuid "8f4dea14-8a1a-4b50-b528-969c8692f2b8")
   )
   (global_label "LED_K"
     (shape input)
     (at 190.0 178.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "5182a25b-a649-433d-8c7a-e3ed2926b170")
+    (uuid "c104510b-e83a-4292-8818-665783be773b")
   )
   (symbol
-    (lib_id "Regulator_Switching:AP63205WU")
+    (lib_id "Device:R")
     (at 240.0 175.0 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "98643e2e-23cf-4e4e-9152-b2b84d06a7d2")
-    (property "Reference" "U1" (at 240.0 171.5 0)
+    (uuid "eabad542-c942-4475-8b32-8a96a53e904d")
+    (property "Reference" "R4" (at 240.0 171.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Value" "AP63205" (at 240.0 178.5 0)
+    (property "Value" "1k" (at 240.0 178.5 0)
       (effects (font (size 1.27 1.27))))
-    (property "Footprint" "Package_TO_SOT_SMD:TSOT-23-6" (at 240.0 175.0 0)
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 240.0 175.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "f2dc47f2-27be-4439-88bf-d87189a4e487"))
-    (pin "2" (uuid "a16a9fc3-c538-4d9e-ae07-3fa070ba0788"))
-    (pin "3" (uuid "35c0ff2b-3600-4ea8-b086-37b571106c19"))
-    (pin "4" (uuid "519a56a8-6a9b-4a2b-a084-13350d7301cf"))
-    (pin "5" (uuid "fc9c79f7-ecc6-469d-a294-33f28b8219f3"))
-    (pin "6" (uuid "a9705ac6-518a-44b3-8fc2-94907bd0ef3a"))
+    (pin "1" (uuid "e5794105-33fd-4257-bd58-81ced39dd3d0"))
+    (pin "2" (uuid "d5c6a14b-bf3b-4986-94d0-c3f78fbeb492"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "U1") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "R4") (unit 1))))
   )
-  (global_label "+5V"
+  (global_label "ECHO_5V"
     (shape input)
-    (at 250.16 177.54 0)
+    (at 240.0 171.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "538b981e-5b0b-4e1c-bf97-7ac44cbeba76")
+    (uuid "f9a7073d-0c6c-4004-91d5-4ad6bd19050e")
   )
-  (global_label "VSERVO"
+  (global_label "ECHO"
     (shape input)
-    (at 229.84 177.54 180)
+    (at 240.0 178.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "5486ea6d-d093-4824-9434-3382a636f467")
+    (uuid "fb6ab2fe-80bb-4a06-ba74-f9db7abc21ff")
   )
-  (global_label "VSERVO"
+  (symbol
+    (lib_id "Device:R")
+    (at 290.0 175.0 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "d7805cae-99d6-484e-83b8-8fd434665101")
+    (property "Reference" "R5" (at 290.0 171.5 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "2k" (at 290.0 178.5 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 290.0 175.0 0)
+      (effects (font (size 1.27 1.27)) (hide yes)))
+    (pin "1" (uuid "42c204a1-4ebd-4c8d-9407-acf0750ab2b7"))
+    (pin "2" (uuid "b51fe863-099e-4502-bee8-265028e5e5f7"))
+    (instances
+      (project "sticks3-bot-hat"
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "R5") (unit 1))))
+  )
+  (global_label "ECHO"
     (shape input)
-    (at 229.84 172.46 180)
+    (at 290.0 171.19 270)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "52aa908a-47c7-4a4c-80aa-77c262422f46")
+    (uuid "20a3adb9-99a0-4d51-aeab-ef5ef2ced5ed")
   )
   (global_label "GND"
     (shape input)
-    (at 240.0 182.62 90)
+    (at 290.0 178.81 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "58f2a487-4791-4a3c-b380-b9ead178dd87")
+    (uuid "2ec0234f-f61e-43bb-9800-3ec2d47e8ad2")
+  )
+  (symbol
+    (lib_id "Regulator_Switching:AP63205WU")
+    (at 40.0 220.0 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "bbd7233e-2463-4b89-834c-94f09738870f")
+    (property "Reference" "U1" (at 40.0 216.5 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "AP63205" (at 40.0 223.5 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:TSOT-23-6" (at 40.0 220.0 0)
+      (effects (font (size 1.27 1.27)) (hide yes)))
+    (pin "1" (uuid "79c28686-05bf-4300-b0c3-8b37f44106f3"))
+    (pin "2" (uuid "ef8b9e77-f421-429e-944b-8186ecc33b16"))
+    (pin "3" (uuid "14b1638a-cf7a-41c9-93ed-06cdbc174e9b"))
+    (pin "4" (uuid "d316b044-9ec7-458f-8e76-e2c9a3a1786a"))
+    (pin "5" (uuid "0be02848-2976-46e9-ad3e-90aef4cc9eed"))
+    (pin "6" (uuid "cb3dc200-2294-4fcd-81eb-20adbc293f5f"))
+    (instances
+      (project "sticks3-bot-hat"
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "U1") (unit 1))))
+  )
+  (global_label "+5V"
+    (shape input)
+    (at 50.16 222.54 0)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "1d13a020-0603-48a2-8792-c181d229e4e7")
+  )
+  (global_label "VSERVO"
+    (shape input)
+    (at 29.84 222.54 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "b60439f9-d503-45fb-910c-7ffb0ae38fca")
+  )
+  (global_label "VSERVO"
+    (shape input)
+    (at 29.84 217.46 180)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "3b95f670-ea39-4bab-8580-27d192331773")
+  )
+  (global_label "GND"
+    (shape input)
+    (at 40.0 227.62 90)
+    (effects (font (size 1.0 1.0)) (justify left))
+    (uuid "74f0ab4c-9d93-4c73-a914-8a030556da83")
   )
   (global_label "SW_NODE"
     (shape input)
-    (at 250.16 172.46 0)
+    (at 50.16 217.46 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "db85d55b-eb33-48b0-9cd2-042ed788a406")
+    (uuid "b3adf4df-dc2e-4940-ab51-e3ac7afa71e6")
   )
   (global_label "BST"
     (shape input)
-    (at 250.16 175.0 0)
+    (at 50.16 220.0 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "2467d768-06e9-46eb-8e5b-60088911ed4d")
+    (uuid "56432c70-eb75-49f2-96a3-d099bbfcb289")
   )
   (symbol
     (lib_id "power:PWR_FLAG")
@@ -3101,23 +3397,23 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "8f019b96-5117-4110-a022-28981a5d94e0")
+    (uuid "1e025135-02f9-43b4-925c-274f6d1f24cf")
     (property "Reference" "#FLG01" (at 40.0 261.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "GND" (at 40.0 268.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 40.0 265.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "18a5cb05-7251-4f53-b145-686e58c3c92c"))
+    (pin "1" (uuid "8836f682-7197-468c-8f73-92910da69bfb"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "#FLG01") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "#FLG01") (unit 1))))
   )
   (global_label "GND"
     (shape input)
     (at 40.0 265.0 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "444b2c10-45d8-4a17-a214-d7e9c61e3b49")
+    (uuid "187e6389-32ff-4e2d-a468-17961d35a160")
   )
   (symbol
     (lib_id "power:PWR_FLAG")
@@ -3127,23 +3423,23 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "c5b8dfa4-1cd5-423d-8821-4f2ba977c177")
+    (uuid "9ed47292-f13c-42ad-a68c-7007e023320c")
     (property "Reference" "#FLG02" (at 65.0 261.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "VSERVO" (at 65.0 268.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 65.0 265.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "2bc9e594-526c-462d-969f-b48fb0acb882"))
+    (pin "1" (uuid "2abd3351-3547-46d7-8d06-dd1c3bbbd0c3"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "#FLG02") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "#FLG02") (unit 1))))
   )
   (global_label "VSERVO"
     (shape input)
     (at 65.0 265.0 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "603fdbc1-d27d-4bd9-a068-8df803f6b209")
+    (uuid "96bfc201-8445-42db-a6fb-5933c97735a6")
   )
   (symbol
     (lib_id "power:PWR_FLAG")
@@ -3153,23 +3449,23 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "463ebc97-07ac-424a-baf7-e2b27781e5f4")
+    (uuid "500510ca-d0bd-4ab2-a3b4-940facb51f69")
     (property "Reference" "#FLG03" (at 90.0 261.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "+5V" (at 90.0 268.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 90.0 265.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "aea7e2bd-f94a-4eec-a3fe-8acedfccdf4e"))
+    (pin "1" (uuid "b221c293-3716-4ee6-a7a8-7860ed0c128c"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "#FLG03") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "#FLG03") (unit 1))))
   )
   (global_label "+5V"
     (shape input)
     (at 90.0 265.0 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "64e2a48b-5984-44bd-9a35-59d820a9bcbd")
+    (uuid "6c6f1de7-dc74-4e83-9e48-faddd5cc615a")
   )
   (symbol
     (lib_id "power:PWR_FLAG")
@@ -3179,23 +3475,23 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "34e086c4-c03b-437a-8dbb-ec72cb8d2c6f")
+    (uuid "051383a7-4324-42a9-afed-65a8dcefa580")
     (property "Reference" "#FLG04" (at 115.0 261.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Value" "+3V3" (at 115.0 268.5 0)
       (effects (font (size 1.27 1.27))))
     (property "Footprint" "" (at 115.0 265.0 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "477908a4-e5ab-44a6-91e4-5e78a9fc02e7"))
+    (pin "1" (uuid "c709f208-d063-463e-b759-8769ba8da58b"))
     (instances
       (project "sticks3-bot-hat"
-        (path "/f274bf87-c989-4735-ab94-4471d4535f51" (reference "#FLG04") (unit 1))))
+        (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "#FLG04") (unit 1))))
   )
   (global_label "+3V3"
     (shape input)
     (at 115.0 265.0 90)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "cbf79b7b-ce63-4afe-9c70-1391c1b3a58a")
+    (uuid "052561cd-49c0-474b-bbed-1dbe80c35603")
   )
   (sheet_instances
     (path "/" (page "1"))

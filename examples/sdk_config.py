@@ -43,6 +43,9 @@ if BOARD == 'maxv1':
         'C': 32,
     }
 
+    # No HC-SR04 header on the Max V1 board.
+    DISTANCE_SENSOR_PINS = {}
+
     # Start button boot.py waits on (active low, internal pull-up).
     BUTTON_PIN = 27
 
@@ -63,11 +66,17 @@ else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
         'tilt': 7,
     }
 
-    # Two sensor headers on the HAT, both ADC1 (3V3 only — S3 pins are not
-    # 5 V tolerant).
+    # COLOR header (V G - A0, 3V3): TCRT5000 reflection sensor's A0 on
+    # G1 = ADC1_CH0. Port 'C' like the Max V1 so line_follow.py runs unchanged.
     COLOR_SENSOR_PINS = {
-        'A': 1,
-        'B': 8,
+        'C': 1,
+    }
+
+    # DIST header (5V TRIG ECHO GND): HC-SR04. The HAT divides the 5 V echo
+    # pulse down to 3.3 V before G8; TRIG is driven at 3.3 V, which the
+    # sensor accepts.
+    DISTANCE_SENSOR_PINS = {
+        'D': {'trig': 2, 'echo': 8},
     }
 
     # BtnA on the front of the stick (active low, internal pull-up).

@@ -6,7 +6,10 @@ C3,CL10B104KB8NNNC,Samsung,0603,C1591,100nF 50V X7R
 "C4,C5",CL31A226KAHNNNE,Samsung,1206,C12891,22uF 25V X5R
 C7,470uF 16V radial D8xH11.5 P3.5,generic,THT,,bulk for servo stalls
 R3,0603WAF2202T5E,UniOhm,0603,C4190,22k 1% (~0.14 mA: dim power LED)
+R4,0603WAF1001T5E,UniOhm,0603,C21190,"1k 1% (HC-SR04 ECHO divider, series)"
+R5,0603WAF2001T5E,UniOhm,0603,C4109,"2k 1% (HC-SR04 ECHO divider, to GND)"
 D1,0603 green LED,generic,0603,,power indicator
 J1,2x8 pin header 2.54mm male RIGHT-ANGLE (90 deg),generic,THT,,"plugs into StickS3 HAT2 socket, stick lies flat"
-"J2,J3,J4,J5,J6,J7,J8,J10",1x3 pin header 2.54mm male vertical,generic,THT,,servo / sensor headers
+"J2,J3,J4,J5,J6,J7",1x3 pin header 2.54mm male vertical,generic,THT,,servo / encoder headers
+"J8,J10",1x4 pin header 2.54mm male vertical,generic,THT,,COLOR (V G - A0) / DIST (HC-SR04) headers
 J11,DC barrel jack 5.5x2.1 horizontal (PJ-102A type),generic,THT,,"battery box plugs in, center = +6V"

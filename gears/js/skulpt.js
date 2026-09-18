@@ -24,6 +24,7 @@ var skulpt = new function() {
     './motor_pair.py': '../examples/sdk_motor_pair.py',
     './orientation.py': 'minibot/orientation.py',
     './color_sensor.py': 'minibot/color_sensor.py',
+    './distance_sensor.py': 'minibot/distance_sensor.py',
     './head.py': 'minibot/head.py',
     './wonder_echo.py': 'minibot/wonder_echo.py',
     './minibot_sim.js': 'js/minibotSim.js',

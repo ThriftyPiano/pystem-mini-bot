@@ -112,21 +112,25 @@ def silk(x, y, text, size=1.0, layer=pcbnew.F_SilkS, rot=0, bold=False):
 for ref, comp in design.COMPONENTS.items():
     pass  # per-connector labels are placed explicitly below
 
-silk(73.0, 79.6, "PySTEM Mini Bot - StickS3 HAT v3", 1.0,
+silk(73.0, 79.6, "PySTEM Mini Bot - StickS3 HAT v4", 1.0,
      layer=pcbnew.B_SilkS, bold=True)
 silk(73.0, 81.5, "robot.pystem.com - battery 6V, center +", 0.9,
      layer=pcbnew.B_SilkS)
 # connector labels: sensor row (between the rows), servo row (below)
-silk(59, 73.7, "ENC A", 0.7)
-silk(68, 73.7, "ENC B", 0.7)
-silk(77, 73.7, "COLOR A", 0.7)
-silk(86, 73.7, "COLOR B", 0.7)
+silk(59.84, 73.7, "ENC A", 0.7)
+silk(68.64, 73.7, "ENC B", 0.7)
+silk(78.71, 73.7, "COLOR", 0.7)
+silk(88.3, 73.7, "DIST", 0.7)
+# per-pin legend under the sensor row: V G D0 / V G - A0 / 5V T E G
+for _x, _c in [(57.3, "V"), (59.84, "G"), (62.38, "D"), (66.1, "V"), (68.64, "G"), (71.18, "D"),
+               (74.9, "V"), (77.44, "G"), (79.98, "-"), (82.52, "A"),
+               (86.24, "5"), (88.78, "T"), (91.32, "E"), (93.86, "G")]:
+    silk(_x, 72.5, _c, 0.6)
 silk(59.84, 79.2, "WHEEL A", 0.8)
 silk(68.64, 79.2, "WHEEL B", 0.8)
 silk(77.44, 79.2, "PAN", 0.8)
 silk(86.24, 79.2, "TILT", 0.8)
 silk(87.0, 66.6, "6V ctr+", 0.7)
-silk(52.7, 71.0, "S 3V G", 0.6)
 silk(52.7, 76.2, "S V G", 0.6)
 silk(65.5, 58.6, "StickS3 flat, screen up", 0.7)
 
