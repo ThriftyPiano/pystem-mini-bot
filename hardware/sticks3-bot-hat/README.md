@@ -1,4 +1,4 @@
-# PySTEM Mini Bot — StickS3 HAT v4
+# PySTEM Mini Bot — StickS3 HAT
 
 A 48 x 33 mm carrier PCB (4 servo + 4 sensor headers in two rows) that turns an M5StickS3 into the Mini Bot's
 brain. The stick plugs into a right-angle HAT2 header and **lies flat** on

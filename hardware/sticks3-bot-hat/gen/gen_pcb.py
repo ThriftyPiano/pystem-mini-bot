@@ -112,7 +112,7 @@ def silk(x, y, text, size=1.0, layer=pcbnew.F_SilkS, rot=0, bold=False):
 for ref, comp in design.COMPONENTS.items():
     pass  # per-connector labels are placed explicitly below
 
-silk(73.0, 79.6, "PySTEM Mini Bot - StickS3 HAT v4", 1.0,
+silk(73.0, 79.6, "PySTEM Mini Bot - StickS3 HAT", 1.0,
      layer=pcbnew.B_SilkS, bold=True)
 silk(73.0, 81.5, "robot.pystem.com - battery 6V, center +", 0.9,
      layer=pcbnew.B_SilkS)

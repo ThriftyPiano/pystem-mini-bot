@@ -155,7 +155,7 @@ for d in list(board.GetDrawings()):
         if txt in ("S 3V G", "ENC A", "ENC B", "COLOR A", "COLOR B"):
             board.Remove(d)
         elif "HAT v3" in txt:
-            d.SetText(txt.replace("HAT v3", "HAT v4"))
+            d.SetText(txt.replace(" HAT v3", " HAT"))
 def silk(x, y, text, size=1.0):
     t = pcbnew.PCB_TEXT(board)
     t.SetText(text); t.SetPosition(V(x, y)); t.SetLayer(pcbnew.F_SilkS)
