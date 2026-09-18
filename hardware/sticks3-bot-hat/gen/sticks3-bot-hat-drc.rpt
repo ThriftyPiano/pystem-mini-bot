@@ -1,8 +1,16 @@
 ** Drc report for sticks3-bot-hat.kicad_pcb **
-** Created on 2026-09-11T16:05:17 **
+** Created on 2026-09-18T21:12:35 **
 ** Report includes: Errors **
 
-** Found 0 DRC violations **
+** Found 2 DRC violations **
+[courtyards_overlap]: Courtyards overlap
+    Rule: board setup constraints courtyard; error
+    @(57.5000 mm, 55.5000 mm): Footprint J1
+    @(52.7000 mm, 52.7000 mm): Footprint H1
+[courtyards_overlap]: Courtyards overlap
+    Rule: board setup constraints courtyard; error
+    @(52.7000 mm, 79.5000 mm): Footprint H3
+    @(57.3000 mm, 76.2000 mm): Footprint J2
 
 ** Found 0 unconnected pads **
 

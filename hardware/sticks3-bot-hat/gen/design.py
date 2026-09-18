@@ -125,22 +125,24 @@ COMPONENTS = {
            (72.7, 63.2, 0), {"1": "VSERVO", "2": "GND"}, None),
 
     # --- Power LED -------------------------------------------------------
-    "R3": ("Device", "R", "1k",
+    "R3": ("Device", "R", "22k",
            STD_FP, "Resistor_SMD", "R_0603_1608Metric",
            (92.7, 71.3, 90), {"1": "+5V", "2": "LED_K"}, None),
+    # R3 = 22k keeps the LED at ~0.14 mA: a faint power indicator, not a
+    # searchlight. 1k (~3 mA) was far too bright on the first JLCPCB batch.
     "D1": ("Device", "LED", "GREEN",
            STD_FP, "LED_SMD", "LED_0603_1608Metric",
            (92.7, 74.4, 90), {"1": "GND", "2": "LED_K"}, None),
 
     # --- Mounting holes -------------------------------------------------
     "H1": ("Mechanical", "MountingHole", "M3",
-           STD_FP, "MountingHole", "MountingHole_2.7mm_M2.5", (52.7, 52.7, 0), {}, None),
+           STD_FP, "MountingHole", "MountingHole_3.2mm_M3", (52.7, 52.7, 0), {}, None),
     "H2": ("Mechanical", "MountingHole", "M3",
-           STD_FP, "MountingHole", "MountingHole_2.7mm_M2.5", (95.3, 52.7, 0), {}, None),
+           STD_FP, "MountingHole", "MountingHole_3.2mm_M3", (95.3, 52.7, 0), {}, None),
     "H3": ("Mechanical", "MountingHole", "M3",
-           STD_FP, "MountingHole", "MountingHole_2.7mm_M2.5", (52.7, 79.5, 0), {}, None),
+           STD_FP, "MountingHole", "MountingHole_3.2mm_M3", (52.7, 79.5, 0), {}, None),
     "H4": ("Mechanical", "MountingHole", "M3",
-           STD_FP, "MountingHole", "MountingHole_2.7mm_M2.5", (95.3, 79.5, 0), {}, None),
+           STD_FP, "MountingHole", "MountingHole_3.2mm_M3", (95.3, 79.5, 0), {}, None),
 }
 
 # BOM for JLCPCB assembly (refs grouped by orderable part).
@@ -154,7 +156,7 @@ BOM = [
     ("C3",  "CL10B104KB8NNNC", "Samsung", "0603", "C1591", "100nF 50V X7R"),
     ("C4,C5", "CL31A226KAHNNNE", "Samsung", "1206", "C12891", "22uF 25V X5R"),
     ("C7",  "470uF 16V radial D8xH11.5 P3.5", "generic", "THT", "", "bulk for servo stalls"),
-    ("R3",  "0603WAF1001T5E", "UniOhm", "0603", "C21190", "1k 1%"),
+    ("R3",  "0603WAF2202T5E", "UniOhm", "0603", "C4190", "22k 1% (~0.14 mA: dim power LED)"),
     ("D1",  "0603 green LED", "generic", "0603", "", "power indicator"),
     ("J1",  "2x8 pin header 2.54mm male RIGHT-ANGLE (90 deg)", "generic", "THT", "", "plugs into StickS3 HAT2 socket, stick lies flat"),
     ("J2,J3,J4,J5,J6,J7,J8,J10", "1x3 pin header 2.54mm male vertical", "generic", "THT", "", "servo / sensor headers"),
