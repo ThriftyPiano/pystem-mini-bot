@@ -2758,82 +2758,82 @@
       (project "sticks3-bot-hat"
         (path "/76cba402-eb9b-48ec-82b7-eefdaa9b8bf7" (reference "J1") (unit 1))))
   )
-  (global_label "GND"
+  (global_label "SERVO_A"
     (shape input)
     (at 234.92 77.38 180)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "f8cf78ba-4330-4db7-9c19-b2e76cb93407")
   )
-  (global_label "SERVO_A"
+  (global_label "GND"
     (shape input)
     (at 247.62 77.38 0)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "9272c171-1f04-4d34-a797-d6a97d068c0a")
   )
-  (no_connect (at 234.92 79.92) (uuid "11b0ec97-3b3d-4d15-9afd-63a3e2b2b438"))
   (global_label "SERVO_B"
     (shape input)
-    (at 247.62 79.92 0)
+    (at 234.92 79.92 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "3a2e9474-abce-4754-b9c5-f1952b8e8cf9")
+    (uuid "11b0ec97-3b3d-4d15-9afd-63a3e2b2b438")
   )
-  (no_connect (at 234.92 82.46) (uuid "7b34ba0c-60c8-4281-806b-0170331ababb"))
+  (no_connect (at 247.62 79.92) (uuid "3a2e9474-abce-4754-b9c5-f1952b8e8cf9"))
   (global_label "PAN"
     (shape input)
-    (at 247.62 82.46 0)
+    (at 234.92 82.46 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "5e6dd18f-8e8b-4ba5-b2f6-ce6206f4dde9")
+    (uuid "7b34ba0c-60c8-4281-806b-0170331ababb")
   )
-  (global_label "COLOR"
+  (no_connect (at 247.62 82.46) (uuid "5e6dd18f-8e8b-4ba5-b2f6-ce6206f4dde9"))
+  (global_label "TILT"
     (shape input)
     (at 234.92 85.0 180)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "412ff510-1d66-4836-86e4-c45c7cf87fd2")
   )
-  (global_label "TILT"
+  (global_label "COLOR"
     (shape input)
     (at 247.62 85.0 0)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "2b571a94-1e6c-44a9-924f-db2a669fcbc5")
   )
-  (global_label "ECHO"
+  (global_label "ENC_A"
     (shape input)
     (at 234.92 87.54 180)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "a9f47ea0-b067-4bf9-ad3c-17b8c4a65cbe")
   )
-  (global_label "ENC_A"
+  (global_label "ECHO"
     (shape input)
     (at 247.62 87.54 0)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "fb73d4b6-7085-4597-a25f-84bf366f7721")
   )
-  (no_connect (at 234.92 90.08) (uuid "a02441c1-c51a-4da6-a646-3dbc88ac42af"))
   (global_label "ENC_B"
     (shape input)
-    (at 247.62 90.08 0)
+    (at 234.92 90.08 180)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "523548cd-5d18-4f43-bfb1-2a512958c380")
+    (uuid "a02441c1-c51a-4da6-a646-3dbc88ac42af")
   )
-  (global_label "+3V3"
+  (no_connect (at 247.62 90.08) (uuid "523548cd-5d18-4f43-bfb1-2a512958c380"))
+  (global_label "TRIG"
     (shape input)
     (at 234.92 92.62 180)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "b913dee0-c4cd-44b9-a4c1-ea0ec50e2853")
   )
-  (global_label "TRIG"
+  (global_label "+3V3"
     (shape input)
     (at 247.62 92.62 0)
     (effects (font (size 1.0 1.0)) (justify left))
     (uuid "9528315b-13d8-457e-a106-adb6bb72cada")
   )
+  (no_connect (at 234.92 95.16) (uuid "9868bea9-8a21-4d9f-b9d2-5d2620ec92fc"))
   (global_label "+5V"
     (shape input)
-    (at 234.92 95.16 180)
+    (at 247.62 95.16 0)
     (effects (font (size 1.0 1.0)) (justify left))
-    (uuid "9868bea9-8a21-4d9f-b9d2-5d2620ec92fc")
+    (uuid "7de867f7-ec65-40a9-96c1-535fc09b25ad")
   )
-  (no_connect (at 247.62 95.16) (uuid "7de867f7-ec65-40a9-96c1-535fc09b25ad"))
   (symbol
     (lib_id "Connector_Generic:Conn_01x04")
     (at 290.0 85.0 0)

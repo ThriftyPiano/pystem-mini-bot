@@ -1,6 +1,7 @@
 # Refill all copper zones and save (needed after editing footprints outside the GUI).
+import sys
 import pcbnew
-PCB = "/work/sticks3-bot-hat.kicad_pcb"
+PCB = sys.argv[1] if len(sys.argv) > 1 else "/work/sticks3-bot-hat.kicad_pcb"
 board = pcbnew.LoadBoard(PCB)
 pcbnew.ZONE_FILLER(board).Fill(board.Zones())
 board.Save(PCB)

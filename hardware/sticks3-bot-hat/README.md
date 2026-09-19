@@ -42,6 +42,21 @@ that the 5 V rail is up.
 The stick's own Grove port (G9/G10) stays free — the WonderEcho voice
 module plugs in there directly.
 
+### Header rows
+
+With the stick screen up, its socket has the GPIO row (G5 G4 G6 G7 G43 G44
+G2 G3) on top and the power row (GND EXT_5V BOOT G1 G8 BAT 3V3 5V_IN)
+underneath, GND in the column nearest J1's square pad. A right-angle header
+feeds its upper pins from the pad row farther from the board edge (J1's odd
+pads), so odd pads carry the GPIOs and even pads the power row. **v3 and v4
+boards were built with the rows the other way round** (M5Stack's pinout
+table numbers the socket from the power row, which was copied into J1). On
+those boards nothing is powered and the buck's 5 V lands on G3. Fix in the
+field: 11 female-female Dupont wires from the stick's socket to the J1 pads,
+same column, other row (GND→2, 3V3→14, 5V_IN→16, G1→8, G8→10, G5→1, G4→3,
+G6→5, G7→7, G43→9, G44→11); tested on a v3 board with all sensors and
+servos. v5 swaps the rows in the design (`gen/tools/rework_v5_j1rows.py`).
+
 ## GPIO map (for the firmware port)
 
 | Role | GPIO | Notes |
@@ -60,7 +75,11 @@ module plugs in there directly.
 ## Ordering a batch (JLCPCB)
 
 1. Run `gen/export.sh` (needs KiCad 10) — it writes `fab/`:
-   `sticks3-bot-hat-gerbers.zip`, `bom.csv`, `positions.csv`.
+   `sticks3-bot-hat-gerbers.zip`, `bom.csv`, `positions.csv`. The gerbers
+   are not committed since the v5 row swap: the v4 set would build the wrong
+   header. Open the board in pcbnew and refill the zones (B) first — the
+   rework script strips the stale fills, and `kicad-cli` exports whatever
+   fill is stored.
 2. Upload the gerber zip at jlcpcb.com. 2-layer, 1.6 mm, any color.
 3. Enable "PCB Assembly" (economy, top side). Upload `bom.csv` and
    `positions.csv`. U1 (C2071056) and L1 (C57254) are pre-matched; let the
@@ -77,17 +96,19 @@ module plugs in there directly.
 
 1. Visual: no bridges around U1/L1.
 2. Battery unplugged: no short between servo rail and GND.
-3. Battery box plugged in and switched on: 5.0 V +-0.1 on J1 pin 15
-   (5V_IN) vs GND, LED faintly lit (it runs at ~0.14 mA on purpose).
+3. Battery box plugged in and switched on (stick removed): 5.0 V +-0.1 on
+   J1 pin 16 (5V_IN, even row, last column) vs GND, LED faintly lit (it runs at ~0.14 mA on purpose).
    Battery box must be wired center-positive.
-   With an HC-SR04 on DIST and a 5 V level on its ECHO pin, J1 pin 9 (G8)
+   With an HC-SR04 on DIST and a 5 V level on its ECHO pin, J1 pin 10 (G8)
    must read ~3.3 V — that's the R4/R5 divider doing its job.
 4. **Orientation check — the HAT2 socket is unkeyed**: plug the stick in
-   unpowered and meter continuity from the stick's USB shell (GND) to J1
-   pin 1 (the silkscreen-marked corner pin). If it beeps, orientation is
-   right; if the stick faces screen-down, flip it 180 and re-check — then
-   mark the correct side on the silk. A flipped stick would put 5 V on
-   GPIO pins.
+   screen up, power it from USB only, and meter from the stick's USB-C
+   shell (GND) to the J1 pads: pin 2 (the round pad beside the square
+   pin 1) must read 0 V and pin 14 (same row, seventh column) 3.3 V. If
+   those voltages show up on the square-pad row instead, the header rows
+   are swapped (the v3/v4 boards) — see "Header rows" below. Never power
+   the battery box with the stick plugged in until this check passes: a
+   mis-seated stick gets the buck's 5 V on a GPIO or on its GND.
 5. The stick cantilevers off the board edge on the header — support its far
    end with a foam pad or standoff on the chassis.
 
@@ -97,8 +118,9 @@ Everything is generated from `gen/design.py` (single source of truth for
 connectivity) by `gen/gen_pcb.py` (board via KiCad's pcbnew API +
 freerouting) and `gen/gen_sch.py` (schematic). The routed board was then
 hand-finished, so later revisions edit `sticks3-bot-hat.kicad_pcb` in place
-(`gen/tools/rework_v4.py` is the scripted v3 -> v4 edit) rather than
-regenerating it. `gen/export.sh` runs ERC/DRC and writes the fab outputs; it
+(`gen/tools/rework_v4.py` is the scripted v3 -> v4 edit, run in the KiCad
+docker image; `gen/tools/rework_v5_j1rows.py` is the v4 -> v5 J1 row swap,
+plain text edit, no pcbnew needed) rather than regenerating it. `gen/export.sh` runs ERC/DRC and writes the fab outputs; it
 uses `kicad-cli` if installed, otherwise the `kicad/kicad:10.0` docker
 image. DRC is clean apart from two courtyard warnings where the M3 holes'
 screw-head circle grazes J1/J2.
@@ -106,6 +128,23 @@ screw-head circle grazes J1/J2.
 - `sticks3-bot-hat.kicad_pcb` — routed 2-layer board, 48 x 33 mm, GND pours
 - `sticks3-bot-hat.kicad_sch` / `sticks3-bot-hat-schematic.pdf`
 - `sticks3-bot-hat.pretty/` — local footprint for the SS12D10 switch
-- `render-top.png`, `render-bottom.png`, `render-3d.png` (regenerate with `gen/render.sh`)
+- `render-top.png`, `render-bottom.png`, `render-3d.png` (regenerate with `gen/render.sh`; still show the v4 routing around J1)
+
+### Finishing v5 (needs KiCad 10 on the Mac)
+
+The v5 row swap was made without KiCad (text edits, `gen/tools/rework_v5_j1rows.py`),
+so these steps are still open:
+
+1. Open `sticks3-bot-hat.kicad_pcb` in pcbnew. Expect a "zones need refilling"
+   notice: press **B** to refill, then run DRC (Inspect > DRC, "refill zones"
+   ticked). Only the two known M3 courtyard warnings should remain. Save.
+2. Open the schematic once (eeschema) and run ERC; the J1 labels were moved
+   by script, so also check the board's "update PCB from schematic" reports no
+   net changes.
+3. `gen/export.sh` — regenerates `fab/` (gerbers + zip, positions, BOM, the
+   schematic PDF) and re-runs DRC/ERC into `gen/*.rpt`. Commit `fab/`.
+4. `gen/render.sh` — refreshes the three render PNGs (they still show v4).
+5. Order at JLCPCB per "Ordering a batch"; `fab/cpl-jlcpcb-corrected.csv`
+   is unchanged (no part moved in v5).
 
 HAT2 pinout reference: [M5Stack StickS3 docs](https://docs.m5stack.com/en/core/StickS3).

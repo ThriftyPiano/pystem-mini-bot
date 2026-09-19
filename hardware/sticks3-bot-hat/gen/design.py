@@ -10,6 +10,9 @@
 # module carries its own), the Grove port, and the boot button (the stick
 # has its own buttons). design_v1_buck.py preserves the full v1.
 #
+# v5: J1 rows swapped (see the HAT2 note below); routing around J1 redone
+# by gen/tools/rework_v5_j1rows.py, nothing else moved.
+#
 # v4: sensor headers follow the LM393 sensor modules' pin order (VCC GND D0
 # A0) so a straight Dupont cable works: ENC = V G D0, COLOR = V G - A0
 # (4 pins, D0 position unused). COLOR B became DIST: a 4-pin HC-SR04 header
@@ -18,11 +21,16 @@
 # was free. M2.5 mounting holes became M3. The power LED moved right of the
 # DIST header. Board size unchanged.
 #
-# HAT2 bus pinout (M5StickS3 docs — odd pins GND/5V column, even pins GPIO):
-#   1 GND    | 2  G5      9  G8   | 10 G43
-#   3 EXT_5V | 4  G4      11 BAT  | 12 G44
-#   5 BOOT   | 6  G6      13 3V3  | 14 G2
-#   7 G1     | 8  G7      15 5V_IN| 16 G3
+# HAT2 socket as it meets J1 (verified on hardware, 2026-09-19; the first
+# batch had the rows swapped). Stick lies flat, screen up, socket end on the
+# header. J1's odd pads (square pad 1, the row farther from the board edge)
+# feed the header's UPPER pins, which land on the stick's GPIO row; the even
+# pads (row nearest the edge) feed the LOWER pins = the stick's power row.
+# Columns run from the pin-1 end:
+#   J1 odd  (upper pins): 1 G5  | 3 G4     | 5 G6   | 7 G7  | 9 G43 | 11 G44 | 13 G2  | 15 G3
+#   J1 even (lower pins): 2 GND | 4 EXT_5V | 6 BOOT | 8 G1  | 10 G8 | 12 BAT | 14 3V3 | 16 5V_IN
+# (M5Stack's own table numbers the socket the other way round: their odd
+# pins are the power row. Do not copy it into J1 without this mapping.)
 #
 # Signal plan (GPIO roles chosen so header pin order matches connector order,
 # which keeps the fan-out crossing-free; COLOR needs ADC1 = GPIO1..10):
@@ -55,10 +63,10 @@ COMPONENTS = {
     "J1": ("Connector_Generic", "Conn_02x08_Odd_Even", "HAT2_StickS3",
            STD_FP, "Connector_PinHeader_2.54mm", "PinHeader_2x08_P2.54mm_Horizontal",
            (57.5, 55.5, 90),
-           {"1": "GND", "2": "SERVO_A", "3": None, "4": "SERVO_B",
-            "5": None, "6": "PAN", "7": "COLOR", "8": "TILT",
-            "9": "ECHO", "10": "ENC_A", "11": None, "12": "ENC_B",
-            "13": "+3V3", "14": "TRIG", "15": "+5V", "16": None},
+           {"1": "SERVO_A", "2": "GND", "3": "SERVO_B", "4": None,
+            "5": "PAN", "6": None, "7": "TILT", "8": "COLOR",
+            "9": "ENC_A", "10": "ECHO", "11": "ENC_B", "12": None,
+            "13": "TRIG", "14": "+3V3", "15": None, "16": "+5V"},
            "StickS3"),
 
     # --- Servo headers (S | V+ | G), 6 V battery rail ------------------

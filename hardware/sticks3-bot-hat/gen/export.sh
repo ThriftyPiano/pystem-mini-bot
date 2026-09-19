@@ -27,6 +27,18 @@ CLI() { $KICAD_CLI "$@"; }
 PCB=../sticks3-bot-hat.kicad_pcb
 SCH=../sticks3-bot-hat.kicad_sch
 FAB=../fab
+
+# Zone fills: kicad-cli exports the fill stored in the file, so refill first
+# (the scripted reworks strip stale fills). Uses the macOS bundle's python
+# or the docker image; otherwise open the board in pcbnew, press B, save.
+KICAD_PY=~/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
+if [ -x "$KICAD_PY" ]; then
+    "$KICAD_PY" tools/refill_zones.py "$PCB"
+elif command -v docker >/dev/null; then
+    docker run --rm -u "$(id -u):$(id -g)" -v "$ROOT:/work" "$KICAD_IMAGE" python3 /work/gen/tools/refill_zones.py
+else
+    echo "*** WARNING: could not refill zones - refill in pcbnew (B) and save before trusting these gerbers ***"
+fi
 # fab/cpl-jlcpcb-corrected.csv is hand-maintained (JLC-specific part rotations
 # that the assembled boards were built from) - keep it, regenerate the rest.
 rm -rf "$FAB/gerbers" "$FAB"/*.zip "$FAB/positions.csv" "$FAB/bom.csv"
