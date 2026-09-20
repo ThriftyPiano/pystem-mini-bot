@@ -22,7 +22,9 @@ from machine import PWM
 import vga1_16x32 as font
 from machine import Pin, reset
 
-lcd = sticks3.display()
+# The stick sits sideways on the robot (power-button edge up): landscape,
+# 240x135, 15 characters per line. Same value as config.LCD_ROTATION.
+lcd = sticks3.display(3)
 mic = sticks3.microphone()
 
 # Robot control demo: the wheel servos of the Bot HAT live on G5/G4
@@ -38,7 +40,7 @@ def drive(forward):
 def show(*lines):
     lcd.fill(0)
     for i, s in enumerate(lines):
-        lcd.text(font, str(s), 10, 10 + 40 * i, 0xFFFF)
+        lcd.text(font, str(s)[:15], 4, 4 + 40 * i, 0xFFFF)
 
 label = ''
 label_index = -1

@@ -8,28 +8,34 @@ import motor
 import motor_pair
 import speech
 
-# The StickS3 has a screen; the Max V1 and the simulator do not.
+# The StickS3 has a screen; the Max V1 and the simulator do not. The stick
+# sits sideways on the robot, so the screen is used in landscape
+# (config.LCD_ROTATION): 240x135, 15 characters per line in the 16x32 font.
 try:
     import sticks3
     import vga1_16x32 as font
-    lcd = sticks3.display()
+    from config import LCD_ROTATION
+    lcd = sticks3.display(LCD_ROTATION)
 except ImportError:
     lcd = None
 
 def show(*lines):
-    """Print the lines, and draw them on the screen when there is one
-    (8 characters per line in the 16x32 font)."""
+    """Print the lines, and draw them centred on the screen when there is one."""
     print(*lines)
     if lcd is None:
         return
     lcd.fill(0)
+    step = font.HEIGHT + 8
+    y = max(0, (lcd.height - len(lines) * step + 8) // 2)
     for i, s in enumerate(lines):
-        lcd.text(font, str(s)[:8], 4, 20 + 45 * i, 0xFFFF)
+        s = str(s)[:lcd.width // font.WIDTH]
+        x = max(0, (lcd.width - len(s) * font.WIDTH) // 2)
+        lcd.text(font, s, x, y + step * i, 0xFFFF)
 
 motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)
-show("Voice", "control", "starting")
+show("Voice control", "starting...")
 speech.start()
-show("Say a", "command", "Ready!")
+show("Ready!", "Say a command")
 print("Commands:", speech.labels())
 
 try:

@@ -55,6 +55,9 @@ if BOARD == 'maxv1':
     # Orientation sensor backend (see orientation.py).
     IMU = 'mpu6050'
 
+    # No screen on the Max V1 (kept so programs can import it on either board).
+    LCD_ROTATION = 0
+
 else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
     MOTOR_PINS = {
         'A': {'servo': 5, 'encoder': 43},   # WHEEL A / ENC A (left)
@@ -88,6 +91,12 @@ else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
     EXT_I2C = None
 
     IMU = 'bmi270'
+
+    # The stick lies sideways on the robot with its power-button edge at
+    # the top, so the 135x240 portrait LCD is used as 240x135 landscape:
+    # st7789py rotation 3 (verified on the robot, 2026-09-19). In the
+    # frozen 16x32 font that is 15 characters per line, 4 lines.
+    LCD_ROTATION = 3
 
 # How the IMU's axes map onto the robot's. Each entry names the sensor axis
 # (with optional '-' to flip) that supplies the robot's x, y, z; the robot's
