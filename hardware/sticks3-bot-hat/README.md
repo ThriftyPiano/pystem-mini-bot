@@ -80,13 +80,18 @@ servos. v5 swaps the rows in the design (`gen/tools/rework_v5_j1rows.py`).
    `kicad-cli` exports whatever fill is stored in the board file.
 2. Upload the gerber zip at jlcpcb.com. 2-layer, 1.6 mm, any color.
 3. Enable "PCB Assembly" (economy, top side). Upload `bom.csv` and
-   `positions.csv`. U1 (C2071056) and L1 (C57254) are pre-matched; let the
-   BOM matcher confirm the passives, and pick in-stock generics for the
-   headers (J1 must be the **right-angle / 90-degree** 2x8; J8/J10 are 1x4,
-   the rest 1x3), the 5.5x2.1 barrel jack (PJ-102A type), and the 470 uF
-   radial cap. `fab/cpl-jlcpcb-corrected.csv` is the hand-corrected
-   placement file (JLC's part rotations) that the v3 batch was built from;
-   only R3 moved and R4/R5 were added since, so re-check those three.
+   `cpl-jlcpcb-corrected.csv` (not `positions.csv`, see below). Every BOM
+   row carries an LCSC number that was matched for the v5 order, so the
+   matcher should resolve all of them without a manual search; just check
+   nothing shows as out of stock (backups are listed above the `BOM` table
+   in `gen/design.py`). Two numbers in older BOMs were wrong: C4190 is 2.2k
+   (not 22k) and C4109 is the 0402 2k — R3 is C31850 and R5 is C22975 now.
+   `positions.csv` is kicad-cli's raw placement export (KiCad rotations);
+   `fab/cpl-jlcpcb-corrected.csv` is the same placement in JLC's column
+   format with the part rotations hand-corrected in JLC's preview, and is
+   what the boards were built from. `export.sh` regenerates `positions.csv`
+   so a moved part shows up as a diff; carry that change into the CPL by
+   hand and re-check the rotation in JLC's preview.
    Mounting holes are M3 (3.2 mm); use screws with heads <= 5.5 mm, the
    two left holes sit close to the J1/J2 headers.
 

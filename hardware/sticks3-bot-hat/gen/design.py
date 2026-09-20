@@ -173,22 +173,28 @@ COMPONENTS = {
 }
 
 # BOM for JLCPCB assembly (refs grouped by orderable part).
-# LCSC numbers: U1/L1 verified; passives are JLC "basic" classics — have
-# JLCPCB's BOM matcher confirm them at order time. THT connectors/switches
-# are generic; pick in-stock equivalents in the JLC parts library.
+# LCSC numbers as matched/chosen for the v5 JLCPCB order (2026-09-19); every
+# row resolves in the BOM matcher without a manual search. R3 (C31850) and R5
+# (C22975) replace numbers that pointed at the wrong value/size (C4190 is
+# 2.2k, C4109 is 0402). No Basic-library 0603 green LED exists, so D1 is an
+# Extended part like the THT connectors. C16214 (DC-005) sits on the
+# PJ-102A-pattern pads: in-line pins 6.3 vs 6.0 mm, side pin 3.0/4.6 vs
+# 3.0/4.7 mm, within the 1x3 mm slots. Backups if out of stock: C7 C216292
+# (Changzhou Huawei) or C109066 (Rubycon ZLH); J1 C239339 (CJT A2541WR-2x8P);
+# J8/J10 C32713270 (hanxia).
 BOM = [
     ("U1",  "AP63205WU-7", "Diodes Inc", "TSOT-23-6", "C2071056", "3.8-32V in, 5V/2A sync buck"),
     ("L1",  "SWPA6045S6R8MT", "Sunlord", "6045", "C57254", "6.8uH 3A power inductor"),
     ("C1",  "CL21A106KAYNNNE", "Samsung", "0805", "C15850", "10uF 25V X5R"),
     ("C3",  "CL10B104KB8NNNC", "Samsung", "0603", "C1591", "100nF 50V X7R"),
     ("C4,C5", "CL31A226KAHNNNE", "Samsung", "1206", "C12891", "22uF 25V X5R"),
-    ("C7",  "470uF 16V radial D8xH11.5 P3.5", "generic", "THT", "", "bulk for servo stalls"),
-    ("R3",  "0603WAF2202T5E", "UniOhm", "0603", "C4190", "22k 1% (~0.14 mA: dim power LED)"),
+    ("C7",  "RGA471M1CBK-0811", "Lelon", "D8xL11.5 P3.5 THT", "C134593", "470uF 16V radial, bulk for servo stalls"),
+    ("R3",  "0603WAF2202T5E", "UniOhm", "0603", "C31850", "22k 1% (~0.14 mA: dim power LED)"),
     ("R4",  "0603WAF1001T5E", "UniOhm", "0603", "C21190", "1k 1% (HC-SR04 ECHO divider, series)"),
-    ("R5",  "0603WAF2001T5E", "UniOhm", "0603", "C4109", "2k 1% (HC-SR04 ECHO divider, to GND)"),
-    ("D1",  "0603 green LED", "generic", "0603", "", "power indicator"),
-    ("J1",  "2x8 pin header 2.54mm male RIGHT-ANGLE (90 deg)", "generic", "THT", "", "plugs into StickS3 HAT2 socket, stick lies flat"),
-    ("J2,J3,J4,J5,J6,J7", "1x3 pin header 2.54mm male vertical", "generic", "THT", "", "servo / encoder headers"),
-    ("J8,J10", "1x4 pin header 2.54mm male vertical", "generic", "THT", "", "COLOR (V G - A0) / DIST (HC-SR04) headers"),
-    ("J11", "DC barrel jack 5.5x2.1 horizontal (PJ-102A type)", "generic", "THT", "", "battery box plugs in, center = +6V"),
+    ("R5",  "0603WAF2001T5E", "UniOhm", "0603", "C22975", "2k 1% (HC-SR04 ECHO divider, to GND)"),
+    ("D1",  "XL-1608SYGC-06", "XINGLIGHT", "0603", "C965805", "green LED, power indicator"),
+    ("J1",  "HX PZ2.54-2x8P WC-A", "hanxia", "2x8 2.54mm RIGHT-ANGLE THT", "C41417356", "plugs into StickS3 HAT2 socket, stick lies flat"),
+    ("J2,J3,J4,J5,J6,J7", "2.54-1*3P", "BOOMELE", "1x3 2.54mm vertical THT", "C49257", "servo / encoder headers"),
+    ("J8,J10", "B-2100S04P-A110", "Ckmtw", "1x4 2.54mm vertical THT", "C124378", "COLOR (V G - A0) / DIST (HC-SR04) headers"),
+    ("J11", "DC-005 2.0", "BOOMELE", "5.5x2.1 barrel jack THT", "C16214", "battery box plugs in, center = +6V (PJ-102A pattern)"),
 ]
