@@ -12,12 +12,21 @@
 #      "turn right", "stop", "dance".
 #   5. The robot keeps doing the action until you say another command.
 
+# This program is for the ESP32 Max V1 robot, which has the WonderEcho
+# module. The StickS3 robot listens with its own microphone and a model
+# you train on the Speech page: use voice_speech.py there instead.
+
 # STEP 1: Import the libraries we need
 # --------------------------------------------
 import motor               # Per-motor velocity control (closed-loop)
 import wonder_echo         # Voice recognition (Hiwonder WonderEcho)
 import head                # Pan/tilt head servos (for the dance)
 import time
+from config import BOARD
+
+if BOARD == 'sticks3':
+    raise SystemExit("voice_drive.py needs the WonderEcho on the Max V1 robot. "
+                     "On the StickS3 robot run voice_speech.py instead.")
 
 # STEP 2: How fast to move
 # --------------------------------------------

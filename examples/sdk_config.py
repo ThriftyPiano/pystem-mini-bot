@@ -91,13 +91,15 @@ else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
 
 # How the IMU's axes map onto the robot's. Each entry names the sensor axis
 # (with optional '-' to flip) that supplies the robot's x, y, z; the robot's
-# z is "up", so yaw is the rotation about it. The Max V1 mapping is identity
-# (the MPU-6050 board is mounted flat). The StickS3 lies flat, screen up, on
-# the HAT — its z is up too, but confirm x/y and the yaw sign on the bench
-# and adjust here rather than in orientation.py.
+# z is "up", so yaw is the rotation about it and motor_pair expects it to
+# grow when the robot turns clockwise. The Max V1 mapping is identity (the
+# MPU-6050 board is mounted flat). The StickS3 lies flat, screen up, on the
+# HAT: its z is up (+1 g at rest, measured 2026-09-19) but the BMI270's yaw
+# rate is counter-clockwise-positive, so z is flipped here. Change this
+# table, not orientation.py, if the stick is ever mounted differently.
 IMU_AXES = {
     'maxv1':   ('x', 'y', 'z'),
-    'sticks3': ('x', 'y', 'z'),
+    'sticks3': ('x', 'y', '-z'),
 }[BOARD]
 
 # Head Servo Configuration
