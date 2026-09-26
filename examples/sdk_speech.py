@@ -12,7 +12,7 @@
 #       if cmd == 'forward': ...
 #
 # While a program is listening, the robot also advertises over Bluetooth
-# as "MiniBot": the Speech page's "Connect Robot" button records clips
+# as "Mini Bot XXXX": the Speech page's "Connect Robot" button records clips
 # through the robot's own microphone (motor noise included) to train on.
 # Nothing extra to call - any program that uses speech.start() serves it.
 #
@@ -46,7 +46,7 @@ def start(model=None, threshold=70, grace_ms=2000, recorder=True):
     grace_ms:  delay before the thread starts. A running thread blocks
                MicroPython's soft reset, which locks the IDE out; the
                grace period leaves time to Ctrl-C at boot.
-    recorder:  also advertise over Bluetooth as "MiniBot" so the Speech
+    recorder:  also advertise over Bluetooth as "Mini Bot XXXX" so the Speech
                page can record training clips through this microphone
                while the program runs. Pass False to keep the radio off.
     """
@@ -167,7 +167,8 @@ def recorder_connected():
 _SVC_UUID = '7a5e0001-9b4c-4f2e-8a2d-3c1e5d6f7a01'
 _CTRL_UUID = '7a5e0002-9b4c-4f2e-8a2d-3c1e5d6f7a01'
 _DATA_UUID = '7a5e0003-9b4c-4f2e-8a2d-3c1e5d6f7a01'
-_NAME = 'MiniBot'
+_NAME = 'Mini Bot'      # + last two MAC bytes, so several robots can be on at once
+_name = _NAME
 _SAMPLE_RATE = 16000
 _BYTES_PER_MS = 32          # 16 kHz x 16-bit mono
 _MAX_REC_MS = 10000
@@ -192,9 +193,12 @@ def _recorder_start():
     except ImportError:
         print('speech: no bluetooth module in this firmware, recorder off')
         return
+    global _name
     ble = bluetooth.BLE()
     ble.active(True)
-    ble.config(gap_name=_NAME, mtu=517)
+    mac = ble.config('mac')[1]
+    _name = '%s %02X%02X' % (_NAME, mac[-2], mac[-1])
+    ble.config(gap_name=_name, mtu=517)
     ble.irq(_ble_irq)
     ((_ctrl_h, _data_h),) = ble.gatts_register_services((
         (bluetooth.UUID(_SVC_UUID), (
@@ -205,7 +209,7 @@ def _recorder_start():
     ble.gatts_set_buffer(_ctrl_h, 32)
     _ble = ble
     _advertise(ble)
-    print('speech: recorder ready, connect from the Speech page as "%s"' % _NAME)
+    print('speech: recorder ready, connect from the Speech page as "%s"' % _name)
 
 
 def _advertise(ble):
@@ -213,7 +217,7 @@ def _advertise(ble):
     # The 128-bit service UUID goes in the advertisement (what the Speech
     # page filters on); the name fits in the scan response.
     adv = b'\x02\x01\x06' + b'\x11\x07' + bytes(bluetooth.UUID(_SVC_UUID))
-    name = _NAME.encode()
+    name = _name.encode()
     resp = bytes([len(name) + 1, 0x09]) + name
     ble.gap_advertise(200000, adv_data=adv, resp_data=resp)
 

@@ -210,7 +210,7 @@ input {
         <table class="steps-table">
             <tr><td>Step 1: initial training data — choose up to 5 speech commands, then add 20 1-second audio samples for each and label them.</td></tr>
             <tr><td>Step 2: train and refine — train the model and check the training accuracy, add more audio samples and check their predictions, then re-train.</td></tr>
-            <tr><td>Step 3: motor noise — with a speech program running on the robot, click <b>Connect Robot</b>, add samples while it drives (commands, and motor noise labelled <b>[OTHER]</b>), then re-train.</td></tr>
+            <tr><td>Step 3: motor noise — with a speech program running on the robot, click <b>Connect Robot</b>, add samples while it drives, then re-train.</td></tr>
             <tr><td>Step 4: use the model with your robot in the <a href="ide.html">IDE</a>, or with the virtual robot on the <a href="simulator.html">Simulator</a> page.</td></tr>
         </table>
         <table class="tips-box">
@@ -1394,7 +1394,7 @@ async function connectRobot() {
         return;
     }
     try {
-        setMessage('Choose your robot in the Bluetooth dialog. It must be running a speech program (for example voice_speech.py).');
+        setMessage('Choose your robot ("Mini Bot ...") in the Bluetooth dialog. It must be running a speech program (for example voice_speech.py).');
         var device = await navigator.bluetooth.requestDevice({
             filters: [{services: [ROBOT_SVC]}]
         });
