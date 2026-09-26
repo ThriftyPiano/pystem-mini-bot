@@ -7,12 +7,10 @@ import minibot_sim
 
 _last = None
 
-def start(model=None, threshold=70, grace_ms=0, recorder=True):
+def start(model=None, threshold=70, grace_ms=0):
     """Start listening. `model` (a session name) is informational here — the
     simulator page chooses the model; pass it anyway so the same program
-    runs on the robot. `recorder` (the robot's Bluetooth recorder for the
-    Speech page) has no simulator equivalent and is accepted for
-    compatibility."""
+    runs on the robot."""
     if not minibot_sim.speech_start():
         raise OSError("No speech model selected on the simulator page")
     print("speech: listening for", ", ".join(labels()))

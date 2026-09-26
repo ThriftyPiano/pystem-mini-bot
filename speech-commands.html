@@ -210,8 +210,7 @@ input {
         <table class="steps-table">
             <tr><td>Step 1: initial training data — choose up to 5 speech commands, then add 20 1-second audio samples for each and label them.</td></tr>
             <tr><td>Step 2: train and refine — train the model and check the training accuracy, add more audio samples and check their predictions, then re-train.</td></tr>
-            <tr><td>Step 3: motor noise — with a speech program running on the robot, click <b>Connect Robot</b>, add samples while it drives, then re-train.</td></tr>
-            <tr><td>Step 4: use the model with your robot in the <a href="ide.html">IDE</a>, or with the virtual robot on the <a href="simulator.html">Simulator</a> page.</td></tr>
+            <tr><td>Step 3: use the model with your robot in the <a href="ide.html">IDE</a>, or with the virtual robot on the <a href="simulator.html">Simulator</a> page.</td></tr>
         </table>
         <table class="tips-box">
             <tr><td>💡 Tip: over 100 audio samples are needed to train a decent model; a low training accuracy indicates audio samples are of bad quality or mis-labelled.</td></tr>
@@ -234,13 +233,6 @@ input {
             <button onclick="exportSession()" title="Save this model's samples, trained model and speech_model.py to a file">Export</button>
             <button onclick="$('#import-file').click()" title="Load a model exported on another machine as a new session">Import</button>
             <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
-        </div>
-        <div id="robot-bar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <span style="font-weight:600;">Robot:</span>
-            <button id="robot-connect" onclick="connectRobot()" title="Bluetooth link to a StickS3 robot that is running a speech program">Connect Robot</button>
-            <span id="robot-status" style="color:#666;">not connected</span>
-            <span style="width:12px;"></span>
-            <button id="robot-sample" onclick="addRobotSample()" disabled title="Record a 1-second sample through the robot's microphone">Add Robot Sample</button>
         </div>
         <p id="message">Model training is based on TensorFlow.js in browser. You audio samples are not saved to any server.</p>
         <table id="samples" class="grid">
@@ -341,6 +333,17 @@ var negativeSampleUrls = [
     'speech-commands/music2.wav',
     'speech-commands/music3.wav',
 ];
+// Motor noise recorded on the robot while driving (util/record_mic.py).
+// Used two ways: sliced into '[OTHER]' negatives like the files above, and
+// mixed into every newly labelled command sample as hidden copies, so the
+// classifier learns each word over the motors. Missing files are skipped.
+var motorNoiseUrls = [
+    'speech-commands/motor1.wav',
+    'speech-commands/motor2.wav',
+    'speech-commands/motor3.wav',
+];
+var motorNoise = [];   // decoded clips, Float32Array at sampleRate
+var NOISY_COPIES_PER_SAMPLE = 2;
 
 function setMessage(msg) {
     $('#message').html(msg);
@@ -421,7 +424,7 @@ function drawSampleViz(sample, index) {
 function addSampleToTableRow(sample, index) {
     $('#samples-header').after(
         `<tr class="sample" id="sample_${index}">
-<td>${sample.source === 'robot' ? '🤖 ' : ''}${sample.time}</td>
+<td>${sample.time}</td>
 <td>
 <button id="play_${index}" onclick="playSample(samples[${index}], this, null, null)">
 Play Audio
@@ -493,8 +496,8 @@ function saveSample(sample) {
     if (sample.mfcc) {
         obj['mfcc'] = arrayBufferToBase64(sample.mfcc.buffer);
     }
-    if (sample.source)
-        obj['source'] = sample.source;
+    if (sample.parent)
+        obj['parent'] = sample.parent;
     localStorage.setItem(sampleKey(sample.isoTime),
         JSON.stringify(obj));
 }
@@ -539,9 +542,75 @@ function refreshLabels() {
 function updateLabel(index, label) {
     if (!label)
         return;
-    samples[index]['label'] = label;
+    var sample = samples[index];
+    sample['label'] = label;
+    saveSample(sample);
+    // Hidden noisy copies follow their parent's label; made on first labelling.
+    siblingsOf(sample).forEach(s => {
+        s.label = label;
+        saveSample(s);
+    });
+    if (label !== labelOther && sample.audio && siblingsOf(sample).length === 0)
+        makeNoisySiblings(sample);
     refreshLabels();
-    saveSample(samples[index]);
+}
+
+function siblingsOf(sample) {
+    return samples.filter(s => s.parent === sample.isoTime && !(s.removed || false));
+}
+
+// RMS of the loudest third of 20 ms frames: the level of the word itself,
+// not of the silence around it.
+function loudRms(audio) {
+    var frame = 320;
+    var energies = [];
+    for (var i = 0; i + frame <= audio.length; i += frame) {
+        var e = 0;
+        for (var j = i; j < i + frame; j++)
+            e += audio[j] * audio[j];
+        energies.push(e / frame);
+    }
+    energies.sort((a, b) => b - a);
+    var top = energies.slice(0, Math.max(1, Math.floor(energies.length / 3)));
+    return Math.sqrt(top.reduce((a, b) => a + b, 0) / top.length);
+}
+
+function mixNoise(clean, noise) {
+    var off = Math.floor(Math.random() * (noise.length - clean.length + 1));
+    var window_ = noise.subarray(off, off + clean.length);
+    var speechLevel = loudRms(clean);
+    var noiseLevel = loudRms(window_);
+    // 3 to 15 dB signal-to-noise: clearly audible motors, not a wall of noise.
+    var snrDb = 3 + Math.random() * 12;
+    var gain = noiseLevel > 0 ? speechLevel / (noiseLevel * Math.pow(10, snrDb / 20)) : 0;
+    var out = new Float32Array(clean.length);
+    for (var i = 0; i < clean.length; i++)
+        out[i] = Math.max(-1, Math.min(1, clean[i] + gain * window_[i]));
+    return out;
+}
+
+// Hidden copies of a labelled sample with motor noise mixed in. Needs the
+// sample's audio, which only samples recorded in this page visit still
+// have (storage keeps features, not audio) - labelling happens right
+// after recording, so that is the normal case.
+function makeNoisySiblings(sample) {
+    if (!motorNoise.length || !sample.audio || !sample.label || sample.label === labelOther)
+        return 0;
+    for (var k = 0; k < NOISY_COPIES_PER_SAMPLE; k++) {
+        var clip = motorNoise[Math.floor(Math.random() * motorNoise.length)];
+        var copy = {
+            time: sample.time,
+            isoTime: sample.isoTime + '.n' + k,
+            label: sample.label,
+            parent: sample.isoTime,
+            audio: mixNoise(sample.audio, clip)
+        };
+        updatePrediction(copy);
+        copy.audio = null;
+        samples.push(copy);
+        saveSample(copy);
+    }
+    return NOISY_COPIES_PER_SAMPLE;
 }
 
 // Generate MFCC from audio.
@@ -669,8 +738,12 @@ async function playSample(sample, btn, begin, end) {
 function removeSample(index) {
     $(`#sample_${index}`).remove();
     samples[index]['removed'] = true;
-    refreshLabels();
     localStorage.removeItem(sampleKey(samples[index].isoTime));
+    siblingsOf(samples[index]).forEach(s => {
+        s.removed = true;
+        localStorage.removeItem(sampleKey(s.isoTime));
+    });
+    refreshLabels();
 }
 
 // Promise resolve function to stop an ongoing recording.
@@ -795,6 +868,11 @@ function loadSamplesFromStorage() {
         var sample = loadSample(key);
         if (sample === null)
             return;
+        if (sample.parent) {
+            // Noisy copy: trains with its parent, never shown in the table.
+            samples.push(sample);
+            return;
+        }
         addSampleToTableRow(sample, samples.length);
         $(`#play_${samples.length}`).prop('disabled', true);
         $(`#label_${samples.length}`).prop('disabled', true);
@@ -871,31 +949,54 @@ function loadSamplesFromDevice(deviceSamples) {
     refreshLabels();
 }
 
+async function fetchAudio(url, context) {
+    var resp = await $.ajax({
+        url: url,
+        xhrFields: {responseType: 'blob'},
+        dataType: 'binary'
+    });
+    var audioBuffer = await context.decodeAudioData(await resp.arrayBuffer());
+    return audioBuffer.getChannelData(0);
+}
+
+function addNegativeWindows(audioBuffer) {
+    for (var j = 0;
+         j + audioInputCount <= audioBuffer.length;
+         j += audioInputCount) {
+        var audioData = new Float32Array(audioInputCount);
+        audioData.set(
+            audioBuffer.slice(j, j + audioInputCount));
+        var sample = {
+            audio: audioData,
+            label: labelOther
+        };
+        updatePrediction(sample);
+        sample.audio = null;
+        sample.mfcc = null;
+        samples.push(sample);
+    }
+}
+
 async function loadNegativeSamples() {
     var context = new AudioContext({sampleRate: sampleRate});
     for (var i = 0; i < negativeSampleUrls.length; i++) {
-        var resp = await $.ajax({
-            url: negativeSampleUrls[i],
-            xhrFields: {responseType: 'blob'},   
-            dataType: 'binary'
-        });
-        var arrayBuffer = await resp.arrayBuffer();
-        var audioBuffer = await context.decodeAudioData(arrayBuffer);
-        audioBuffer = audioBuffer.getChannelData(0);
-        for (var j = 0;
-             j + audioInputCount <= audioBuffer.length;
-             j += audioInputCount) {
-            var audioData = new Float32Array(audioInputCount);
-            audioData.set(
-                audioBuffer.slice(j, j + audioInputCount));
-            var sample = {
-                audio: audioData,
-                label: labelOther
-            };
-            updatePrediction(sample);
-            sample.audio = null;
-            sample.mfcc = null;
-            samples.push(sample);
+        addNegativeWindows(await fetchAudio(negativeSampleUrls[i], context));
+    }
+    motorNoise.forEach(addNegativeWindows);
+    await context.close();
+}
+
+// Decode the motor-noise recordings once, at page load, so labelling a
+// sample can mix them in straight away.
+async function loadMotorNoise() {
+    var context = new AudioContext({sampleRate: sampleRate});
+    for (var i = 0; i < motorNoiseUrls.length; i++) {
+        try {
+            var audio = await fetchAudio(motorNoiseUrls[i], context);
+            if (audio.length >= audioInputCount)
+                motorNoise.push(audio);
+        } catch (e) {
+            // Not recorded yet: fine, training just runs without motor noise.
         }
     }
     await context.close();
@@ -1356,189 +1457,6 @@ $('#file').change(e => {
     reader.readAsText(e.target.files[0], 'UTF-8');
 });
 
-// ============================================================
-// Robot recording over Bluetooth.
-//
-// A StickS3 robot running any speech program (speech.start() in
-// examples/sdk_speech.py) advertises a GATT service; this page records
-// through the robot's own microphone with it, motors and all:
-//   CTRL  write   'rec <ms>' / 'stop'
-//   DATA  notify  'S'+status, 'H'+<u32 bytes><u16 rate>, 'D'+pcm, 'E'
-// Clips arrive as 16 kHz 16-bit mono and become ordinary samples
-// (marked source: 'robot'): label a spoken command, or label the motors
-// alone '[OTHER]', so the model learns both over real driving noise.
-// ============================================================
-var ROBOT_SVC = '7a5e0001-9b4c-4f2e-8a2d-3c1e5d6f7a01';
-var ROBOT_CTRL = '7a5e0002-9b4c-4f2e-8a2d-3c1e5d6f7a01';
-var ROBOT_DATA = '7a5e0003-9b4c-4f2e-8a2d-3c1e5d6f7a01';
-var ROBOT_SAMPLE_MS = 992;       // audioInputCount samples at 16 kHz
-// Test hook: a function (ms) => Int16Array standing in for the robot.
-window.robotTestSource = null;
-
-var robotLink = null;   // {device, ctrl, data}
-var robotRx = null;     // transfer in flight: {buf, pos, total, resolve, reject, timer, onStart}
-
-function robotStatus(text, connected) {
-    $('#robot-status').text(text);
-    $('#robot-sample').prop('disabled', !connected);
-    $('#robot-connect').text(connected ? 'Disconnect Robot' : 'Connect Robot');
-}
-
-async function connectRobot() {
-    if (robotLink) {
-        robotLink.device.gatt.disconnect();
-        return;
-    }
-    if (!navigator.bluetooth) {
-        setMessage('Web Bluetooth is not available in this browser: use Chrome or Edge on a computer with Bluetooth.');
-        return;
-    }
-    try {
-        setMessage('Choose your robot ("Mini Bot ...") in the Bluetooth dialog. It must be running a speech program (for example voice_speech.py).');
-        var device = await navigator.bluetooth.requestDevice({
-            filters: [{services: [ROBOT_SVC]}]
-        });
-        device.addEventListener('gattserverdisconnected', onRobotDisconnected);
-        var server = await device.gatt.connect();
-        var svc = await server.getPrimaryService(ROBOT_SVC);
-        var ctrl = await svc.getCharacteristic(ROBOT_CTRL);
-        var data = await svc.getCharacteristic(ROBOT_DATA);
-        data.addEventListener('characteristicvaluechanged', onRobotPacket);
-        await data.startNotifications();
-        robotLink = {device, ctrl, data};
-        robotStatus('connected to ' + (device.name || 'robot'), true);
-        setMessage('Robot connected. Add Robot Sample records 1 second through the robot\'s microphone: say a command, or stay quiet and label the motor noise [OTHER].');
-    } catch (err) {
-        robotLink = null;
-        robotStatus('not connected', false);
-        setMessage('Robot connection failed: ' + err.message);
-    }
-}
-
-function onRobotDisconnected() {
-    robotLink = null;
-    robotStatus('not connected', false);
-    if (robotRx) {
-        var rx = robotRx;
-        robotRx = null;
-        clearTimeout(rx.timer);
-        rx.reject(new Error('robot disconnected'));
-    }
-    setMessage('Robot disconnected.');
-}
-
-function onRobotPacket(e) {
-    var dv = e.target.value;
-    var v = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength);
-    if (v.length === 0)
-        return;
-    var rx = robotRx;
-    var kind = String.fromCharCode(v[0]);
-    if (kind === 'S') {
-        var status = new TextDecoder().decode(v.subarray(1));
-        if (rx && status === 'rec' && rx.onStart)
-            rx.onStart();
-        if (rx && status === 'busy')
-            robotRxDone(new Error('the robot is still busy with the previous recording'));
-        return;
-    }
-    if (!rx)
-        return;
-    clearTimeout(rx.timer);
-    rx.timer = setTimeout(() => robotRxDone(new Error('timed out waiting for the robot')), 15000);
-    if (kind === 'H') {
-        rx.total = dv.getUint32(1, true);
-        rx.rate = dv.getUint16(5, true);
-        rx.buf = new Uint8Array(rx.total);
-        rx.pos = 0;
-    } else if (kind === 'D' && rx.buf) {
-        var n = Math.min(v.length - 1, rx.total - rx.pos);
-        rx.buf.set(v.subarray(1, 1 + n), rx.pos);
-        rx.pos += n;
-        if (rx.onProgress)
-            rx.onProgress(rx.pos / rx.total);
-    } else if (kind === 'E') {
-        if (!rx.buf || rx.pos < rx.total) {
-            robotRxDone(new Error('incomplete clip from the robot'));
-            return;
-        }
-        if (rx.rate !== sampleRate) {
-            robotRxDone(new Error('robot clip is ' + rx.rate + ' Hz, expected ' + sampleRate));
-            return;
-        }
-        robotRxDone(null, new Int16Array(rx.buf.buffer, 0, rx.total / 2));
-    }
-}
-
-function robotRxDone(err, pcm) {
-    var rx = robotRx;
-    robotRx = null;
-    if (!rx)
-        return;
-    clearTimeout(rx.timer);
-    if (err)
-        rx.reject(err);
-    else
-        rx.resolve(pcm);
-}
-
-function int16ToFloat32(pcm) {
-    var out = new Float32Array(pcm.length);
-    for (var i = 0; i < pcm.length; i++)
-        out[i] = pcm[i] / 32768;
-    return out;
-}
-
-// Record `ms` of audio on the robot; resolves to a Float32Array.
-async function robotRecord(ms, onStart, onProgress) {
-    if (window.robotTestSource) {
-        if (onStart)
-            onStart();
-        return int16ToFloat32(window.robotTestSource(ms));
-    }
-    if (!robotLink)
-        throw new Error('no robot connected');
-    if (robotRx)
-        throw new Error('a robot recording is already in progress');
-    var promise = new Promise((resolve, reject) => {
-        robotRx = {buf: null, pos: 0, total: 0, resolve, reject, onStart, onProgress,
-                   timer: setTimeout(() => robotRxDone(new Error('the robot did not answer')), 15000)};
-    });
-    await robotLink.ctrl.writeValue(new TextEncoder().encode('rec ' + ms));
-    var pcm = await promise;
-    return int16ToFloat32(pcm);
-}
-
-function setRobotBusy(busy) {
-    $('#robot-sample').prop('disabled', busy || !robotLink && !window.robotTestSource);
-}
-
-async function addRobotSample() {
-    setRobotBusy(true);
-    try {
-        var audio = await robotRecord(ROBOT_SAMPLE_MS,
-            () => setMessage('🔴 Say your speech command now — the robot is recording.'),
-            f => setMessage(`Receiving the clip from the robot... ${Math.round(f * 100)}%`));
-    } catch (err) {
-        setMessage('Robot recording failed: ' + err.message);
-        setRobotBusy(false);
-        return;
-    }
-    setRobotBusy(false);
-    var clip = new Float32Array(audioInputCount);
-    clip.set(audio.subarray(0, Math.min(audio.length, audioInputCount)));
-    var sample = {
-        time: new Date().toLocaleString(),
-        isoTime: new Date().toISOString(),
-        audio: clip,
-        source: 'robot'
-    };
-    updatePrediction(sample);
-    addSampleToTableRow(sample, samples.length);
-    samples.push(sample);
-    setMessage('Done. Review the robot sample and add label.');
-}
-
 function batchPredict(cutoff, key, mfcc) {
     var frameLen = mfccFrameLen;
     var numFramesPerInput = mfccNumFrames;
@@ -1636,6 +1554,7 @@ function handleMessage(e) {
     });
     initSessions();
     window.addEventListener("message", handleMessage);
+    await loadMotorNoise();
 })();
         </script>
         </div>
