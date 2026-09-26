@@ -215,7 +215,7 @@ input {
             <tr><td>Step 5: re-train the model with more audio samples.</td></tr>
             <tr><td>Step 6: download speech_model.py, and upload it to your M5StickS3 with the <a href="ide.html">IDE</a> (needs the <a href="firmware.html#sticks3-speech">speech firmware</a>) — or pick the model on the <a href="simulator.html">Simulator</a> page and talk to the virtual robot.</td></tr>
             <tr><td>Tip: each model is a named session (bar below). Keep one per project; samples and the trained model are saved in this browser.</td></tr>
-            <tr><td>Tip: motors are loud. Run a speech program on the robot (for example <code>voice_speech.py</code>), click <b>Connect Robot</b> and record samples and <b>driving noise</b> through the robot's own microphone while it drives — the noise is also mixed into your samples so the model learns to hear commands over the motors.</td></tr>
+            <tr><td>Tip: motors are loud. Run a speech program on the robot (for example <code>voice_speech.py</code>), click <b>Connect Robot</b> and add samples through the robot's own microphone while it drives: say a command and label it, or stay quiet and label the motor noise <b>[OTHER]</b>, so the model learns what commands sound like over the motors.</td></tr>
         </table>
         <table class="tips-box">
             <tr><td>💡 Tip: over 100 audio samples are needed to train a decent model.</td></tr>
@@ -245,14 +245,6 @@ input {
             <span id="robot-status" style="color:#666;">not connected</span>
             <span style="width:12px;"></span>
             <button id="robot-sample" onclick="addRobotSample()" disabled title="Record a 1-second sample through the robot's microphone">Add Robot Sample</button>
-            <button id="robot-noise" onclick="addRobotNoise()" disabled title="Record 5 seconds of the robot driving (nobody speaking) to teach the model what the motors sound like">Record Driving Noise</button>
-            <button id="mix-noise" onclick="mixNoiseIntoSamples()" disabled title="Make noisy copies of the samples recorded since this page was opened">Mix Noise into Samples</button>
-        </div>
-        <div id="noise-panel" style="display:none;margin-bottom:10px;">
-            <table id="noise-list" class="grid">
-                <tr><th>Driving Noise</th><th>Length</th><th></th></tr>
-            </table>
-            <p id="noise-summary" style="color:#666;margin:6px 0 0 0;"></p>
         </div>
         <p id="message">Model training is based on TensorFlow.js in browser. You audio samples are not saved to any server.</p>
         <table id="samples" class="grid">
@@ -507,8 +499,6 @@ function saveSample(sample) {
     }
     if (sample.source)
         obj['source'] = sample.source;
-    if (sample.parent)
-        obj['parent'] = sample.parent;
     localStorage.setItem(sampleKey(sample.isoTime),
         JSON.stringify(obj));
 }
@@ -553,17 +543,9 @@ function refreshLabels() {
 function updateLabel(index, label) {
     if (!label)
         return;
-    var sample = samples[index];
-    sample['label'] = label;
-    saveSample(sample);
-    // Noisy copies follow their parent's label; make them on first labelling.
-    siblingsOf(sample).forEach(s => {
-        s.label = label;
-        saveSample(s);
-    });
-    if (label !== labelOther && sample.audio && siblingsOf(sample).length === 0)
-        makeNoisySiblings(sample);
+    samples[index]['label'] = label;
     refreshLabels();
+    saveSample(samples[index]);
 }
 
 // Generate MFCC from audio.
@@ -691,13 +673,8 @@ async function playSample(sample, btn, begin, end) {
 function removeSample(index) {
     $(`#sample_${index}`).remove();
     samples[index]['removed'] = true;
-    localStorage.removeItem(sampleKey(samples[index].isoTime));
-    siblingsOf(samples[index]).forEach(s => {
-        s.removed = true;
-        localStorage.removeItem(sampleKey(s.isoTime));
-    });
     refreshLabels();
-    renderNoisePanel();
+    localStorage.removeItem(sampleKey(samples[index].isoTime));
 }
 
 // Promise resolve function to stop an ongoing recording.
@@ -822,11 +799,6 @@ function loadSamplesFromStorage() {
         var sample = loadSample(key);
         if (sample === null)
             return;
-        if (sample.parent) {
-            // Noisy copy: trains with its parent, never shown in the table.
-            samples.push(sample);
-            return;
-        }
         addSampleToTableRow(sample, samples.length);
         $(`#play_${samples.length}`).prop('disabled', true);
         $(`#label_${samples.length}`).prop('disabled', true);
@@ -1036,9 +1008,8 @@ async function trainModel() {
         model.dispose();
     }
     setMessage('Starting training.');
-    // Driving-noise windows count as user negatives: always trained on.
     var otherSamples = usefulSamples().filter(
-        x => x.label === labelOther && x.time).concat(noiseNegativeSamples());
+        x => x.label === labelOther && x.time);
     if (otherSamples.length < nonOtherSamples.length * 3) {
         var n = nonOtherSamples.length * 3 - otherSamples.length;
         var sysOtherSamples = usefulSamples().filter(
@@ -1098,9 +1069,6 @@ function exportSession() {
     var sampleObjs = Object.keys(localStorage).sort()
         .filter(k => k.startsWith(sampleKeyPrefix(s.id)))
         .map(k => JSON.parse(localStorage.getItem(k)));
-    var noiseObjs = Object.keys(localStorage).sort()
-        .filter(k => k.startsWith(noiseKeyPrefix(s.id)))
-        .map(k => JSON.parse(localStorage.getItem(k)));
     var m = loadModelFromSession(s.id);
     var bundle = {
         format: EXPORT_FORMAT,
@@ -1108,7 +1076,6 @@ function exportSession() {
         exportedAt: new Date().toISOString(),
         name: s.name,
         samples: sampleObjs,
-        noise: noiseObjs,
         model: m,
         speechModelPy: m ? SpeechModels.toPython(m) : null
     };
@@ -1139,10 +1106,6 @@ function importSessionFromText(text) {
     bundle.samples.forEach(obj => {
         if (obj && obj.isoTime && obj.feature)
             localStorage.setItem(prefix + obj.isoTime, JSON.stringify(obj));
-    });
-    (bundle.noise || []).forEach(obj => {
-        if (obj && obj.isoTime && obj.pcm)
-            localStorage.setItem(noiseKeyPrefix(s.id) + obj.isoTime, JSON.stringify(obj));
     });
     if (bundle.model && bundle.model.labels && bundle.model.data)
         localStorage.setItem(modelKey(s.id), JSON.stringify(bundle.model));
@@ -1212,10 +1175,6 @@ function modelKey(id) {
     return 'speech-model:' + (id || sessionsIndex.active);
 }
 
-function noiseKeyPrefix(id) {
-    return 'sn:' + (id || sessionsIndex.active) + ':';
-}
-
 function newSessionId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
@@ -1259,7 +1218,6 @@ function switchSession(id) {
     saveSessionsIndex();
     clearSamplesTable();
     loadSamplesFromStorage();
-    loadNoiseFromStorage();
     restoreModelFromSession();
     renderSessionSelect();
     setMessage('');
@@ -1293,7 +1251,7 @@ function deleteSession() {
     if (!confirm(`Delete session "${s.name}" and all of its samples and its trained model?`))
         return;
     Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(sampleKeyPrefix(s.id)) || key.startsWith(noiseKeyPrefix(s.id)))
+        if (key.startsWith(sampleKeyPrefix(s.id)))
             localStorage.removeItem(key);
     });
     localStorage.removeItem(modelKey(s.id));
@@ -1382,7 +1340,7 @@ function restoreModelFromSession() {
 function clearCache() {
     $('#clear-cache').prop('disabled', true);
     [...Object.keys(localStorage)].forEach(key => {
-        if (!key.startsWith(sampleKeyPrefix()) && !key.startsWith(noiseKeyPrefix()))
+        if (!key.startsWith(sampleKeyPrefix()))
             return;
         localStorage.removeItem(key);
     });
@@ -1410,31 +1368,23 @@ $('#file').change(e => {
 // through the robot's own microphone with it, motors and all:
 //   CTRL  write   'rec <ms>' / 'stop'
 //   DATA  notify  'S'+status, 'H'+<u32 bytes><u16 rate>, 'D'+pcm, 'E'
-// Clips arrive as 16 kHz 16-bit mono and become ordinary samples.
-// Driving-noise clips (nobody speaking) are kept per session under
-// sn:<id>:<isoTime> as base64 int16 and used two ways at training time:
-// sliced into '[OTHER]' negatives, and mixed into labelled samples as
-// hidden "noisy copies" (samples with a `parent`) so the classifier hears
-// each command over the motors.
+// Clips arrive as 16 kHz 16-bit mono and become ordinary samples
+// (marked source: 'robot'): label a spoken command, or label the motors
+// alone '[OTHER]', so the model learns both over real driving noise.
 // ============================================================
 var ROBOT_SVC = '7a5e0001-9b4c-4f2e-8a2d-3c1e5d6f7a01';
 var ROBOT_CTRL = '7a5e0002-9b4c-4f2e-8a2d-3c1e5d6f7a01';
 var ROBOT_DATA = '7a5e0003-9b4c-4f2e-8a2d-3c1e5d6f7a01';
 var ROBOT_SAMPLE_MS = 992;       // audioInputCount samples at 16 kHz
-var ROBOT_NOISE_MS = 5000;
-var NOISY_COPIES_PER_SAMPLE = 2;
-var MAX_NOISE_NEGATIVES = 60;
 // Test hook: a function (ms) => Int16Array standing in for the robot.
 window.robotTestSource = null;
 
 var robotLink = null;   // {device, ctrl, data}
 var robotRx = null;     // transfer in flight: {buf, pos, total, resolve, reject, timer, onStart}
-var noiseClips = [];    // {isoTime, time, seconds, audio: Float32Array}
 
 function robotStatus(text, connected) {
     $('#robot-status').text(text);
     $('#robot-sample').prop('disabled', !connected);
-    $('#robot-noise').prop('disabled', !connected);
     $('#robot-connect').text(connected ? 'Disconnect Robot' : 'Connect Robot');
 }
 
@@ -1461,7 +1411,7 @@ async function connectRobot() {
         await data.startNotifications();
         robotLink = {device, ctrl, data};
         robotStatus('connected to ' + (device.name || 'robot'), true);
-        setMessage('Robot connected. Add Robot Sample records 1 second through the robot\'s microphone; Record Driving Noise takes 5 seconds of the motors with nobody speaking.');
+        setMessage('Robot connected. Add Robot Sample records 1 second through the robot\'s microphone: say a command, or stay quiet and label the motor noise [OTHER].');
     } catch (err) {
         robotLink = null;
         robotStatus('not connected', false);
@@ -1543,13 +1493,6 @@ function int16ToFloat32(pcm) {
     return out;
 }
 
-function float32ToInt16(audio) {
-    var out = new Int16Array(audio.length);
-    for (var i = 0; i < audio.length; i++)
-        out[i] = Math.round(Math.max(-1, Math.min(1, audio[i])) * 32767);
-    return out;
-}
-
 // Record `ms` of audio on the robot; resolves to a Float32Array.
 async function robotRecord(ms, onStart, onProgress) {
     if (window.robotTestSource) {
@@ -1572,7 +1515,6 @@ async function robotRecord(ms, onStart, onProgress) {
 
 function setRobotBusy(busy) {
     $('#robot-sample').prop('disabled', busy || !robotLink && !window.robotTestSource);
-    $('#robot-noise').prop('disabled', busy || !robotLink && !window.robotTestSource);
 }
 
 async function addRobotSample() {
@@ -1599,188 +1541,6 @@ async function addRobotSample() {
     addSampleToTableRow(sample, samples.length);
     samples.push(sample);
     setMessage('Done. Review the robot sample and add label.');
-}
-
-async function addRobotNoise() {
-    setRobotBusy(true);
-    try {
-        var audio = await robotRecord(ROBOT_NOISE_MS,
-            () => setMessage('🔴 Recording driving noise for 5 seconds — keep the robot moving and stay quiet.'),
-            f => setMessage(`Receiving the noise clip from the robot... ${Math.round(f * 100)}%`));
-    } catch (err) {
-        setMessage('Robot recording failed: ' + err.message);
-        setRobotBusy(false);
-        return;
-    }
-    setRobotBusy(false);
-    if (audio.length < audioInputCount) {
-        setMessage('Noise clip is too short.');
-        return;
-    }
-    var clip = {
-        time: new Date().toLocaleString(),
-        isoTime: new Date().toISOString(),
-        seconds: Math.round(audio.length / sampleRate * 10) / 10,
-        audio: audio
-    };
-    saveNoiseClip(clip);
-    noiseClips.push(clip);
-    renderNoisePanel();
-    var n = mixNoiseIntoSamples(true);
-    setMessage(`Driving noise saved (${clip.seconds} s). It trains as [OTHER] and is mixed into your samples` +
-               (n ? `: ${n} noisy copies made now.` : '. New samples get noisy copies when you label them.'));
-}
-
-// ---- Noise clips: storage and panel
-
-function saveNoiseClip(clip) {
-    localStorage.setItem(noiseKeyPrefix() + clip.isoTime, JSON.stringify({
-        time: clip.time,
-        isoTime: clip.isoTime,
-        seconds: clip.seconds,
-        pcm: arrayBufferToBase64(float32ToInt16(clip.audio).buffer)
-    }));
-}
-
-function loadNoiseFromStorage() {
-    noiseClips = [];
-    Object.keys(localStorage).sort().forEach(key => {
-        if (!key.startsWith(noiseKeyPrefix()))
-            return;
-        try {
-            var obj = JSON.parse(localStorage.getItem(key));
-            var bin = atob(obj.pcm);
-            var bytes = new Uint8Array(bin.length);
-            for (var i = 0; i < bin.length; i++)
-                bytes[i] = bin.charCodeAt(i);
-            obj.audio = int16ToFloat32(new Int16Array(bytes.buffer));
-            noiseClips.push(obj);
-        } catch (e) {
-            console.warn('bad noise clip', key, e);
-        }
-    });
-    renderNoisePanel();
-}
-
-function removeNoise(index) {
-    var clip = noiseClips[index];
-    if (!clip || !confirm('Remove this driving-noise clip? Noisy copies already made from it are kept.'))
-        return;
-    localStorage.removeItem(noiseKeyPrefix() + clip.isoTime);
-    noiseClips.splice(index, 1);
-    renderNoisePanel();
-}
-
-function playNoise(index, btn) {
-    playSample({audio: noiseClips[index].audio, time: noiseClips[index].time}, btn, null, null);
-}
-
-function siblingsOf(sample) {
-    return samples.filter(s => s.parent === sample.isoTime && !(s.removed || false));
-}
-
-function renderNoisePanel() {
-    $('#noise-list tr[id^="noise_"]').remove();
-    noiseClips.forEach((clip, i) => {
-        $('#noise-list').append(
-            `<tr id="noise_${i}"><td>🤖 ${clip.time}</td><td>${clip.seconds} s</td>
-<td><button onclick="playNoise(${i}, this)">Play</button>
-<button onclick="removeNoise(${i})">Remove</button></td></tr>`);
-    });
-    var copies = samples.filter(s => s.parent && !(s.removed || false)).length;
-    var parents = new Set(samples.filter(s => s.parent && !(s.removed || false)).map(s => s.parent)).size;
-    var mixable = usefulSamples().filter(
-        s => !s.parent && s.audio && s.label !== labelOther && siblingsOf(s).length === 0).length;
-    $('#noise-summary').text((noiseClips.length || copies)
-        ? `${copies} noisy copies of ${parents} samples train with this model.` +
-          (noiseClips.length && mixable ? ` ${mixable} labelled samples from this page visit can still be mixed.` : '')
-        : '');
-    $('#noise-panel').toggle(noiseClips.length > 0 || copies > 0);
-    $('#mix-noise').prop('disabled', !(noiseClips.length && mixable));
-}
-
-// ---- Mixing
-
-// RMS of the loudest third of 20 ms frames: the level of the word itself,
-// not of the silence around it.
-function loudRms(audio) {
-    var frame = 320;
-    var energies = [];
-    for (var i = 0; i + frame <= audio.length; i += frame) {
-        var e = 0;
-        for (var j = i; j < i + frame; j++)
-            e += audio[j] * audio[j];
-        energies.push(e / frame);
-    }
-    energies.sort((a, b) => b - a);
-    var top = energies.slice(0, Math.max(1, Math.floor(energies.length / 3)));
-    return Math.sqrt(top.reduce((a, b) => a + b, 0) / top.length);
-}
-
-function mixNoise(clean, noise) {
-    var off = Math.floor(Math.random() * (noise.length - clean.length + 1));
-    var window_ = noise.subarray(off, off + clean.length);
-    var speechLevel = loudRms(clean);
-    var noiseLevel = loudRms(window_);
-    // Signal-to-noise ratio between 3 and 15 dB: audible motors, not a wall of noise.
-    var snrDb = 3 + Math.random() * 12;
-    var gain = noiseLevel > 0 ? speechLevel / (noiseLevel * Math.pow(10, snrDb / 20)) : 0;
-    var out = new Float32Array(clean.length);
-    for (var i = 0; i < clean.length; i++)
-        out[i] = Math.max(-1, Math.min(1, clean[i] + gain * window_[i]));
-    return out;
-}
-
-// Make hidden noisy copies of a labelled sample (needs its audio, so only
-// samples recorded since the page was opened qualify).
-function makeNoisySiblings(sample) {
-    if (!noiseClips.length || !sample.audio || !sample.label || sample.label === labelOther)
-        return 0;
-    for (var k = 0; k < NOISY_COPIES_PER_SAMPLE; k++) {
-        var clip = noiseClips[Math.floor(Math.random() * noiseClips.length)];
-        var copy = {
-            time: sample.time,
-            isoTime: sample.isoTime + '.n' + k,
-            label: sample.label,
-            parent: sample.isoTime,
-            source: 'mix',
-            audio: mixNoise(sample.audio, clip.audio)
-        };
-        updatePrediction(copy);
-        copy.audio = null;
-        samples.push(copy);
-        saveSample(copy);
-    }
-    renderNoisePanel();
-    return NOISY_COPIES_PER_SAMPLE;
-}
-
-function mixNoiseIntoSamples(quiet) {
-    var todo = usefulSamples().filter(
-        s => !s.parent && s.audio && s.label !== labelOther && siblingsOf(s).length === 0);
-    var made = 0;
-    todo.forEach(s => { made += makeNoisySiblings(s); });
-    if (!quiet)
-        setMessage(made
-            ? `Made ${made} noisy copies of ${todo.length} samples.`
-            : 'Nothing to mix: only samples recorded since this page was opened still have their audio.');
-    return made;
-}
-
-// Driving-noise windows as '[OTHER]' samples, regenerated for each training.
-function noiseNegativeSamples() {
-    var out = [];
-    var hop = Math.floor(audioInputCount / 2);
-    noiseClips.forEach(clip => {
-        for (var j = 0; j + audioInputCount <= clip.audio.length && out.length < MAX_NOISE_NEGATIVES; j += hop) {
-            var sample = {audio: clip.audio.slice(j, j + audioInputCount), label: labelOther, time: clip.time};
-            updatePrediction(sample);
-            sample.audio = null;
-            sample.mfcc = null;
-            out.push(sample);
-        }
-    });
-    return out;
 }
 
 function batchPredict(cutoff, key, mfcc) {
