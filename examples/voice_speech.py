@@ -1,13 +1,10 @@
-# ============================================
-# VOICE CONTROL WITH YOUR OWN SPEECH MODEL
-# ============================================
-# Train a model on the Speech page with the commands below (or your own),
-# then run this on the StickS3 robot (write the model to the robot from
-# the IDE too) or in the Simulator with that model selected.
+# Voice control with a model trained on the Speech page. Runs on the
+# StickS3 robot (write the model to the robot from the IDE) or in the
+# Simulator with that model selected.
 import motor
 import motor_pair
 import speech
-import screen   # screen.show() prints, and draws on the StickS3's screen
+import screen
 
 motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)
 screen.show("Voice control", "starting...")

@@ -1,19 +1,8 @@
 # filename: ble_repl.py
-# The MicroPython REPL over Bluetooth LE, so the IDE can connect to the
-# robot without a USB cable ("Connect Bluetooth" in ide.html).
+# The REPL over Bluetooth LE (Nordic UART Service) so the IDE can connect
+# without a cable. Started by boot.py (config.BLE_REPL); interrupt-driven,
+# no thread. Advertises as "Mini Bot XXXX" (XXXX from the address).
 #
-# boot.py starts this before it waits for the start button (see
-# config.BLE_REPL), and it stays up for the life of the program: it is
-# interrupt-driven, no thread. The REPL is mirrored onto a Bluetooth UART
-# stream with os.dupterm(), so the IDE talks the exact same line protocol
-# it uses over USB - upload, run, stop (Ctrl-C) and the terminal all work
-# unchanged. Output goes to USB and Bluetooth at the same time.
-#
-# The robot advertises as "Mini Bot XXXX", XXXX from its Bluetooth address,
-# so several robots can be on in one room; boot.py shows the name on the
-# LCD. Standard Nordic UART Service UUIDs, one connection at a time.
-#
-#   import ble_repl
 #   ble_repl.start()          # returns the advertised name
 #   ble_repl.connected()      # True while the IDE is attached
 import io
@@ -37,16 +26,14 @@ _UART_UUID = bluetooth.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
 _TX_UUID = bluetooth.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E')   # robot -> IDE (notify)
 _RX_UUID = bluetooth.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E')   # IDE -> robot (write)
 _NAME = 'Mini Bot'
-# Output is batched: the friendly REPL echoes one character per write(),
-# and one notification per character floods the radio. A short timer
-# coalesces a burst into MTU-sized notifications.
+# Output is batched into MTU-sized notifications; one notification per
+# echoed character floods the radio.
 _FLUSH_MS = 20
-_TX_TIMER_ID = 3       # hardware timers kept for this module
+_TX_TIMER_ID = 3
 _RX_TIMER_ID = 2
-# Input is paced: os.dupterm_notify() copies everything read() offers into
-# the console's 260-byte ring buffer and silently drops the overflow, so
-# each push is capped and only made once the REPL has emptied the ring
-# (select.poll on sys.stdin says whether it still holds bytes).
+# Input is paced: os.dupterm_notify() drops whatever does not fit in the
+# console's 260-byte ring buffer, so pushes are capped and only made once
+# the ring is empty.
 _PUMP_MS = 2
 _PUMP_BYTES = 250
 
@@ -59,10 +46,8 @@ class BLEREPL(io.IOBase):
         self._name = name
         self._conn = None
         self._mtu = 23
-        # Both buffers are only ever extended and trimmed in place, never
-        # rebound: the IRQ handler is a scheduled callback that can run
-        # between any two bytecodes of the reader, and a write that lands
-        # in a buffer the reader is about to discard is lost.
+        # Buffers are extended and trimmed in place, never rebound: the IRQ
+        # handler can run between any two bytecodes of the reader.
         self._rxbuf = bytearray()
         self._rxpos = 0
         self._budget = 0
@@ -81,16 +66,12 @@ class BLEREPL(io.IOBase):
                 (_RX_UUID, _FLAG_WRITE | _FLAG_WRITE_NO_RESPONSE),
             )),
         ))
-        # Append mode. Acknowledged writes complete when the radio has
-        # stored them, before this module's IRQ drains them, so the buffer
-        # must hold everything the IDE sends between two replies: one
-        # upload piece is ~3.2 KB (robot.js), in 500-byte writes.
+        # Append mode, large enough for a whole upload piece (~3.2 KB) to
+        # land before the IRQ drains it.
         ble.gatts_set_buffer(self._rx, 16384, True)
         self._advertise()
 
     def _advertise(self):
-        # Service UUID in the advertisement (what the IDE filters on), the
-        # name in the scan response.
         adv = b'\x02\x01\x06' + b'\x11\x07' + bytes(_UART_UUID)
         name = self._name.encode()
         resp = bytes([len(name) + 1, 0x09]) + name
@@ -117,19 +98,13 @@ class BLEREPL(io.IOBase):
                                     callback=self._pump)
 
     def _pump(self, _timer=None):
-        """Hand the REPL the next slice of input, if it has room.
-
-        Runs from the write IRQ and then from the pump timer until the
-        buffer is drained. A Ctrl-C is spotted inside dupterm_notify and
-        raised in the running program, so Stop works mid-program too.
-        """
         if len(self._rxbuf) <= self._rxpos:
             if self._pumping:
                 self._pumping = False
                 self._rx_timer.deinit()
             return
         if self._stdin_poll.poll(0):
-            return          # the REPL has not consumed the last push yet
+            return
         self._budget = _PUMP_BYTES
         os.dupterm_notify(None)  # type: ignore[attr-defined]
 
@@ -146,10 +121,7 @@ class BLEREPL(io.IOBase):
         data = bytes(buf[pos:pos + n])
         pos += n
         if pos >= len(buf):
-            # Everything consumed: drop the prefix in place (slice
-            # assignment; MicroPython's bytearray has no del). A write that
-            # lands in between is appended after it and survives.
-            buf[:pos] = b''
+            buf[:pos] = b''   # slice assignment; MicroPython bytearray has no del
             pos = 0
         self._rxpos = pos
         return data
@@ -162,14 +134,12 @@ class BLEREPL(io.IOBase):
         return len(data)
 
     def ioctl(self, op, arg):
-        # Never report readable: sys.stdin's poll also asks the dupterm
-        # streams, and _pump relies on it to reflect the ring buffer alone.
-        # Input reaches the REPL through the ring buffer anyway.
+        # Never report readable: sys.stdin's poll must reflect the ring
+        # buffer alone (see _pump).
         return 0
 
     def write(self, buf):
-        # Never raise from here: an exception inside a dupterm write makes
-        # MicroPython silently detach the stream.
+        # Must never raise: an exception here silently detaches the stream.
         if self._conn is None:
             return len(buf)
         self._txbuf.extend(buf)
@@ -189,8 +159,7 @@ class BLEREPL(io.IOBase):
         mv = memoryview(data)
         for i in range(0, len(data), step):
             chunk = mv[i:i + step]
-            # ENOMEM is the radio's queue-full signal: wait a little, then
-            # drop the rest rather than stall the program.
+            # ENOMEM means the radio's queue is full: retry briefly, then drop.
             for _ in range(40):
                 try:
                     self._ble.gatts_notify(self._conn, self._tx, chunk)
@@ -218,7 +187,6 @@ def start():
 
 
 def _show_status(name, state):
-    # Line 1 of the screen: "EBC6: available" / "EBC6: connected".
     try:
         import screen
         screen.status('%s: %s' % (name[-4:], state))

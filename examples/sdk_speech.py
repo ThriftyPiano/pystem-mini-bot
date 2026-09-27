@@ -1,19 +1,11 @@
 # filename: speech.py
-# Speech commands for the M5StickS3 robot.
+# Speech commands on the StickS3: the trained speech_model.py plus the
+# stick's microphone in a background thread. The simulator has the same API.
 #
-# Wraps the trained model (speech_model.py from the Speech page) and the
-# stick's microphone in a background thread, so a program only has to ask
-# what was heard. The same API exists in the browser simulator.
-#
-#   import speech
 #   speech.start()
-#   while True:
-#       cmd = speech.wait_for_command()
-#       if cmd == 'forward': ...
+#   cmd = speech.wait_for_command()
 #
-# Needs the StickS3 speech firmware (frozen sticks3 + speech_commands
-# modules) and a speech_model.py on the device. Not available on the
-# Max V1 robot, which has no microphone: use wonder_echo there.
+# Needs the StickS3 speech firmware and a speech_model.py on the device.
 import time
 
 _labels = []
@@ -22,23 +14,17 @@ _pending = None
 _running = False
 _thread_started = False
 
-# Recognition covers the last ~1 s of audio; this chunk is the slide step
-# between evaluations (5120 bytes = 160 ms at 16 kHz 16-bit mono). The
-# ~1 s window re-hits a word several times, so accept one command per
-# DEBOUNCE_MS at most.
-_CHUNK_BYTES = 5120
+_CHUNK_BYTES = 5120     # 160 ms at 16 kHz 16-bit mono
 _DEBOUNCE_MS = 1000
 
 
 def start(model=None, threshold=70, grace_ms=2000):
     """Load the model and start listening in the background.
 
-    model:     ignored on the device (the uploaded speech_model.py is the
-               model); accepted so simulator programs run unchanged.
+    model:     ignored on the device; accepted so simulator programs run unchanged.
     threshold: minimum probability (0-100) to accept a word.
     grace_ms:  delay before the thread starts. A running thread blocks
-               MicroPython's soft reset, which locks the IDE out; the
-               grace period leaves time to Ctrl-C at boot.
+               soft reset, so this leaves time to Ctrl-C at boot.
     """
     global _labels, _running, _thread_started
     try:
@@ -76,13 +62,10 @@ def _worker(mic, speech_model, threshold):
                     last_ms = now
                     _last = label
                     _pending = label
-            # Brief yield so the USB stack and other tasks are serviced.
             time.sleep_ms(5)
     except BaseException as e:
-        # Surface thread crashes instead of silently wedging the board.
         print('speech thread died:', repr(e))
     finally:
-        # Let start() spin up a fresh thread after stop().
         _thread_started = False
 
 
@@ -94,7 +77,7 @@ def stop():
 
 
 def labels():
-    """The command words of the loaded model (without the '[OTHER]' class)."""
+    """The command words of the loaded model (without '[OTHER]')."""
     return [l for l in _labels if l != '[OTHER]']
 
 

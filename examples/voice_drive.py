@@ -1,26 +1,11 @@
-# ============================================
-# VOICE DRIVE EXAMPLE - Drive Your Robot With Your Voice!
-# ============================================
-# This program lets you control your robot by speaking commands.
-# Each command runs the robot CONTINUOUSLY until you say a new one.
-#
-# HOW TO USE:
-#   1. Power on the robot (the WonderEcho needs ~1 second to start).
-#   2. Run this program.
-#   3. Say "Hello Hiwonder" to wake the module up.
-#   4. Then say one of: "forward", "backward", "turn left",
-#      "turn right", "stop", "dance".
-#   5. The robot keeps doing the action until you say another command.
+# Voice drive with the WonderEcho module (Max V1 robot only).
+# Say "Hello Hiwonder", then "forward", "backward", "turn left",
+# "turn right", "stop" or "dance". Each command runs until the next one.
+# The StickS3 robot uses voice_speech.py instead.
 
-# This program is for the ESP32 Max V1 robot, which has the WonderEcho
-# module. The StickS3 robot listens with its own microphone and a model
-# you train on the Speech page: use voice_speech.py there instead.
-
-# STEP 1: Import the libraries we need
-# --------------------------------------------
-import motor               # Per-motor velocity control (closed-loop)
-import wonder_echo         # Voice recognition (Hiwonder WonderEcho)
-import head                # Pan/tilt head servos (for the dance)
+import motor
+import wonder_echo
+import head
 import time
 from config import BOARD
 
@@ -28,21 +13,10 @@ if BOARD == 'sticks3':
     raise SystemExit("voice_drive.py needs the WonderEcho on the Max V1 robot. "
                      "On the StickS3 robot run voice_speech.py instead.")
 
-# STEP 2: How fast to move
-# --------------------------------------------
-DRIVE_VELOCITY = 270   # forward/backward speed in deg/sec
-TURN_VELOCITY  = 38    # in-place spin speed -> chassis ~34 deg/sec yaw rate.
-                       # ~10 sec for a full 360 spin. The closed-loop
-                       # integrator ramps PWM up to overcome static friction
-                       # automatically, so the slow target works across
-                       # different surfaces.
+DRIVE_VELOCITY = 270   # deg/sec
+TURN_VELOCITY  = 38    # deg/sec per wheel, ~34 deg/sec chassis yaw
 
-# STEP 3: Action functions
-# --------------------------------------------
-# Port A = left wheel, Port B = right wheel.
-# The right motor is mounted reversed, so its forward-chassis direction
-# is NEGATIVE port velocity. That's why each function below uses opposite
-# signs on A and B for translation, and matching signs for rotation.
+# Port A = left wheel, port B = right wheel (mounted reversed).
 
 def go_forward():
     motor.run(motor.PORT_A,  DRIVE_VELOCITY)
@@ -53,12 +27,10 @@ def go_backward():
     motor.run(motor.PORT_B,  DRIVE_VELOCITY)
 
 def turn_left():
-    # Left wheel back, right wheel forward -> rotate CCW
     motor.run(motor.PORT_A, -TURN_VELOCITY)
     motor.run(motor.PORT_B, -TURN_VELOCITY)
 
 def turn_right():
-    # Left wheel forward, right wheel back -> rotate CW
     motor.run(motor.PORT_A,  TURN_VELOCITY)
     motor.run(motor.PORT_B,  TURN_VELOCITY)
 
@@ -67,8 +39,7 @@ def stop():
     motor.stop(motor.PORT_B)
 
 def _dance_poll(ms):
-    # Sleep ~ms while listening for a voice command, so the dance can react
-    # promptly to "stop". Returns the command id (CMD_NONE if none came in).
+    # Sleep ~ms while still listening, so "stop" interrupts the dance.
     slept = 0
     while slept < ms:
         cmd = wonder_echo.read_command()
@@ -79,20 +50,13 @@ def _dance_poll(ms):
     return wonder_echo.CMD_NONE
 
 def do_dance():
-    # Whole-body dance: the wheels wiggle and spin while the head grooves,
-    # LOOPING until you say another command ("stop" to just stop).
-    # motor.run() is non-blocking (a background timer holds each wheel at its
-    # target velocity), so we kick off a wheel move and layer head moves on
-    # top, then change it up. Kept moderate on purpose: two motors plus two
-    # servos moving at once draws a lot of current, and big simultaneous
-    # slews can brown out the board -- so gentle acceleration and mostly
-    # in-place spins (short forward/back pops add flavor without wandering).
-    SPIN = 100   # deg/sec, lively in-place spin
-    POP  = 150   # deg/sec, short forward/back pop
-    ACC  = 450   # gentle accel -> smaller current spike (matters more for a
-                 # continuous dance; big fast ramps cause supply dips/resets)
+    # Kept moderate: two motors plus two servos slewing at once can brown
+    # out the board.
+    SPIN = 100
+    POP  = 150
+    ACC  = 450
     beat = 260
-    c = 90       # head center
+    c = 90
 
     def spin_cw():
         motor.run(motor.PORT_A,  SPIN, acceleration=ACC)
@@ -107,7 +71,6 @@ def do_dance():
         motor.run(motor.PORT_A, -POP, acceleration=ACC)
         motor.run(motor.PORT_B,  POP, acceleration=ACC)
 
-    # One full cycle: (start a wheel move, move the head, how many beats to hold)
     moves = (
         (spin_cw,     lambda: head.look(c - 60, c + 30), 2),
         (spin_ccw,    lambda: head.look(c + 60, c + 30), 2),
@@ -115,7 +78,6 @@ def do_dance():
         (pop_back,    lambda: head.tilt(c + 40),         1),
     )
 
-    # Loop the choreography until a voice command interrupts it.
     interrupt = wonder_echo.CMD_NONE
     while interrupt == wonder_echo.CMD_NONE:
         for wheels, headmove, mult in moves:
@@ -125,13 +87,11 @@ def do_dance():
             if interrupt != wonder_echo.CMD_NONE:
                 break
 
-    stop()            # wheels off
-    head.center()     # head back to rest
-    head.release()    # servos limp
+    stop()
+    head.center()
+    head.release()
 
-    # If a real drive command (not "stop", not another "dance") interrupted
-    # the dance, run it now so "forward" mid-dance just starts driving.
-    # Never re-enter the dance here, or "dance" mid-dance would loop forever.
+    # Run the interrupting drive command; never re-enter the dance from here.
     if interrupt not in (wonder_echo.CMD_STOP, wonder_echo.CMD_DANCE):
         entry = ACTIONS.get(interrupt)
         if entry is not None:
@@ -148,13 +108,10 @@ ACTIONS = {
     wonder_echo.CMD_DANCE:    ('dance',    do_dance),
 }
 
-# STEP 4: Main loop - listen and dispatch
-# --------------------------------------------
 print('Voice control ready. Say "Hello Hiwonder" then a command.')
 print('Press Ctrl-C to exit.')
 
-# Audible "I'm alive" announcement so you know voice_drive is running.
-# TYPE_BROADCAST phrase id 6 = "parking completed" on the stock firmware.
+# Broadcast phrase 6 ("parking completed") announces that the program is running.
 wonder_echo.speak(wonder_echo.TYPE_BROADCAST, 6)
 
 try:
@@ -172,14 +129,3 @@ try:
 except KeyboardInterrupt:
     stop()
     print('Stopped.')
-
-# ============================================
-# EXPERIMENT IDEAS:
-# ============================================
-# 1. Make a "fast" mode: when you say "forward" twice in a row, double
-#    DRIVE_VELOCITY. (Track the previous command in a variable.)
-# 2. Use wonder_echo.speak(wonder_echo.TYPE_COMMAND, 1) to have the
-#    robot acknowledge each command audibly.
-# 3. Add a safety stop: if color_sensor.reflection() drops near zero
-#    (edge of table!), stop even if no voice command came in.
-# ============================================
