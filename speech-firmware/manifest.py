@@ -1,6 +1,6 @@
 # Frozen modules for the StickS3 speech-commands firmware: board support
-# for all on-board hardware (LCD, mic, speaker, IMU, power chip, buttons)
-# and the robot SDK.
+# for all on-board hardware (LCD, mic, speaker, IMU, power chip, buttons),
+# the robot SDK, and a default boot.py / main.py.
 include("$(PORT_DIR)/boards/manifest.py")
 freeze(
     "device",
@@ -15,11 +15,10 @@ freeze(
         "bmi270_config_file.py",
     ),
 )
-# The robot SDK (examples/sdk_*.py), staged by build.sh under build/sdk
-# with the sdk_ prefix stripped, so a freshly flashed stick imports motor,
-# motor_pair, screen, ... with nothing uploaded. A file of the same name
-# on the device's filesystem takes precedence ('' comes before '.frozen'
-# on sys.path), so uploading a newer SDK file from the IDE still works.
-# boot.py is deliberately not frozen: boot/main scripts are looked up in
-# the frozen set first, so a frozen boot.py could not be overridden.
+# build/sdk is staged by build.sh: examples/sdk_*.py with the sdk_ prefix
+# stripped (sdk_boot.py and sdk_main.py become minibot_boot / minibot_main),
+# plus boot_stubs/boot.py and main.py. A same-named file uploaded to the
+# device's filesystem takes precedence over every one of them: modules
+# because '' precedes '.frozen' on sys.path, boot.py / main.py because the
+# frozen stubs exec the uploaded file when it exists.
 freeze("build/sdk")

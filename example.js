@@ -7,6 +7,7 @@ const exampleManager = {
         'motor_control.py',
         'sdk_ble_repl.py',
         'sdk_boot.py',
+    'sdk_main.py',
         'sdk_color_sensor.py',
         'sdk_config.py',
         'sdk_distance_sensor.py',

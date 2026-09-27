@@ -138,6 +138,23 @@ for f in "$ROOT"/../examples/sdk_*.py; do
 done
 echo "SDK modules to freeze: $(ls "$BUILD/sdk" | tr '\n' ' ')"
 
+# --- Robot SDK + default boot/main (frozen, see manifest.py) ---
+rm -rf "$BUILD/sdk"
+mkdir -p "$BUILD/sdk"
+for f in "$ROOT"/../examples/sdk_*.py; do
+    name=$(basename "$f")
+    name=${name#sdk_}
+    case "$name" in
+        boot.py) name=minibot_boot.py ;;
+        main.py) name=minibot_main.py ;;
+    esac
+    cp "$f" "$BUILD/sdk/$name"
+done
+cp "$ROOT"/boot_stubs/boot.py "$ROOT"/boot_stubs/main.py "$BUILD/sdk/"
+echo "Frozen SDK: $(ls "$BUILD/sdk" | tr '\n' ' ')"
+# The frozen table is not always regenerated when only the manifest changed.
+rm -f "$BUILD/micropython/ports/esp32/build-ESP32_GENERIC_S3-SPIRAM_OCT/frozen_content.c"
+
 # --- Build ---
 # -Wno-gnu-folding-constant: newer Apple clang errors on MP_STATIC_ASSERT
 make -C "$BUILD/micropython/mpy-cross" -j CFLAGS_EXTRA=-Wno-gnu-folding-constant
