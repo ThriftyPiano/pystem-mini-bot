@@ -64,8 +64,11 @@ class BLEREPL(io.IOBase):
                 (_RX_UUID, _FLAG_WRITE | _FLAG_WRITE_NO_RESPONSE),
             )),
         ))
-        # Append mode: several IDE writes can land before the REPL reads.
-        ble.gatts_set_buffer(self._rx, 2048, True)
+        # Append mode. Acknowledged writes complete when the radio has
+        # stored them, before this module's IRQ drains them, so the buffer
+        # must hold everything the IDE sends between two replies: one
+        # upload piece is ~3.2 KB (robot.js), in 500-byte writes.
+        ble.gatts_set_buffer(self._rx, 16384, True)
         self._advertise()
 
     def _advertise(self):
