@@ -18,7 +18,9 @@
 #   ble_repl.connected()      # True while the IDE is attached
 import io
 import os
+import sys
 import time
+import select
 import machine
 import bluetooth
 
@@ -30,8 +32,6 @@ _FLAG_READ = 0x0002
 _FLAG_WRITE_NO_RESPONSE = 0x0004
 _FLAG_WRITE = 0x0008
 _FLAG_NOTIFY = 0x0010
-_MP_STREAM_POLL = 3
-_MP_STREAM_POLL_RD = 1
 
 _UART_UUID = bluetooth.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
 _TX_UUID = bluetooth.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E')   # robot -> IDE (notify)
@@ -41,7 +41,14 @@ _NAME = 'Mini Bot'
 # and one notification per character floods the radio. A short timer
 # coalesces a burst into MTU-sized notifications.
 _FLUSH_MS = 20
-_TIMER_ID = 3          # hardware timer kept for this module
+_TX_TIMER_ID = 3       # hardware timers kept for this module
+_RX_TIMER_ID = 2
+# Input is paced: os.dupterm_notify() copies everything read() offers into
+# the console's 260-byte ring buffer and silently drops the overflow, so
+# each push is capped and only made once the REPL has emptied the ring
+# (select.poll on sys.stdin says whether it still holds bytes).
+_PUMP_MS = 2
+_PUMP_BYTES = 250
 
 _repl = None
 
@@ -52,10 +59,20 @@ class BLEREPL(io.IOBase):
         self._name = name
         self._conn = None
         self._mtu = 23
+        # Both buffers are only ever extended and trimmed in place, never
+        # rebound: the IRQ handler is a scheduled callback that can run
+        # between any two bytecodes of the reader, and a write that lands
+        # in a buffer the reader is about to discard is lost.
         self._rxbuf = bytearray()
+        self._rxpos = 0
+        self._budget = 0
         self._txbuf = bytearray()
         self._flush_pending = False
-        self._timer = machine.Timer(_TIMER_ID)
+        self._timer = machine.Timer(_TX_TIMER_ID)
+        self._rx_timer = machine.Timer(_RX_TIMER_ID)
+        self._pumping = False
+        self._stdin_poll = select.poll()
+        self._stdin_poll.register(sys.stdin, select.POLLIN)
         ble.config(gap_name=name, mtu=517)
         ble.irq(self._irq)
         ((self._tx, self._rx),) = ble.gatts_register_services((
@@ -83,7 +100,7 @@ class BLEREPL(io.IOBase):
         if event == _IRQ_CENTRAL_CONNECT:
             self._conn = data[0]
             self._mtu = 23
-            self._txbuf = bytearray()
+            self._txbuf[:] = b''
             _show_status(self._name, 'connected')
         elif event == _IRQ_CENTRAL_DISCONNECT:
             self._conn = None
@@ -92,21 +109,49 @@ class BLEREPL(io.IOBase):
         elif event == _IRQ_MTU_EXCHANGED:
             self._mtu = data[1]
         elif event == _IRQ_GATTS_WRITE and data[1] == self._rx:
-            self._rxbuf += self._ble.gatts_read(self._rx)
-            # Wake the REPL (or deliver Ctrl-C to a running program).
-            os.dupterm_notify(None)  # type: ignore[attr-defined]
+            self._rxbuf.extend(self._ble.gatts_read(self._rx))
+            self._pump()
+            if not self._pumping and len(self._rxbuf) > self._rxpos:
+                self._pumping = True
+                self._rx_timer.init(period=_PUMP_MS, mode=machine.Timer.PERIODIC,
+                                    callback=self._pump)
+
+    def _pump(self, _timer=None):
+        """Hand the REPL the next slice of input, if it has room.
+
+        Runs from the write IRQ and then from the pump timer until the
+        buffer is drained. A Ctrl-C is spotted inside dupterm_notify and
+        raised in the running program, so Stop works mid-program too.
+        """
+        if len(self._rxbuf) <= self._rxpos:
+            if self._pumping:
+                self._pumping = False
+                self._rx_timer.deinit()
+            return
+        if self._stdin_poll.poll(0):
+            return          # the REPL has not consumed the last push yet
+        self._budget = _PUMP_BYTES
+        os.dupterm_notify(None)  # type: ignore[attr-defined]
 
     # ---- stream interface used by os.dupterm
 
     def read(self, sz=None):
-        if not self._rxbuf:
+        buf = self._rxbuf
+        pos = self._rxpos
+        avail = min(len(buf) - pos, self._budget)
+        if avail <= 0:
             return None
-        if sz is None or sz >= len(self._rxbuf):
-            data = bytes(self._rxbuf)
-            self._rxbuf = bytearray()
-        else:
-            data = bytes(self._rxbuf[:sz])
-            self._rxbuf = self._rxbuf[sz:]
+        n = avail if sz is None else min(sz, avail)
+        self._budget -= n
+        data = bytes(buf[pos:pos + n])
+        pos += n
+        if pos >= len(buf):
+            # Everything consumed: drop the prefix in place (slice
+            # assignment; MicroPython's bytearray has no del). A write that
+            # lands in between is appended after it and survives.
+            buf[:pos] = b''
+            pos = 0
+        self._rxpos = pos
         return data
 
     def readinto(self, buf):
@@ -117,8 +162,9 @@ class BLEREPL(io.IOBase):
         return len(data)
 
     def ioctl(self, op, arg):
-        if op == _MP_STREAM_POLL and self._rxbuf:
-            return _MP_STREAM_POLL_RD
+        # Never report readable: sys.stdin's poll also asks the dupterm
+        # streams, and _pump relies on it to reflect the ring buffer alone.
+        # Input reaches the REPL through the ring buffer anyway.
         return 0
 
     def write(self, buf):
@@ -126,7 +172,7 @@ class BLEREPL(io.IOBase):
         # MicroPython silently detach the stream.
         if self._conn is None:
             return len(buf)
-        self._txbuf += buf
+        self._txbuf.extend(buf)
         if not self._flush_pending:
             self._flush_pending = True
             self._timer.init(period=_FLUSH_MS, mode=machine.Timer.ONE_SHOT,
@@ -134,8 +180,8 @@ class BLEREPL(io.IOBase):
         return len(buf)
 
     def _flush(self, _timer=None):
-        data = self._txbuf
-        self._txbuf = bytearray()
+        data = bytes(self._txbuf)
+        self._txbuf[:len(data)] = b''
         self._flush_pending = False
         if self._conn is None or not data:
             return
@@ -186,6 +232,7 @@ def stop():
         return
     os.dupterm(None, 0)  # type: ignore[attr-defined]
     _repl._timer.deinit()
+    _repl._rx_timer.deinit()
     _repl._ble.active(False)
     _repl = None
 
