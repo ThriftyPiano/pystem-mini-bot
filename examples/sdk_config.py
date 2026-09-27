@@ -84,7 +84,8 @@ HEAD_CONFIG = {
 }
 
 MOTOR_CONFIG = {
-    # Encoder pulses per wheel revolution (20-slot disc, ~2:1 gearbox).
+    # Encoder pulses per wheel revolution: 2-hole disc on a geared shaft,
+    # 40 rising edges per wheel turn measured on the robot (2026-09-27).
     'pulses_per_revolution': 40,
 
     'wheel_diameter_cm': 6.0,
