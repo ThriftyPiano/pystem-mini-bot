@@ -66,7 +66,7 @@ def button_pressed_callback(pin):
 # Bouncing happens on both edges, so usually, trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING is safest if you want to catch either.
 button.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=button_pressed_callback)
 
-show("Press top button to start")
+show("Press top btn", "to start")
 
 while not button_pressed:
     time.sleep(0.1)

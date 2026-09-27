@@ -2,8 +2,9 @@
 # The robot's screen as four lines of text.
 #
 # On the StickS3 the LCD is used in landscape (the stick lies sideways on
-# the robot, see config.LCD_ROTATION) with the 8x16 font from font8x16.py:
-# 30 characters per line, four lines. Line 1 is the status line - the
+# the robot, see config.LCD_ROTATION) with the firmware's 16x32 font: 15
+# characters per line, four lines (4 x 32 px fills the 135 px height,
+# the largest text that still gives four lines). Line 1 is the status line - the
 # Bluetooth link keeps it at "XXXX: available" / "XXXX: connected" (XXXX
 # is the robot's name suffix, so you connect to the right robot). Lines
 # 2-4 belong to the program:
@@ -15,7 +16,7 @@
 # Max V1 (no screen) and in the simulator, where this module is a no-op
 # apart from the print.
 LINES = 3          # program lines (2-4)
-COLUMNS = 30
+COLUMNS = 15
 
 _lcd = None
 _font = None
@@ -26,7 +27,7 @@ try:
     from config import BOARD, LCD_ROTATION
     if BOARD == 'sticks3':
         import sticks3
-        import font8x16 as _font
+        import vga1_16x32 as _font
         _lcd = sticks3.display(LCD_ROTATION)
 except Exception as e:
     print("screen unavailable:", e)

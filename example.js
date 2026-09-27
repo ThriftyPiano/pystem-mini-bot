@@ -14,7 +14,6 @@ const exampleManager = {
         'sdk_motor.py',
         'sdk_motor_pair.py',
         'sdk_orientation.py',
-        'sdk_font8x16.py',
         'sdk_screen.py',
         'sdk_speech.py',
         'sdk_wonder_echo.py',
