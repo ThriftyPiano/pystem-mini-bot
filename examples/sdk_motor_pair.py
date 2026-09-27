@@ -107,37 +107,39 @@ class MotorPair:
                 current_yaw = self.orientation_sensor.get_yaw()
                 yaw_error = target_yaw - current_yaw
                 
-                # Apply correction if yaw error is significant
-                if abs(yaw_error) > 1.0:
-                    # Proportional control. With closed-loop velocity in
-                    # motor.run() the per-motor asymmetry is already gone, so
-                    # the IMU only needs to compensate for floor-level effects
-                    # (traction, slight wheel mismatch, weight bias). Gentler
-                    # gains keep this from oscillating with the inner loop.
-                    correction = yaw_error * 10
-                    correction = max(-60, min(60, correction))
+                # Proportional control. With closed-loop velocity in
+                # motor.run() the per-motor asymmetry is already gone, so
+                # the IMU only needs to compensate for floor-level effects
+                # (traction, slight wheel mismatch, weight bias). Gentler
+                # gains keep this from oscillating with the inner loop.
+                # Always re-apply: with a dead band the last correction stayed
+                # on the motors once the error dropped inside it, so the robot
+                # kept turning until it left the band the other way (S-curves).
+                correction = yaw_error * 10
+                correction = max(-60, min(60, correction))
+                if abs(yaw_error) <= 0.5:
+                    correction = 0
+                if correction_mode == 'position':
+                    # For move_for_degrees - adjust target_velocity
+                    left_motor = motor._get_motor(self.left_port)
+                    right_motor = motor._get_motor(self.right_port)
                     
-                    if correction_mode == 'position':
-                        # For move_for_degrees - adjust target_velocity
-                        left_motor = motor._get_motor(self.left_port)
-                        right_motor = motor._get_motor(self.right_port)
-                        
-                        if left_motor.is_running:
-                            corrected_velocity = velocity + correction
-                            left_motor.target_velocity = corrected_velocity
-                        
-                        if right_motor.is_running:
-                            corrected_velocity = -velocity + correction
-                            right_motor.target_velocity = corrected_velocity
+                    if left_motor.is_running:
+                        corrected_velocity = velocity + correction
+                        left_motor.target_velocity = corrected_velocity
                     
-                    elif correction_mode == 'velocity':
-                        # For move_for_time - direct motor speed adjustment
-                        corrected_left_velocity = velocity + correction
-                        corrected_right_velocity = -velocity + correction
-                        
-                        motor.run(self.left_port, int(corrected_left_velocity))
-                        motor.run(self.right_port, int(corrected_right_velocity))
-                        
+                    if right_motor.is_running:
+                        corrected_velocity = -velocity + correction
+                        right_motor.target_velocity = corrected_velocity
+                
+                elif correction_mode == 'velocity':
+                    # For move_for_time - direct motor speed adjustment
+                    corrected_left_velocity = velocity + correction
+                    corrected_right_velocity = -velocity + correction
+                    
+                    motor.run(self.left_port, int(corrected_left_velocity))
+                    motor.run(self.right_port, int(corrected_right_velocity))
+                    
             except Exception as e:
                 # If orientation fails, continue without correction
                 pass
