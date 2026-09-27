@@ -83,7 +83,6 @@ class RobotController {
         this.transport = null;       // 'serial' | 'ble'
         this.bleDevice = null;
         this.bleName = null;
-        this.chunkSize = 1024;
         this.lastLineEcho = '';
         
         // Background reading system
@@ -555,111 +554,6 @@ class RobotController {
     }
 
     /**
-     * Convert binary data to hex string and wrap in MicroPython code
-     */
-    wrapCodeHex(binCode, saveTo = null, append = false) {
-        const chunkSize = this.chunkSize;
-        
-        // Convert string to bytes if needed
-        let bytes;
-        if (typeof binCode === 'string') {
-            const encoder = new TextEncoder();
-            bytes = encoder.encode(binCode);
-        } else {
-            bytes = binCode;
-        }
-
-        // Convert to hex string
-        let hexStr = '';
-        for (let i = 0; i < bytes.length; i++) {
-            hexStr += bytes[i].toString(16).padStart(2, '0');
-        }
-
-        let output = '';
-        output += `import gc; gc.collect(); b_ = bytearray(${bytes.length}); bi_ = 0\r\n`;
-        
-        const chunks = Math.ceil(hexStr.length / chunkSize);
-        for (let i = 0; i < chunks; i++) {
-            const chunk = hexStr.substring(i * chunkSize, (i + 1) * chunkSize);
-            output += `c_ = b'${chunk}'\r\n`;
-            output += "for i in range(len(c_)//2): b_[bi_+i] = int(c_[2*i:2*i+2], 16).to_bytes(1, 'little')[0]\r\n";
-            output += "_EMPTY_\r\n";
-            output += 'bi_ += len(c_)//2; print(".", end=""); del c_; gc.collect()\r\n';
-        }
-        
-        if (saveTo === null) {
-            output += 'print(" Running."); print("--------"); b_ = b_.decode()\r\n';
-            output += 'exec(b_)\r\n';
-            output += 'del b_\r\n';
-        } else {
-            const writeMode = append ? 'ab' : 'wb';
-            output += `f_ = open('${saveTo}', '${writeMode}')\r\n`;
-            output += '_ = f_.write(b_)\r\n';
-            output += 'f_.close();\r\n';
-            output += 'del f_; del b_; gc.collect(); print(" Done.")\r\n';
-        }
-        
-        return output;
-    }
-
-    /**
-     * Execute raw code on the device
-     */
-    async executeCodeRaw(code, retry = false) {
-        if (!this.connected) {
-            throw new Error('Not connected to device');
-        }
-
-        // Send Ctrl-C to interrupt current program
-        const encoder = new TextEncoder();
-        const ctrlC = '\x03';
-        
-        await this.writer.write(encoder.encode(ctrlC));
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await this.writer.write(encoder.encode(ctrlC));
-
-        // Read any pending data
-        const data = await this.readUntilPrompt();
-        if (data === null) {
-            throw new Error('Device is not responding. Try unplugging and resetting the device.');
-        }
-
-        // Send the code line by line
-        const normalizedCode = code.replace(/\r/g, '\n');
-        const lines = normalizedCode.split('\n');
-        
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) {
-                continue;
-            }
-            
-            const actualLine = trimmedLine === '_EMPTY_' ? '' : trimmedLine;
-            
-            if (!retry || actualLine.startsWith('exec(')) {
-                if (await this.sendLine(actualLine) === null) {
-                    throw new Error('Failed to send line to device');
-                }
-            } else {
-                // Retry logic for unstable connections
-                let success = false;
-                for (let attempt = 0; attempt < 3; attempt++) {
-                    const lineResult = await this.sendLine(actualLine);
-                    if (lineResult !== null && !lineResult.includes('Traceback')) {
-                        success = true;
-                        break;
-                    }
-                }
-                if (!success) {
-                    throw new Error('Failed to send line after retries');
-                }
-            }
-        }
-    }
-
-    /**
      * Download code from the device
      * @param {string} filename - Source filename to download (default: 'main.py')
      * @returns {string} - The file content as a string
@@ -721,7 +615,82 @@ class RobotController {
     }
 
     /**
-     * Upload code to the device
+     * Wait until the received stream contains `marker` (or time out).
+     * Returns everything received, or null on timeout.
+     */
+    async readUntilMarker(marker, timeoutMs) {
+        const consumer = this.createBufferConsumer('readUntilMarker');
+        const deadline = Date.now() + timeoutMs;
+        let output = '';
+        try {
+            while (Date.now() < deadline) {
+                output += await consumer.readWithTimeout(200);
+                if (output.includes(marker)) {
+                    return output;
+                }
+            }
+            return null;
+        } finally {
+            this.removeBufferConsumer(consumer);
+        }
+    }
+
+    /**
+     * Interrupt whatever runs and enter the raw REPL (no echo, one
+     * round trip per program). Must be paired with exitRawRepl().
+     */
+    async enterRawRepl() {
+        const encoder = new TextEncoder();
+        await this.writer.write(encoder.encode('\x03'));
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.writer.write(encoder.encode('\x03'));
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.writer.write(encoder.encode('\x01'));
+        const banner = await this.readUntilMarker('raw REPL; CTRL-B to exit', 3000);
+        if (banner === null) {
+            throw new Error('Device is not responding. Try resetting the device.');
+        }
+    }
+
+    async exitRawRepl() {
+        try {
+            await this.writer.write(new TextEncoder().encode('\x02'));
+            await this.readUntilMarker('>>> ', 2000);
+        } catch (error) {
+            console.warn('Could not leave raw REPL:', error);
+        }
+    }
+
+    /**
+     * Run one program in the raw REPL and return its stdout.
+     * Throws if the program raised.
+     */
+    async execRaw(program, timeoutMs = 10000) {
+        await this.writer.write(new TextEncoder().encode(program + '\x04'));
+        // Reply: "OK" <stdout> \x04 <stderr> \x04 ">"
+        const reply = await this.readUntilMarker('\x04>', timeoutMs);
+        if (reply === null) {
+            throw new Error('Device did not finish the command in time');
+        }
+        const body = reply.slice(reply.indexOf('OK') + 2, reply.lastIndexOf('\x04>'));
+        const sep = body.indexOf('\x04');
+        const stdout = sep < 0 ? body : body.slice(0, sep);
+        const stderr = sep < 0 ? '' : body.slice(sep + 1);
+        if (stderr.trim()) {
+            throw new Error(stderr.trim().split('\n').pop());
+        }
+        return stdout;
+    }
+
+    /**
+     * Upload code to the device.
+     *
+     * Raw REPL + base64: the device never echoes, so one round trip
+     * moves a few KB instead of a 512-byte hex line, which matters most
+     * over Bluetooth. Pieces are written with 'ab' and a gc.collect()
+     * between them so the file never needs a large contiguous buffer
+     * (the ESP32 heap fragments fast; that is what used to raise
+     * OSError 28), and base64 keeps every special character intact.
      * @param {string} code - The code to upload
      * @param {string} filename - Target filename (default: 'main.py')
      */
@@ -738,34 +707,42 @@ class RobotController {
             }
         }
 
+        const bytes = new TextEncoder().encode(code);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const b64 = btoa(binary);
+        const piece = 3072;   // base64 chars per round trip (~2.3 KB of file)
+        const pieces = Math.max(1, Math.ceil(b64.length / piece));
+
+        console.log(`Uploading ${bytes.length} bytes to ${filename} in ${pieces} pieces...`);
+        await this.enterRawRepl();
         try {
-            console.log(`Uploading code to ${filename}...`);
-            
-            // Split large files into chunks
-            // This has to be half of this.chunkSize to avoid OSError 28
-            const chunkSize = this.chunkSize // 2;
-            const chunks = Math.ceil(code.length / chunkSize);
-            
-            for (let i = 0; i < chunks; i++) {
-                const chunk = code.substring(i * chunkSize, (i + 1) * chunkSize);
-                const append = i > 0;
-                
-                if (append) {
-                    console.log(`Uploading chunk ${i + 1}/${chunks}...`);
+            await this.execRaw("import gc, binascii\ngc.collect()\n");
+            for (let i = 0; i < pieces; i++) {
+                const chunk = b64.slice(i * piece, (i + 1) * piece);
+                const mode = i === 0 ? 'wb' : 'ab';
+                const program =
+                    `f = open('${filename}', '${mode}')\n` +
+                    `f.write(binascii.a2b_base64('${chunk}'))\n` +
+                    `f.close()\ngc.collect()\nprint('PIECE_OK')\n`;
+                const out = await this.execRaw(program, 15000);
+                if (!out.includes('PIECE_OK')) {
+                    throw new Error('Device did not confirm piece ' + (i + 1));
                 }
-                
-                // Wrap the chunk in MicroPython upload code
-                const wrappedCode = this.wrapCodeHex(chunk, filename, append);
-                
-                // Execute the wrapped code
-                await this.executeCodeRaw(wrappedCode, true);
             }
-            
-            console.log(`Successfully uploaded code to ${filename}`);
+            const size = await this.execRaw(`import os\nprint(os.stat('${filename}')[6])\n`);
+            if (parseInt(size, 10) !== bytes.length) {
+                throw new Error(`File on device is ${size.trim()} bytes, expected ${bytes.length}`);
+            }
+            console.log(`Successfully uploaded ${filename}`);
             return true;
         } catch (error) {
             console.error('Failed to upload code:', error);
             throw error;
+        } finally {
+            await this.exitRawRepl();
         }
     }
 

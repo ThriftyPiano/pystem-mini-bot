@@ -44,10 +44,17 @@ def upload_file(src_path, dest_name=None, repl=None):
     lines.append("print('UPLOADED', n, %r)" % dest_name)
     code = "\n".join(lines)
 
+    # Wait for the device's confirmation rather than a fixed settle time:
+    # a 6 KB file takes longer than 2 s to unhexlify and write, and moving
+    # on early leaves the next command queued behind a half-written file.
     if repl is None:
         with RawREPL() as r:
-            return r.run(code, settle=2.0)
-    return repl.run(code, settle=2.0)
+            out = r.run(code, stream=True, echo=False, timeout=120, end_marker=b'UPLOADED')
+    else:
+        out = repl.run(code, stream=True, echo=False, timeout=120, end_marker=b'UPLOADED')
+    if 'UPLOADED' not in out:
+        raise RuntimeError('upload of %s did not complete:\n%s' % (dest_name, out[-300:]))
+    return out
 
 
 if __name__ == "__main__":

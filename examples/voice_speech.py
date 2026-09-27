@@ -7,41 +7,18 @@
 import motor
 import motor_pair
 import speech
-
-# The StickS3 has a screen; the Max V1 and the simulator do not. The stick
-# sits sideways on the robot, so the screen is used in landscape
-# (config.LCD_ROTATION): 240x135, 15 characters per line in the 16x32 font.
-try:
-    import sticks3
-    import vga1_16x32 as font
-    from config import LCD_ROTATION
-    lcd = sticks3.display(LCD_ROTATION)
-except ImportError:
-    lcd = None
-
-def show(*lines):
-    """Print the lines, and draw them centred on the screen when there is one."""
-    print(*lines)
-    if lcd is None:
-        return
-    lcd.fill(0)
-    step = font.HEIGHT + 8
-    y = max(0, (lcd.height - len(lines) * step + 8) // 2)
-    for i, s in enumerate(lines):
-        s = str(s)[:lcd.width // font.WIDTH]
-        x = max(0, (lcd.width - len(s) * font.WIDTH) // 2)
-        lcd.text(font, s, x, y + step * i, 0xFFFF)
+import screen   # screen.show() prints, and draws on the StickS3's screen
 
 motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)
-show("Voice control", "starting...")
+screen.show("Voice control", "starting...")
 speech.start()
-show("Ready!", "Say a command")
+screen.show("Ready!", "Say a command")
 print("Commands:", speech.labels())
 
 try:
     while True:
         cmd = speech.wait_for_command()
-        show("Heard:", cmd)
+        screen.show("Heard:", cmd)
         if cmd == 'forward':
             motor_pair.move(motor_pair.PAIR_1, 0, velocity=360)
         elif cmd == 'backward':
@@ -55,4 +32,4 @@ try:
 finally:
     motor_pair.stop(motor_pair.PAIR_1)
     speech.stop()
-    show("Stopped")
+    screen.show("Stopped")

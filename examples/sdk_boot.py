@@ -24,28 +24,19 @@ if BLE_REPL:
     except Exception as e:
         print("Bluetooth unavailable:", e)
 
-# On the StickS3 the prompt also goes on the built-in LCD. The stick sits
-# sideways on the robot, so the screen is used in landscape (see
-# config.LCD_ROTATION): 240x135, frozen 16x32 font = 15 characters/line.
-lcd = None
-if BOARD == 'sticks3':
-    try:
-        import sticks3
-        import vga1_16x32 as font
-        lcd = sticks3.display(LCD_ROTATION)
-    except Exception as e:
-        print("LCD unavailable:", e)
+# The prompt also goes on the StickS3's screen (screen.py: four lines,
+# line 1 is the Bluetooth status that ble_repl maintains, lines 2-4 are
+# ours). On a board without a screen it just prints.
+try:
+    import screen
+except ImportError:
+    screen = None
 
 def show(*lines):
-    """Draw up to four lines of text, centred on the screen."""
-    if lcd is None:
-        return
-    lcd.fill(0)
-    step = font.HEIGHT + 8
-    y = max(0, (lcd.height - len(lines) * step + 8) // 2)
-    for i, s in enumerate(lines):
-        x = max(0, (lcd.width - len(s) * font.WIDTH) // 2)
-        lcd.text(font, s, x, y + step * i, 0xFFFF)
+    if screen:
+        screen.show(*lines)
+    else:
+        print(*lines)
 
 # Enable internal Pull-Down if your button connects to 3.3V
 # OR Pull-Up if your button connects to GND. 
@@ -75,22 +66,10 @@ def button_pressed_callback(pin):
 # Bouncing happens on both edges, so usually, trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING is safest if you want to catch either.
 button.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=button_pressed_callback)
 
-print("Waiting for start button...")
+show("Press top button to start")
 
-def show_prompt():
-    if ble_name:
-        state = "IDE connected" if ble_repl.connected() else "Press top btn"
-        show(ble_name, state, "to start")
-    else:
-        show("Press top", "button", "to start")
-
-show_prompt()
-was_connected = False
 while not button_pressed:
     time.sleep(0.1)
-    if ble_name and ble_repl.connected() != was_connected:
-        was_connected = not was_connected
-        show_prompt()
 
 # Clean up the interrupt so it doesn't interfere with main.py
 button.irq(handler=None)

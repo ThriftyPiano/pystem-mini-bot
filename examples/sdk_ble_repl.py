@@ -19,6 +19,7 @@
 import io
 import os
 import time
+import machine
 import bluetooth
 
 _IRQ_CENTRAL_CONNECT = 1
@@ -36,6 +37,11 @@ _UART_UUID = bluetooth.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
 _TX_UUID = bluetooth.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E')   # robot -> IDE (notify)
 _RX_UUID = bluetooth.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E')   # IDE -> robot (write)
 _NAME = 'Mini Bot'
+# Output is batched: the friendly REPL echoes one character per write(),
+# and one notification per character floods the radio. A short timer
+# coalesces a burst into MTU-sized notifications.
+_FLUSH_MS = 20
+_TIMER_ID = 3          # hardware timer kept for this module
 
 _repl = None
 
@@ -47,6 +53,9 @@ class BLEREPL(io.IOBase):
         self._conn = None
         self._mtu = 23
         self._rxbuf = bytearray()
+        self._txbuf = bytearray()
+        self._flush_pending = False
+        self._timer = machine.Timer(_TIMER_ID)
         ble.config(gap_name=name, mtu=517)
         ble.irq(self._irq)
         ((self._tx, self._rx),) = ble.gatts_register_services((
@@ -71,9 +80,12 @@ class BLEREPL(io.IOBase):
         if event == _IRQ_CENTRAL_CONNECT:
             self._conn = data[0]
             self._mtu = 23
+            self._txbuf = bytearray()
+            _show_status(self._name, 'connected')
         elif event == _IRQ_CENTRAL_DISCONNECT:
             self._conn = None
             self._advertise()
+            _show_status(self._name, 'available')
         elif event == _IRQ_MTU_EXCHANGED:
             self._mtu = data[1]
         elif event == _IRQ_GATTS_WRITE and data[1] == self._rx:
@@ -108,14 +120,28 @@ class BLEREPL(io.IOBase):
 
     def write(self, buf):
         # Never raise from here: an exception inside a dupterm write makes
-        # MicroPython silently detach the stream. Wait briefly for the
-        # radio's queue, then drop what does not fit.
+        # MicroPython silently detach the stream.
         if self._conn is None:
             return len(buf)
+        self._txbuf += buf
+        if not self._flush_pending:
+            self._flush_pending = True
+            self._timer.init(period=_FLUSH_MS, mode=machine.Timer.ONE_SHOT,
+                             callback=self._flush)
+        return len(buf)
+
+    def _flush(self, _timer=None):
+        data = self._txbuf
+        self._txbuf = bytearray()
+        self._flush_pending = False
+        if self._conn is None or not data:
+            return
         step = max(self._mtu - 3, 20)
-        mv = memoryview(buf)
-        for i in range(0, len(buf), step):
+        mv = memoryview(data)
+        for i in range(0, len(data), step):
             chunk = mv[i:i + step]
+            # ENOMEM is the radio's queue-full signal: wait a little, then
+            # drop the rest rather than stall the program.
             for _ in range(40):
                 try:
                     self._ble.gatts_notify(self._conn, self._tx, chunk)
@@ -123,8 +149,7 @@ class BLEREPL(io.IOBase):
                 except OSError:
                     time.sleep_ms(5)
             else:
-                break
-        return len(buf)
+                return
 
 
 def start():
@@ -139,7 +164,17 @@ def start():
     _repl = BLEREPL(ble, name)
     os.dupterm(_repl, 0)  # type: ignore[attr-defined]
     print('Bluetooth: IDE can connect to "%s"' % name)
+    _show_status(name, 'available')
     return name
+
+
+def _show_status(name, state):
+    # Line 1 of the screen: "EBC6: available" / "EBC6: connected".
+    try:
+        import screen
+        screen.status('%s: %s' % (name[-4:], state))
+    except Exception:
+        pass
 
 
 def stop():
@@ -147,6 +182,7 @@ def stop():
     if _repl is None:
         return
     os.dupterm(None, 0)  # type: ignore[attr-defined]
+    _repl._timer.deinit()
     _repl._ble.active(False)
     _repl = None
 

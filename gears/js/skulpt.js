@@ -30,6 +30,7 @@ var skulpt = new function() {
     './minibot_sim.js': 'js/minibotSim.js',
     './machine.py': 'minibot/machine.py',
     './speech.py': 'minibot/speech.py',
+    './screen.py': 'minibot/screen.py',
   };
   this.preloadedLibs = {};
 
