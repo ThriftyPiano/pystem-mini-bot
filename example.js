@@ -5,6 +5,7 @@ const exampleManager = {
         'led_blink.py',
         'line_follow.py',
         'motor_control.py',
+        'sdk_ble_repl.py',
         'sdk_boot.py',
         'sdk_color_sensor.py',
         'sdk_config.py',

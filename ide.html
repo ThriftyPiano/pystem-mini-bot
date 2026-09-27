@@ -361,7 +361,8 @@
         </nav>
     <div id="toolbar">
         <span style="font-weight: bold; margin-right: 12px; font-size: 12px;">Robot</span>
-        <button id="btn-connect">Connect</button>
+        <button id="btn-connect" title="USB cable">Connect</button>
+        <button id="btn-connect-ble" title="Bluetooth: the robot shows its name (Mini Bot XXXX) on screen at boot">Connect Bluetooth</button>
         <button id="btn-disconnect">Disconnect</button>
         <button id="btn-upload-code">Write to Robot</button>
         <button id="btn-download-code">Read from Robot</button>
@@ -487,6 +488,7 @@
         // Button implementations
         document.addEventListener('DOMContentLoaded', function() {
             const connectBtn = document.getElementById('btn-connect');
+            const connectBleBtn = document.getElementById('btn-connect-ble');
             const disconnectBtn = document.getElementById('btn-disconnect');
             const uploadBtn = document.getElementById('btn-upload-code');
             const downloadBtn = document.getElementById('btn-download-code');
@@ -509,16 +511,22 @@
             // Update button states
             function updateButtonStates() {
                 const isConnected = robotIsConnected();
+                const info = isConnected ? robotGetDeviceInfo() : null;
+                const viaBle = !!(info && info.transport === 'ble');
                 connectBtn.disabled = isConnected;
+                connectBleBtn.disabled = isConnected;
                 disconnectBtn.disabled = !isConnected;
                 uploadBtn.disabled = !isConnected;
                 downloadBtn.disabled = !isConnected;
                 uploadSdkBtn.disabled = !isConnected;
                 uploadModelBtn.disabled = !isConnected || !modelSelect.value;
                 
-                connectBtn.textContent = isConnected ? 'Connected' : 'Connect';
-                connectBtn.style.background = isConnected ? '#4CAF50' : '';
-                connectBtn.style.color = isConnected ? 'white' : '';
+                connectBtn.textContent = isConnected && !viaBle ? 'Connected' : 'Connect';
+                connectBtn.style.background = isConnected && !viaBle ? '#4CAF50' : '';
+                connectBtn.style.color = isConnected && !viaBle ? 'white' : '';
+                connectBleBtn.textContent = viaBle ? 'Connected: ' + (info.name || 'Bluetooth') : 'Connect Bluetooth';
+                connectBleBtn.style.background = viaBle ? '#4CAF50' : '';
+                connectBleBtn.style.color = viaBle ? 'white' : '';
             }
             
             // Make updateButtonStates globally accessible
@@ -545,6 +553,24 @@
                     alert('Failed to connect to device: ' + error.message + '\nTry unplugging and reconnecting the device.');
                     connectBtn.disabled = false;
                     connectBtn.textContent = 'Connect';
+                }
+            });
+
+            // Bluetooth connect button
+            connectBleBtn.addEventListener('click', async function() {
+                try {
+                    connectBleBtn.disabled = true;
+                    connectBleBtn.textContent = 'Connecting...';
+                    const result = await robotConnectBluetooth();
+                    if (result) {
+                        console.log('Successfully connected over Bluetooth');
+                    }
+                    updateButtonStates();
+                } catch (error) {
+                    console.error('Bluetooth connection failed:', error);
+                    alert('Failed to connect over Bluetooth: ' + error.message +
+                          '\nMake sure the robot is on and shows "Mini Bot ..." on its screen.');
+                    updateButtonStates();
                 }
             });
 

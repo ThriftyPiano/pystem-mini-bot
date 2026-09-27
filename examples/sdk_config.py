@@ -58,6 +58,11 @@ if BOARD == 'maxv1':
     # No screen on the Max V1 (kept so programs can import it on either board).
     LCD_ROTATION = 0
 
+    # REPL over Bluetooth for the IDE (ble_repl.py). Off here: the
+    # Bluetooth stack takes ~60 KB of the Max V1's ~100 KB heap. Flip it
+    # on if a program has room.
+    BLE_REPL = False
+
 else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
     MOTOR_PINS = {
         'A': {'servo': 5, 'encoder': 43},   # WHEEL A / ENC A (left)
@@ -97,6 +102,11 @@ else:  # 'sticks3' — pins from hardware/sticks3-bot-hat/README.md
     # st7789py rotation 3 (verified on the robot, 2026-09-19). In the
     # frozen 16x32 font that is 15 characters per line, 4 lines.
     LCD_ROTATION = 3
+
+    # REPL over Bluetooth for the IDE (ble_repl.py): started by boot.py
+    # and left running, so "Connect Bluetooth" in the IDE works without
+    # a cable. The stick's 8 MB PSRAM makes the stack's heap cost moot.
+    BLE_REPL = True
 
 # How the IMU's axes map onto the robot's. Each entry names the sensor axis
 # (with optional '-' to flip) that supplies the robot's x, y, z; the robot's

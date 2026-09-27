@@ -1,7 +1,78 @@
 /**
  * ESP32 Robot Car Communication Interface
  * Extracted from fe_extension.js and kernel.py
+ *
+ * Two transports, one protocol: over USB (WebSerial) or Bluetooth LE
+ * (Web Bluetooth, the robot's ble_repl.py mirroring its REPL onto the
+ * Nordic UART Service). BleLink presents the same reader/writer shape as
+ * the WebSerial streams, so everything above it is transport-agnostic.
  */
+
+const BLE_UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const BLE_UART_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';   // IDE -> robot (write)
+const BLE_UART_TX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';   // robot -> IDE (notify)
+// Web Bluetooth caps a write at 512 bytes; robots negotiate a 517-byte MTU
+// so this is one packet, and a smaller MTU just makes it a long write.
+const BLE_WRITE_CHUNK = 500;
+
+class BleLink {
+    constructor(device, rx, tx) {
+        this.device = device;
+        this.rx = rx;
+        this.tx = tx;
+        this.queue = [];
+        this.waiters = [];
+        this.closed = false;
+        this.onNotify = this.onNotify.bind(this);
+        tx.addEventListener('characteristicvaluechanged', this.onNotify);
+    }
+
+    onNotify(e) {
+        const v = e.target.value;
+        const bytes = new Uint8Array(v.buffer, v.byteOffset, v.byteLength).slice();
+        if (this.waiters.length) {
+            this.waiters.shift()({value: bytes, done: false});
+        } else {
+            this.queue.push(bytes);
+        }
+    }
+
+    // Reader shape: read() resolves with the next notification.
+    read() {
+        if (this.queue.length) {
+            return Promise.resolve({value: this.queue.shift(), done: false});
+        }
+        if (this.closed) {
+            return Promise.resolve({value: undefined, done: true});
+        }
+        return new Promise(resolve => this.waiters.push(resolve));
+    }
+
+    // Writer shape: acknowledged writes give natural back-pressure.
+    async write(bytes) {
+        for (let i = 0; i < bytes.length; i += BLE_WRITE_CHUNK) {
+            const piece = bytes.slice(i, i + BLE_WRITE_CHUNK);
+            if (this.rx.writeValueWithResponse) {
+                await this.rx.writeValueWithResponse(piece);
+            } else {
+                await this.rx.writeValue(piece);
+            }
+        }
+    }
+
+    cancel() {
+        this.closed = true;
+        this.waiters.forEach(resolve => resolve({value: undefined, done: true}));
+        this.waiters = [];
+        return Promise.resolve();
+    }
+
+    releaseLock() {}
+
+    close() {
+        return this.cancel();
+    }
+}
 
 class RobotController {
     constructor() {
@@ -9,6 +80,9 @@ class RobotController {
         this.reader = null;
         this.writer = null;
         this.connected = false;
+        this.transport = null;       // 'serial' | 'ble'
+        this.bleDevice = null;
+        this.bleName = null;
         this.chunkSize = 1024;
         this.lastLineEcho = '';
         
@@ -53,6 +127,7 @@ class RobotController {
             this.writer = this.port.writable.getWriter();
             
             this.connected = true;
+            this.transport = 'serial';
             
             // Listen for disconnect events (USB unplugged)
             this.port.addEventListener('disconnect', () => {
@@ -82,12 +157,112 @@ class RobotController {
     }
 
     /**
+     * Show the Web Bluetooth chooser and connect to a robot running ble_repl.py
+     */
+    async connectBluetooth() {
+        if (!navigator.bluetooth) {
+            throw new Error('Web Bluetooth is not available in this browser: use Chrome or Edge on a computer with Bluetooth');
+        }
+        let device;
+        try {
+            device = await navigator.bluetooth.requestDevice({
+                filters: [{services: [BLE_UART_SERVICE]}]
+            });
+        } catch (error) {
+            if (error.name === 'NotFoundError') {
+                console.log('User canceled Bluetooth device selection');
+                return false;
+            }
+            throw error;
+        }
+        await this.openBle(device);
+        device.addEventListener('gattserverdisconnected', () => this.handleBleDisconnect(device));
+        console.log('Connected over Bluetooth to', device.name);
+        this.updateUIButtonStates();
+        return true;
+    }
+
+    async openBle(device) {
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(BLE_UART_SERVICE);
+        const rx = await service.getCharacteristic(BLE_UART_RX);
+        const tx = await service.getCharacteristic(BLE_UART_TX);
+        await tx.startNotifications();
+        const link = new BleLink(device, rx, tx);
+        this.reader = link;
+        this.writer = link;
+        this.transport = 'ble';
+        this.bleDevice = device;
+        this.bleName = device.name || 'Mini Bot';
+        this.connected = true;
+        this.startBackgroundReading();
+    }
+
+    /**
+     * A soft reset, machine.reset() or walking out of range drops the link;
+     * the robot re-advertises within a second, so try to pick it back up
+     * before giving up.
+     */
+    async handleBleDisconnect(device) {
+        if (this.transport !== 'ble' || this.bleDevice !== device) {
+            return;
+        }
+        this.stopBackgroundReading();
+        if (this.reader) {
+            this.reader.cancel();
+        }
+        this.connected = false;
+        this.updateUIButtonStates();
+        if (window.serialTerminal) {
+            window.serialTerminal.addLine('\n[Bluetooth link dropped - reconnecting...]\n', 'error');
+        }
+        for (let attempt = 0; attempt < 5 && this.bleDevice === device; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 1000 + attempt * 1000));
+            try {
+                await this.openBle(device);
+                if (window.serialTerminal) {
+                    window.serialTerminal.addLine('[Bluetooth reconnected]\n', 'info');
+                }
+                this.updateUIButtonStates();
+                return;
+            } catch (error) {
+                console.log('Bluetooth reconnect attempt failed:', error.message);
+            }
+        }
+        if (this.bleDevice === device) {
+            this.bleDevice = null;
+            this.handleUnexpectedDisconnect();
+        }
+    }
+
+    /**
      * Disconnect from the device
      */
     async disconnect() {
         try {
             // Stop background reading first
             this.stopBackgroundReading();
+
+            if (this.transport === 'ble') {
+                const device = this.bleDevice;
+                this.bleDevice = null;    // stops the auto-reconnect
+                if (this.reader) {
+                    this.reader.cancel();
+                }
+                this.reader = null;
+                this.writer = null;
+                this.connected = false;
+                this.transport = null;
+                if (device && device.gatt.connected) {
+                    device.gatt.disconnect();
+                }
+                this.serialBuffer = [];
+                this.lastBufferPosition = 0;
+                this.bufferConsumers.clear();
+                console.log('Disconnected from Bluetooth device');
+                this.updateUIButtonStates();
+                return;
+            }
             
             if (this.reader) {
                 await this.reader.cancel();
@@ -106,6 +281,7 @@ class RobotController {
             }
             
             this.connected = false;
+            this.transport = null;
             
             // Clear buffer
             this.serialBuffer = [];
@@ -131,21 +307,25 @@ class RobotController {
             this.stopBackgroundReading();
             
             // Clean up without trying to close the port (it's already gone)
+            const wasBle = this.transport === 'ble';
             this.reader = null;
             this.writer = null;
             this.port = null;
             this.connected = false;
+            this.transport = null;
+            this.bleDevice = null;
             
             // Clear buffer
             this.serialBuffer = [];
             this.lastBufferPosition = 0;
             this.bufferConsumers.clear();
             
-            console.log('ESP32 device disconnected unexpectedly (USB unplugged)');
+            console.log('ESP32 device disconnected unexpectedly');
             
             // Notify the UI if possible
             if (window.serialTerminal) {
-                window.serialTerminal.addLine('\n[Device disconnected - USB unplugged]\n', 'error');
+                window.serialTerminal.addLine(wasBle ? '\n[Bluetooth device disconnected]\n'
+                                                     : '\n[Device disconnected - USB unplugged]\n', 'error');
             }
             
             // Update UI button states
@@ -610,12 +790,16 @@ class RobotController {
      * Get device info if available
      */
     getDeviceInfo() {
+        if (this.transport === 'ble') {
+            return {transport: 'ble', name: this.bleName};
+        }
         if (!this.port) {
             return null;
         }
         
         const info = this.port.getInfo();
         return {
+            transport: 'serial',
             usbVendorId: info.usbVendorId,
             usbProductId: info.usbProductId
         };
@@ -627,6 +811,7 @@ const robot = new RobotController();
 
 // Export the main functions
 window.robotConnect = () => robot.connect();
+window.robotConnectBluetooth = () => robot.connectBluetooth();
 window.robotDisconnect = () => robot.disconnect();
 window.robotUploadCode = (code, filename) => robot.uploadCode(code, filename);
 window.robotDownloadCode = (filename) => robot.downloadCode(filename);

@@ -9,6 +9,9 @@ import sys
 
 BOARD = 'sim'
 
+# No Bluetooth in the simulator; kept so boot-style code can import it.
+BLE_REPL = False
+
 # GEARS gives the two drive wheels the fixed addresses outA / outB.
 MOTOR_PINS = {
     'A': {'sim': 'outA'},   # left wheel

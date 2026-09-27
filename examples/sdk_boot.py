@@ -4,13 +4,25 @@ from machine import Pin
 import time
 
 try:
-    from config import BOARD, BUTTON_PIN, LCD_ROTATION
+    from config import BOARD, BUTTON_PIN, LCD_ROTATION, BLE_REPL
 except ImportError:
     # config.py missing from the device: fall back to the Max V1 pin so
     # the board still boots into main.py.
     BOARD = 'maxv1'
     BUTTON_PIN = 27
     LCD_ROTATION = 0
+    BLE_REPL = False
+
+# REPL over Bluetooth so the IDE can connect without a cable. Started
+# here, before the button wait, and left running for main.py; the name
+# goes on the screen so you connect to the right robot.
+ble_name = None
+if BLE_REPL:
+    try:
+        import ble_repl
+        ble_name = ble_repl.start()
+    except Exception as e:
+        print("Bluetooth unavailable:", e)
 
 # On the StickS3 the prompt also goes on the built-in LCD. The stick sits
 # sideways on the robot, so the screen is used in landscape (see
@@ -64,10 +76,21 @@ def button_pressed_callback(pin):
 button.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=button_pressed_callback)
 
 print("Waiting for start button...")
-show("Press top", "button", "to start")
 
+def show_prompt():
+    if ble_name:
+        state = "IDE connected" if ble_repl.connected() else "Press top btn"
+        show(ble_name, state, "to start")
+    else:
+        show("Press top", "button", "to start")
+
+show_prompt()
+was_connected = False
 while not button_pressed:
     time.sleep(0.1)
+    if ble_name and ble_repl.connected() != was_connected:
+        was_connected = not was_connected
+        show_prompt()
 
 # Clean up the interrupt so it doesn't interfere with main.py
 button.irq(handler=None)
