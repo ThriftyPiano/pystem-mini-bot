@@ -134,6 +134,7 @@ class OrientationSensor:
         self.roll = 0
         self.pitch = 0
         self.yaw = 0
+        self.yaw_rate = 0   # deg/s, clockwise positive
         self.last_time = time.ticks_ms()
 
         self.calibrate()
@@ -198,6 +199,7 @@ class OrientationSensor:
         self.pitch = alpha * gyro_pitch + (1 - alpha) * accel_pitch
 
         self.yaw = gyro_yaw
+        self.yaw_rate = gyro_z_dps
 
         return self.roll, self.pitch, self.yaw
 

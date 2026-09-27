@@ -14,6 +14,8 @@ PORT_D = 'D'
 PORT_E = 'E'
 PORT_F = 'F'
 
+VELOCITY_WINDOW_TICKS = 4   # x control_loop_ms
+
 CLOCKWISE = 1
 COUNTERCLOCKWISE = -1
 SHORTEST_PATH = 0
@@ -44,8 +46,9 @@ class Motor:
         self.control_mode = 'idle'   # 'idle' | 'velocity' | 'position'
         self.velocity_integral = 0.0
         self.measured_velocity = 0.0
-        self.last_control_position = 0.0
-        self.last_control_time = 0
+        # (position, ticks_ms) of the last few control ticks: velocity is
+        # measured over ~200 ms because one tick sees only ~2 pulses.
+        self._pos_hist = None
         # Slew-limited target the velocity loop tracks, so both wheels
         # accelerate together on a step input.
         self._ramped_target = 0.0
@@ -160,13 +163,16 @@ class Motor:
         target = self._ramped_target
 
         now = time.ticks_ms()
-        dt_ctrl = time.ticks_diff(now, self.last_control_time) / 1000.0
-        if dt_ctrl <= 0 or self.last_control_time == 0:
+        pos = self.position
+        hist = self._pos_hist
+        if hist is None:
+            hist = self._pos_hist = [(pos, now)] * VELOCITY_WINDOW_TICKS
             inst = 0.0
         else:
-            inst = (self.position - self.last_control_position) / dt_ctrl
-        self.last_control_position = self.position
-        self.last_control_time = now
+            old_pos, old_t = hist.pop(0)
+            hist.append((pos, now))
+            dt_win = time.ticks_diff(now, old_t) / 1000.0
+            inst = (pos - old_pos) / dt_win if dt_win > 0 else 0.0
         self.measured_velocity = 0.5 * self.measured_velocity + 0.5 * inst
         measured = self.measured_velocity
 
@@ -233,8 +239,7 @@ def run(port, velocity, *, acceleration=1000):
         motor.velocity_integral = 0.0
         motor.measured_velocity = 0.0
         motor._ramped_target = 0.0
-        motor.last_control_position = motor.position
-        motor.last_control_time = time.ticks_ms()
+        motor._pos_hist = None
         motor.control_timer.deinit()
         motor.control_mode = 'velocity'
         motor.is_running = True
@@ -303,6 +308,13 @@ def run_to_degrees_counted(port, degrees, velocity, *, stop=True, acceleration=1
 def stop(port, *, stop=True):
     motor = _get_motor(port)
     motor.stop()
+
+def stop_all(*ports):
+    """Cut power to all the given motors at the same instant, then stop each."""
+    for port in ports:
+        _get_motor(port)._set_servo_speed(0)
+    for port in ports:
+        _get_motor(port).stop()
 
 def reset_relative_position(port, position):
     motor = _get_motor(port)

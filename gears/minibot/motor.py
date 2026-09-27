@@ -151,6 +151,11 @@ def stop(port, *, stop=True):
     _get_motor(port).stop()
 
 
+def stop_all(*ports):
+    for port in ports:
+        _get_motor(port).stop()
+
+
 def reset_relative_position(port, position):
     _get_motor(port).position = position
 

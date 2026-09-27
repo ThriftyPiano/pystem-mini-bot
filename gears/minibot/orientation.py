@@ -23,6 +23,7 @@ class OrientationSensor:
         self.roll = 0
         self.pitch = 0
         self.yaw = 0
+        self.yaw_rate = 0
         self.last_time = time.ticks_ms()
         self.calibrate()
 
@@ -40,7 +41,9 @@ class OrientationSensor:
         time.sleep(_SENSOR_DELAY)
         self.roll = self.gyro.rollAngleAndRate(True)[0]
         self.pitch = self.gyro.pitchAngleAndRate(True)[0]
-        self.yaw = _YAW_SIGN * self.gyro.yawAngleAndRate(True)[0] + self._yaw_offset
+        yaw, rate = self.gyro.yawAngleAndRate(True)
+        self.yaw = _YAW_SIGN * yaw + self._yaw_offset
+        self.yaw_rate = _YAW_SIGN * rate
         self.last_time = time.ticks_ms()
         return self.roll, self.pitch, self.yaw
 

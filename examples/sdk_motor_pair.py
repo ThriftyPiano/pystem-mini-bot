@@ -17,6 +17,17 @@ PAIR_1 = 1
 PAIR_2 = 2
 PAIR_3 = 3
 
+# Straight-line yaw hold (PD on yaw error, wheel deg/s per degree and per deg/s).
+YAW_KP = 3.0
+YAW_KD = 0.3
+YAW_MAX_CORRECTION = 40
+# Yaw-feedback turns.
+TURN_TOLERANCE_DEG = 3.0
+TURN_SLOW_ZONE_DEG = 30.0
+TURN_MIN_SCALE = 0.35
+TURN_TIMEOUT_MS = 10000
+HEADING_FIX_DPS = 90        # wheel speed used to square up after a straight run
+
 class MotorPair:
     def __init__(self, pair_id, left_port, right_port, use_orientation=True):
         self.pair_id = pair_id
@@ -27,6 +38,12 @@ class MotorPair:
         self.default_velocity = MOTOR_CONFIG['default_speed_dps']
         self.left_reversed = False
         self.right_reversed = True
+        # The heading the robot is meant to be on: straight runs hold it
+        # and turns add to it, so an error left by one move is corrected
+        # by the next instead of accumulating. A free movement (steering,
+        # tank) makes it unknown; it is re-read from the sensor afterwards.
+        self.target_heading = 0.0
+        self._heading_unknown = False
 
         self.orientation_sensor = None
         if use_orientation and HAS_ORIENTATION:
@@ -47,11 +64,21 @@ class MotorPair:
             return -degrees
         return degrees
 
-    def move(self, steering, velocity=None):
-        """Move with steering: -100 (full left) to 100 (full right), 0 = straight."""
-        if velocity is None:
-            velocity = self.default_velocity
+    # ---- heading bookkeeping
 
+    def _current_yaw(self):
+        sensor = self.orientation_sensor
+        if sensor is None:
+            return 0.0
+        sensor.update()
+        return sensor.get_yaw()
+
+    def _settle_heading(self):
+        if self.orientation_sensor and self._heading_unknown:
+            self.target_heading = self._current_yaw()
+            self._heading_unknown = False
+
+    def _drive(self, steering, velocity):
         left_velocity = velocity
         right_velocity = velocity
 
@@ -66,28 +93,29 @@ class MotorPair:
         motor.run(self.left_port, int(left_velocity))
         motor.run(self.right_port, int(-right_velocity if self.right_reversed else right_velocity))
 
+    def move(self, steering, velocity=None):
+        """Move with steering: -100 (full left) to 100 (full right), 0 = straight."""
+        if velocity is None:
+            velocity = self.default_velocity
+        self._heading_unknown = True
+        self._drive(steering, velocity)
+
     def _init_yaw_reference(self, steering):
-        target_yaw = 0
         if self.orientation_sensor and steering == 0:
-            self.orientation_sensor.update()
-            self.orientation_sensor.reset_yaw()
-            target_yaw = 0
-        return target_yaw
+            self._settle_heading()
+            return self.target_heading
+        self._heading_unknown = True
+        return 0
 
     def _apply_yaw_correction(self, steering, target_yaw, velocity, correction_mode='position'):
         yaw_error = 0
         if self.orientation_sensor and steering == 0:
             try:
-                self.orientation_sensor.update()
-                current_yaw = self.orientation_sensor.get_yaw()
+                current_yaw = self._current_yaw()
                 yaw_error = target_yaw - current_yaw
 
-                # Re-applied every call, no dead band: a correction left on
-                # the motors inside a dead band drives S-curves.
-                correction = yaw_error * 10
-                correction = max(-60, min(60, correction))
-                if abs(yaw_error) <= 0.5:
-                    correction = 0
+                correction = yaw_error * YAW_KP - self.orientation_sensor.yaw_rate * YAW_KD
+                correction = max(-YAW_MAX_CORRECTION, min(YAW_MAX_CORRECTION, correction))
                 if correction_mode == 'position':
                     left_motor = motor._get_motor(self.left_port)
                     right_motor = motor._get_motor(self.right_port)
@@ -111,6 +139,43 @@ class MotorPair:
                 pass
 
         return yaw_error
+
+    def _turn_to_heading(self, target_yaw, left_velocity, right_velocity, clockwise_sign):
+        """Closed loop on yaw: slows down near the target, reverses if it
+        overshoots, and re-checks once stopped so momentum cannot leave the
+        robot outside the tolerance. clockwise_sign is +1 when the given
+        wheel velocities turn the robot clockwise (yaw increasing), -1 otherwise."""
+        start_time = time.ticks_ms()
+        moving = False
+
+        while time.ticks_diff(time.ticks_ms(), start_time) < TURN_TIMEOUT_MS:
+            yaw_error = target_yaw - self._current_yaw()
+
+            if abs(yaw_error) <= TURN_TOLERANCE_DEG:
+                if moving:
+                    self.stop()
+                    moving = False
+                    time.sleep_ms(200)
+                    continue
+                break
+
+            direction = clockwise_sign if yaw_error > 0 else -clockwise_sign
+            scale = max(TURN_MIN_SCALE, min(1.0, abs(yaw_error) / TURN_SLOW_ZONE_DEG)) * direction
+            self.move_tank(left_velocity * scale, right_velocity * scale, _free=False)
+            moving = True
+
+            time.sleep_ms(10)
+
+        self.stop()
+
+    def _fix_heading(self):
+        """After a straight run: square up to the target heading if the stop left it off."""
+        if not self.orientation_sensor or self._heading_unknown:
+            return
+        if abs(self.target_heading - self._current_yaw()) > TURN_TOLERANCE_DEG:
+            self._turn_to_heading(self.target_heading, HEADING_FIX_DPS, -HEADING_FIX_DPS, 1)
+
+    # ---- moves
 
     def move_for_degrees(self, degrees, steering=0, velocity=None):
         if velocity is None:
@@ -149,17 +214,12 @@ class MotorPair:
             if left_reached or right_reached:
                 break
 
-            if left_reached and not left_motor.is_running == False:
-                motor.stop(self.left_port)
-            if right_reached and not right_motor.is_running == False:
-                motor.stop(self.right_port)
-
-            if not (left_reached and right_reached):
-                yaw_error = self._apply_yaw_correction(steering, target_yaw, velocity, 'velocity')
+            self._apply_yaw_correction(steering, target_yaw, velocity, 'velocity')
 
             time.sleep_ms(10)
 
         self.stop()
+        self._fix_heading()
 
     def move_for_time(self, time_ms, steering=0, velocity=None):
         if velocity is None:
@@ -167,29 +227,29 @@ class MotorPair:
 
         target_yaw = self._init_yaw_reference(steering)
 
-        self.move(steering, velocity)
+        self._drive(steering, velocity)
 
-        left_motor = motor._get_motor(self.left_port)
-        right_motor = motor._get_motor(self.right_port)
         start_time = time.ticks_ms()
 
         while time.ticks_diff(time.ticks_ms(), start_time) < time_ms:
-            yaw_error = self._apply_yaw_correction(steering, target_yaw, velocity, 'velocity')
+            self._apply_yaw_correction(steering, target_yaw, velocity, 'velocity')
 
             time.sleep_ms(10)
 
         self.stop()
+        self._fix_heading()
 
     def stop(self):
-        motor.stop(self.left_port)
-        motor.stop(self.right_port)
+        motor.stop_all(self.left_port, self.right_port)
 
-    def move_tank(self, left_velocity, right_velocity):
+    def move_tank(self, left_velocity, right_velocity, _free=True):
+        if _free:
+            self._heading_unknown = True
         motor.run(self.left_port, int(left_velocity))
         motor.run(self.right_port, int(-right_velocity if self.right_reversed else right_velocity))
 
     def move_tank_for_degrees(self, degrees, left_velocity, right_velocity):
-        """Turn by `degrees` of yaw (positive = clockwise)."""
+        """Turn by `degrees` of yaw (positive = clockwise) from the target heading."""
         if not self.orientation_sensor:
             print("Warning: No orientation sensor available, using motor degrees instead of yaw")
             motor.run_for_degrees(self.left_port, int(degrees), int(left_velocity), stop=False)
@@ -200,47 +260,10 @@ class MotorPair:
                 time.sleep_ms(10)
             return
 
-        self.orientation_sensor.update()
-        start_yaw = self.orientation_sensor.get_yaw()
-        target_yaw = start_yaw + degrees
-
-        # Closed loop on yaw: slow down near the target, reverse if it
-        # overshoots, and re-check once stopped so momentum cannot leave
-        # the robot outside the tolerance.
-        tolerance = 3.0
-        slow_zone = 30.0
-        min_scale = 0.35
-        timeout_ms = 10000
-        start_time = time.ticks_ms()
-        moving = False
-
-        while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
-            self.orientation_sensor.update()
-            current_yaw = self.orientation_sensor.get_yaw()
-
-            yaw_error = target_yaw - current_yaw
-
-            if yaw_error > 180:
-                yaw_error -= 360
-            elif yaw_error < -180:
-                yaw_error += 360
-
-            if abs(yaw_error) <= tolerance:
-                if moving:
-                    self.stop()
-                    moving = False
-                    time.sleep_ms(200)
-                    continue
-                break
-
-            direction = 1 if (yaw_error > 0) == (degrees > 0) else -1
-            scale = max(min_scale, min(1.0, abs(yaw_error) / slow_zone)) * direction
-            self.move_tank(left_velocity * scale, right_velocity * scale)
-            moving = True
-
-            time.sleep_ms(10)
-
-        self.stop()
+        self._settle_heading()
+        self.target_heading += degrees
+        self._turn_to_heading(self.target_heading, left_velocity, right_velocity,
+                              1 if degrees >= 0 else -1)
 
     def move_tank_for_time(self, time_ms, left_velocity, right_velocity):
         self.move_tank(left_velocity, right_velocity)
@@ -254,13 +277,15 @@ class MotorPair:
 
     def get_yaw(self):
         if self.orientation_sensor:
-            self.orientation_sensor.update()
-            return self.orientation_sensor.get_yaw()
+            return self._current_yaw()
         return 0
 
     def reset_yaw(self):
+        """Make the current direction the target heading (yaw 0)."""
         if self.orientation_sensor:
             self.orientation_sensor.reset_yaw()
+        self.target_heading = 0.0
+        self._heading_unknown = False
 
 _motor_pairs = {}
 
