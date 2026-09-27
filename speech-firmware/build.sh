@@ -125,6 +125,19 @@ if [ ! -d "$BUILD/nnom" ]; then
     git -C "$BUILD/nnom" reset --hard "$NNOM_COMMIT"
 fi
 
+# --- Robot SDK (frozen, see manifest.py) ---
+rm -rf "$BUILD/sdk"
+mkdir -p "$BUILD/sdk"
+for f in "$ROOT"/../examples/sdk_*.py; do
+    name=$(basename "$f")
+    name=${name#sdk_}
+    if [ "$name" = "boot.py" ]; then
+        continue   # a frozen boot.py would take precedence over an uploaded one
+    fi
+    cp "$f" "$BUILD/sdk/$name"
+done
+echo "SDK modules to freeze: $(ls "$BUILD/sdk" | tr '\n' ' ')"
+
 # --- Build ---
 # -Wno-gnu-folding-constant: newer Apple clang errors on MP_STATIC_ASSERT
 make -C "$BUILD/micropython/mpy-cross" -j CFLAGS_EXTRA=-Wno-gnu-folding-constant
