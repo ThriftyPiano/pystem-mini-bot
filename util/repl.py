@@ -46,14 +46,17 @@ class RawREPL:
     def _drain(self):
         return self.s.read(self.s.in_waiting or 1)
 
-    def run(self, code, settle=1.5, stream=False, timeout=20.0, end_marker=None):
+    def run(self, code, settle=1.5, stream=False, timeout=20.0, end_marker=None, echo=None):
         """Send `code` to raw REPL and return collected stdout.
 
         - settle: how long to wait for one-shot output before returning.
-        - stream: if True, mirror output to stdout as it arrives.
+        - stream: if True, keep reading until end_marker or timeout.
+        - echo: mirror output to stdout as it arrives (default: same as stream).
         - timeout: max seconds to wait when streaming.
         - end_marker: bytes that, once seen, ends the read early (streaming mode).
         """
+        if echo is None:
+            echo = stream
         self.s.write(code.encode() + b"\x04")
         if not stream:
             time.sleep(settle)
@@ -65,7 +68,7 @@ class RawREPL:
             chunk = self.s.read(self.s.in_waiting or 1)
             if chunk:
                 buf += chunk
-                if stream:
+                if echo:
                     sys.stdout.write(chunk.decode(errors="replace"))
                     sys.stdout.flush()
                 if end_marker and end_marker in buf:
@@ -73,7 +76,7 @@ class RawREPL:
                     tail = self.s.read(self.s.in_waiting or 1)
                     if tail:
                         buf += tail
-                        if stream:
+                        if echo:
                             sys.stdout.write(tail.decode(errors="replace"))
                             sys.stdout.flush()
                     break

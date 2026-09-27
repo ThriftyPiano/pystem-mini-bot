@@ -21,16 +21,12 @@ from util.repl import RawREPL
 
 RATE = 16000
 
-DEVICE_CODE = r'''
+DEVICE_CODE = r"""
 import time, gc
 import sticks3
-from ubinascii import b2a_base64
 SECONDS = {seconds}
 DRIVE = {drive}
 n = SECONDS * {rate} * 2
-gc.collect()
-buf = bytearray(n)
-mv = memoryview(buf)
 chunk = bytearray(5120)
 pos = 0
 if DRIVE:
@@ -44,6 +40,7 @@ if DRIVE:
     )
 mic = sticks3.microphone()
 mic.readinto(chunk)   # drop the codec's start-up samples
+f = open('{tmp}', 'wb')
 t0 = time.ticks_ms()
 step = -1
 try:
@@ -55,29 +52,48 @@ try:
                 pattern[s]()
         k = mic.readinto(chunk)
         m = min(k, n - pos)
-        mv[pos:pos + m] = memoryview(chunk)[:m]
+        f.write(memoryview(chunk)[:m])
         pos += m
 finally:
     if DRIVE:
         motor_pair.stop(motor_pair.PAIR_1)
-print('BEGIN', n)
-for i in range(0, n, 3000):
-    print(b2a_base64(mv[i:i + 3000])[:-1].decode())
-print('END')
-'''
+    f.close()
+print('RECORDED', pos)
+"""
+
+PULL_CODE = r"""
+from ubinascii import b2a_base64
+f = open('{tmp}', 'rb')
+f.seek({off})
+print('PIECE', b2a_base64(f.read({size}))[:-1].decode())
+f.close()
+"""
+
+TMP_FILE = 'motor_rec.raw'
+PIECE = 24000
 
 
 def record(seconds, drive, repl):
-    code = DEVICE_CODE.format(seconds=seconds, drive=drive, rate=RATE)
-    out = repl.run(code, stream=False, timeout=seconds + 60, end_marker=b'END')
-    if 'BEGIN' not in out or 'END' not in out:
+    """Record on the device into a temporary file, then pull it in pieces
+    (one raw-REPL round trip each) and delete it."""
+    code = DEVICE_CODE.format(seconds=seconds, drive=drive, rate=RATE, tmp=TMP_FILE)
+    out = repl.run(code, stream=True, echo=False, timeout=seconds + 60, end_marker=b'RECORDED')
+    if 'RECORDED' not in out:
         raise RuntimeError('device did not finish the recording:\n' + out[-500:])
-    lines = out[out.index('BEGIN'):].splitlines()
-    n = int(lines[0].split()[1])
-    pcm = b''.join(base64.b64decode(l.strip()) for l in lines[1:] if l.strip() and l.strip() != 'END')
-    if len(pcm) != n:
-        raise RuntimeError('got %d of %d bytes' % (len(pcm), n))
-    return pcm
+    tail = repl.run("print('OK')", stream=True, echo=False, timeout=5, end_marker=b'OK')
+    n = int((out + tail).split('RECORDED')[1].split()[0])
+    pcm = bytearray()
+    while len(pcm) < n:
+        code = PULL_CODE.format(tmp=TMP_FILE, off=len(pcm), size=min(PIECE, n - len(pcm)))
+        out = repl.run(code, stream=True, echo=False, timeout=30, end_marker=b'\x04')
+        if 'PIECE' not in out:
+            raise RuntimeError('pull failed at %d:\n%s' % (len(pcm), out[-300:]))
+        line = out[out.index('PIECE') + 6:].split()[0]
+        pcm += base64.b64decode(line)
+        print('\r  pulled %d / %d bytes' % (len(pcm), n), end='', flush=True)
+    print()
+    repl.run("import os; os.remove('%s')" % TMP_FILE, settle=0.5)
+    return bytes(pcm)
 
 
 def write_wav(path, pcm):
