@@ -34,6 +34,9 @@ class OrientationSensor:
         print("Calibration complete.")
 
     def update(self):
+        # One yield per update: every sleep hands control to the browser
+        # for a frame, and a turn loop that calls update() each iteration
+        # is only as fast as this.
         time.sleep(_SENSOR_DELAY)
         self.roll = self.gyro.rollAngleAndRate(True)[0]
         self.pitch = self.gyro.pitchAngleAndRate(True)[0]

@@ -204,12 +204,15 @@ class MotorPair:
         start_yaw = self.orientation_sensor.get_yaw()
         target_yaw = start_yaw + degrees
 
-        motor.run(self.left_port, int(left_velocity))
-        motor.run(self.right_port, int(-right_velocity if self.right_reversed else right_velocity))
-
+        # Closed loop on yaw: slow down near the target, reverse if it
+        # overshoots, and re-check once stopped so momentum cannot leave
+        # the robot outside the tolerance.
         tolerance = 3.0
+        slow_zone = 30.0
+        min_scale = 0.35
         timeout_ms = 10000
         start_time = time.ticks_ms()
+        moving = False
 
         while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
             self.orientation_sensor.update()
@@ -223,7 +226,17 @@ class MotorPair:
                 yaw_error += 360
 
             if abs(yaw_error) <= tolerance:
+                if moving:
+                    self.stop()
+                    moving = False
+                    time.sleep_ms(200)
+                    continue
                 break
+
+            direction = 1 if (yaw_error > 0) == (degrees > 0) else -1
+            scale = max(min_scale, min(1.0, abs(yaw_error) / slow_zone)) * direction
+            self.move_tank(left_velocity * scale, right_velocity * scale)
+            moving = True
 
             time.sleep_ms(10)
 

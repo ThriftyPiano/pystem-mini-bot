@@ -301,7 +301,6 @@ class BMI270:
             for i in range(256):
                 self._init_address_0 = 0x00
                 self._init_address_1 = i
-                time.sleep(0.03)
                 self._i2c.writeto_mem(
                     self._address,
                     0x5E,
