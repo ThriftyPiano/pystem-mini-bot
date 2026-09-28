@@ -25,8 +25,9 @@ YAW_MAX_CORRECTION = 40
 TURN_TOLERANCE_DEG = 3.0
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
 TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
+TURN_MIN_DPS = 30           # but never slower than this per wheel (a slower wheel stalls on carpet)
 TURN_RAMP_MS = 500          # speed ramps up from the creep speed over this time after each (re)start
-TURN_TIMEOUT_MS = 10000
+TURN_TIMEOUT_MS = 15000
 HEADING_FIX_DPS = 60        # wheel speed used to square up after a straight run
 
 class MotorPair:
@@ -150,6 +151,11 @@ class MotorPair:
         moving = False
         direction = 0
         phase_start = start_time
+        min_scale = TURN_MIN_SCALE
+        top = max(abs(left_velocity), abs(right_velocity))
+        if top > 0:
+            min_scale = max(min_scale, min(1.0, TURN_MIN_DPS / top))
+        reached = False
 
         while time.ticks_diff(time.ticks_ms(), start_time) < TURN_TIMEOUT_MS:
             yaw_error = target_yaw - self._current_yaw()
@@ -161,6 +167,7 @@ class MotorPair:
                     direction = 0
                     time.sleep_ms(200)
                     continue
+                reached = True
                 break
 
             now = time.ticks_ms()
@@ -170,13 +177,16 @@ class MotorPair:
                 phase_start = now
             ramp = min(1.0, time.ticks_diff(now, phase_start) / TURN_RAMP_MS)
             scale = min(1.0, abs(yaw_error) / TURN_SLOW_ZONE_DEG) * ramp
-            scale = max(TURN_MIN_SCALE, scale) * direction
+            scale = max(min_scale, scale) * direction
             self.move_tank(left_velocity * scale, right_velocity * scale, _free=False)
             moving = True
 
             time.sleep_ms(10)
 
         self.stop()
+        print("Turn to %.1f: %s at %.1f after %.1f s" % (
+            target_yaw, "reached" if reached else "TIMEOUT", self._current_yaw(),
+            time.ticks_diff(time.ticks_ms(), start_time) / 1000))
 
     def _fix_heading(self):
         """After a straight run: square up to the target heading if the stop left it off."""
