@@ -22,7 +22,7 @@ YAW_KP = 3.0
 YAW_KD = 0.3
 YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
-TURN_TOLERANCE_DEG = 3.0
+TURN_TOLERANCE_DEG = 2.0
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
 TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
 TURN_MIN_DPS = 30           # but never slower than this per wheel (a slower wheel stalls on carpet)
