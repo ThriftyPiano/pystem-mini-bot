@@ -200,7 +200,6 @@ class Motor:
         self._set_servo_speed(new_percent)
 
     def stop(self):
-        print(f'STOP command sent to Port {self.port}')
         self.is_running = False
         self.print_ticks = False
         self.control_mode = 'idle'
