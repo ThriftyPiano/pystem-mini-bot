@@ -8,7 +8,7 @@ try:
 except ImportError:
     speech_model = None
 
-screen.show("Program me at", "robot.pystem", ".com")
+screen.show("program me at", "robot.pystem", ".com")
 
 if speech_model is not None:
     import time
