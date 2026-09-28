@@ -22,13 +22,12 @@ YAW_KP = 3.0
 YAW_KD = 0.3
 YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
-TURN_TOLERANCE_DEG = 2.0
+TURN_TOLERANCE_DEG = 3.0
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
 TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
 TURN_MIN_DPS = 30           # but never slower than this per wheel (a slower wheel stalls on carpet)
 TURN_RAMP_MS = 500          # speed ramps up from the creep speed over this time after each (re)start
 TURN_TIMEOUT_MS = 15000
-HEADING_FIX_DPS = 60        # wheel speed used to square up after a straight run
 
 class MotorPair:
     def __init__(self, pair_id, left_port, right_port, use_orientation=True):
@@ -41,9 +40,10 @@ class MotorPair:
         self.left_reversed = False
         self.right_reversed = True
         # The heading the robot is meant to be on: straight runs hold it
-        # and turns add to it, so an error left by one move is corrected
-        # by the next instead of accumulating. A free movement (steering,
-        # tank) makes it unknown; it is re-read from the sensor afterwards.
+        # and turns add to it, so the error a turn leaves is corrected by
+        # the next straight run instead of accumulating. A free movement
+        # (steering, tank) makes it unknown; it is re-read from the sensor
+        # afterwards.
         self.target_heading = 0.0
         self._heading_unknown = False
 
@@ -143,12 +143,13 @@ class MotorPair:
         return yaw_error
 
     def _turn_to_heading(self, target_yaw, left_velocity, right_velocity, clockwise_sign):
-        """Closed loop on yaw: slows down near the target, reverses if it
-        overshoots, and re-checks once stopped so momentum cannot leave the
-        robot outside the tolerance. clockwise_sign is +1 when the given
-        wheel velocities turn the robot clockwise (yaw increasing), -1 otherwise."""
+        """Closed loop on yaw: ramps up, slows down over the last degrees,
+        reverses if it goes past the target while moving, and stops once
+        inside the tolerance. It does not hunt after stopping: whatever the
+        coast leaves is absorbed by the next straight run, which holds the
+        same target heading. clockwise_sign is +1 when the given wheel
+        velocities turn the robot clockwise (yaw increasing), -1 otherwise."""
         start_time = time.ticks_ms()
-        moving = False
         direction = 0
         phase_start = start_time
         min_scale = TURN_MIN_SCALE
@@ -161,12 +162,6 @@ class MotorPair:
             yaw_error = target_yaw - self._current_yaw()
 
             if abs(yaw_error) <= TURN_TOLERANCE_DEG:
-                if moving:
-                    self.stop()
-                    moving = False
-                    direction = 0
-                    time.sleep_ms(200)
-                    continue
                 reached = True
                 break
 
@@ -179,21 +174,14 @@ class MotorPair:
             scale = min(1.0, abs(yaw_error) / TURN_SLOW_ZONE_DEG) * ramp
             scale = max(min_scale, scale) * direction
             self.move_tank(left_velocity * scale, right_velocity * scale, _free=False)
-            moving = True
 
             time.sleep_ms(10)
 
         self.stop()
+        time.sleep_ms(200)
         print("Turn to %.1f: %s at %.1f after %.1f s" % (
             target_yaw, "reached" if reached else "TIMEOUT", self._current_yaw(),
             time.ticks_diff(time.ticks_ms(), start_time) / 1000))
-
-    def _fix_heading(self):
-        """After a straight run: square up to the target heading if the stop left it off."""
-        if not self.orientation_sensor or self._heading_unknown:
-            return
-        if abs(self.target_heading - self._current_yaw()) > TURN_TOLERANCE_DEG:
-            self._turn_to_heading(self.target_heading, HEADING_FIX_DPS, -HEADING_FIX_DPS, 1)
 
     # ---- moves
 
@@ -239,7 +227,6 @@ class MotorPair:
             time.sleep_ms(10)
 
         self.stop()
-        self._fix_heading()
 
     def move_for_time(self, time_ms, steering=0, velocity=None):
         if velocity is None:
@@ -257,7 +244,6 @@ class MotorPair:
             time.sleep_ms(10)
 
         self.stop()
-        self._fix_heading()
 
     def stop(self):
         motor.stop_all(self.left_port, self.right_port)
