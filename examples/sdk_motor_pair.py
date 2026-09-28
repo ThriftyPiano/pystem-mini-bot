@@ -23,10 +23,11 @@ YAW_KD = 0.3
 YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
 TURN_TOLERANCE_DEG = 3.0
-TURN_SLOW_ZONE_DEG = 30.0
-TURN_MIN_SCALE = 0.35
+TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
+TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
+TURN_RAMP_MS = 500          # speed ramps up from the creep speed over this time after each (re)start
 TURN_TIMEOUT_MS = 10000
-HEADING_FIX_DPS = 90        # wheel speed used to square up after a straight run
+HEADING_FIX_DPS = 60        # wheel speed used to square up after a straight run
 
 class MotorPair:
     def __init__(self, pair_id, left_port, right_port, use_orientation=True):
@@ -147,6 +148,8 @@ class MotorPair:
         wheel velocities turn the robot clockwise (yaw increasing), -1 otherwise."""
         start_time = time.ticks_ms()
         moving = False
+        direction = 0
+        phase_start = start_time
 
         while time.ticks_diff(time.ticks_ms(), start_time) < TURN_TIMEOUT_MS:
             yaw_error = target_yaw - self._current_yaw()
@@ -155,12 +158,19 @@ class MotorPair:
                 if moving:
                     self.stop()
                     moving = False
+                    direction = 0
                     time.sleep_ms(200)
                     continue
                 break
 
-            direction = clockwise_sign if yaw_error > 0 else -clockwise_sign
-            scale = max(TURN_MIN_SCALE, min(1.0, abs(yaw_error) / TURN_SLOW_ZONE_DEG)) * direction
+            now = time.ticks_ms()
+            wanted = clockwise_sign if yaw_error > 0 else -clockwise_sign
+            if wanted != direction:
+                direction = wanted
+                phase_start = now
+            ramp = min(1.0, time.ticks_diff(now, phase_start) / TURN_RAMP_MS)
+            scale = min(1.0, abs(yaw_error) / TURN_SLOW_ZONE_DEG) * ramp
+            scale = max(TURN_MIN_SCALE, scale) * direction
             self.move_tank(left_velocity * scale, right_velocity * scale, _free=False)
             moving = True
 

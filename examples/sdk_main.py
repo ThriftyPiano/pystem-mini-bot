@@ -1,6 +1,6 @@
 # filename: main.py
-# Default program: voice control when a speech model is on the robot,
-# otherwise a welcome screen. Writing any program from the IDE replaces it.
+# Default program: shows where to program the robot, then voice control
+# if a speech model is on the robot. Writing any program from the IDE replaces it.
 import screen
 
 try:
@@ -8,9 +8,11 @@ try:
 except ImportError:
     speech_model = None
 
-if speech_model is None:
-    screen.show("Mini Bot ready", "Write a program", "from the IDE")
-else:
+screen.show("Program me at", "robot.pystem", ".com")
+
+if speech_model is not None:
+    import time
+    time.sleep(3)
     import motor
     import motor_pair
     import speech

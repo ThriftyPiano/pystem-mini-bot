@@ -8,7 +8,7 @@ from config import MOTOR_CONFIG
 
 SIDE_M = 1.0            # length of each side
 SPEED_M_PER_S = 0.2
-TURN_VELOCITY = 90      # wheel deg/s while turning in place
+TURN_VELOCITY = 60      # wheel deg/s while turning in place
 
 WHEEL_CIRCUMFERENCE_CM = math.pi * MOTOR_CONFIG['wheel_diameter_cm']
 VELOCITY = round(SPEED_M_PER_S * 100 / WHEEL_CIRCUMFERENCE_CM * 360)   # wheel deg/s
