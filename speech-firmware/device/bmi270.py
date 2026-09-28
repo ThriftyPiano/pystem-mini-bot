@@ -289,12 +289,9 @@ class BMI270:
         https://github.com/CoRoLab-Berlin/bmi270_python
         (c) 2023 MIT License Kevin Sommler
         """
-        if self.internal_status == 0x01:
-            print(hex(self._address), " --> Initialization already done")
-        else:
+        if self.internal_status != 0x01:
             from bmi270_config_file import bmi270_config_file
 
-            print(hex(self._address), " --> Initializing...")
             self._power_configuration = 0x00
             time.sleep(0.00045)
             self._init_control = 0x00
@@ -309,12 +306,6 @@ class BMI270:
                 time.sleep(0.000020)
             self._init_control = 0x01
             time.sleep(0.02)
-            print(
-                hex(self._address),
-                " --> Initialization status: "
-                + "{:08b}".format(self.internal_status)
-                + "\t(00000001 --> OK)",
-            )
 
     @property
     def gyro_range(self) -> str:

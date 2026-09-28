@@ -51,7 +51,6 @@ class MotorPair:
         if use_orientation and HAS_ORIENTATION:
             try:
                 self.orientation_sensor = OrientationSensor()
-                print("Orientation sensor initialized for straight-line correction")
             except Exception as e:
                 print(f"Failed to initialize orientation sensor: {e}")
                 self.orientation_sensor = None
@@ -156,13 +155,11 @@ class MotorPair:
         top = max(abs(left_velocity), abs(right_velocity))
         if top > 0:
             min_scale = max(min_scale, min(1.0, TURN_MIN_DPS / top))
-        reached = False
 
         while time.ticks_diff(time.ticks_ms(), start_time) < TURN_TIMEOUT_MS:
             yaw_error = target_yaw - self._current_yaw()
 
             if abs(yaw_error) <= TURN_TOLERANCE_DEG:
-                reached = True
                 break
 
             now = time.ticks_ms()
@@ -178,10 +175,6 @@ class MotorPair:
             time.sleep_ms(10)
 
         self.stop()
-        time.sleep_ms(200)
-        print("Turn to %.1f: %s at %.1f after %.1f s" % (
-            target_yaw, "reached" if reached else "TIMEOUT", self._current_yaw(),
-            time.ticks_diff(time.ticks_ms(), start_time) / 1000))
 
     # ---- moves
 

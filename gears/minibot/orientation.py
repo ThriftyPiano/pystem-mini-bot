@@ -28,11 +28,8 @@ class OrientationSensor:
         self.calibrate()
 
     def calibrate(self, samples=50):
-        # A simulated gyro has no bias to remove; keep the call (and the
-        # message students are used to) but don't burn a second on it.
-        print("Calibrating orientation sensor... Please keep still.")
+        # A simulated gyro has no bias to remove.
         self.gyro.reset()
-        print("Calibration complete.")
 
     def update(self):
         # One yield per update: every sleep hands control to the browser

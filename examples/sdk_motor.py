@@ -42,7 +42,6 @@ class Motor:
         self.target_velocity = MOTOR_CONFIG['default_speed_dps']
         self.is_running = False
         self.current_speed = 0
-        self.print_ticks = False
         self.control_mode = 'idle'   # 'idle' | 'velocity' | 'position'
         self.velocity_integral = 0.0
         self.measured_velocity = 0.0
@@ -70,9 +69,6 @@ class Motor:
             return
 
         self.pulse_count += 1
-
-        if self.print_ticks:
-            print(f"TICK! Total: {self.pulse_count}")
 
         degrees_per_pulse = 360 / MOTOR_CONFIG['pulses_per_revolution']
         self.position += self.direction * degrees_per_pulse
@@ -110,13 +106,8 @@ class Motor:
         current_pos_snapshot = self.position
         error = self.target_position - current_pos_snapshot
 
-        if self.print_ticks:
-            print(f"Tgt: {self.target_position:.1f} | Cur: {current_pos_snapshot:.1f} | Err: {error:.1f}")
-
         if abs(error) <= 30:
-            print(">>> TARGET REACHED! STOPPING. <<<")
             self.is_running = False
-            self.print_ticks = False
             self._set_servo_speed(0)
             self.control_timer.deinit()
             return
@@ -201,7 +192,6 @@ class Motor:
 
     def stop(self):
         self.is_running = False
-        self.print_ticks = False
         self.control_mode = 'idle'
         self.velocity_integral = 0.0
         self.measured_velocity = 0.0
@@ -252,8 +242,6 @@ def run(port, velocity, *, acceleration=1000):
 def run_for_degrees(port, degrees, velocity, *, stop=True, acceleration=1000, deceleration=1000):
     motor = _get_motor(port)
 
-    motor.print_ticks = True
-
     start_position = motor.position
     motor.target_position = start_position + degrees
     motor.target_velocity = velocity
@@ -284,7 +272,6 @@ def run_for_time(port, time_ms, velocity, *, stop=True, acceleration=1000, decel
 
 def run_to_position(port, position, velocity, *, direction=SHORTEST_PATH, stop=True, acceleration=1000, deceleration=1000):
     motor = _get_motor(port)
-    motor.print_ticks = True
     motor.target_position = position
     motor.target_velocity = velocity
     motor.is_running = True

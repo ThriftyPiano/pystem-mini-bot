@@ -25,7 +25,6 @@ class MPU6050:
 
         try:
             self.i2c.writeto(self.address, bytes([PWR_MGMT_1, 0]))
-            print(f"MPU-6050 found at I2C address: {hex(self.address)}")
         except OSError:
             raise OSError(f"MPU-6050 not found at address {hex(self.address)}. Check wiring and AD0 pin.")
 
@@ -71,7 +70,6 @@ class BMI270:
     def __init__(self):
         import sticks3
         self.dev = sticks3.imu()
-        print("BMI270 found on the StickS3 internal bus")
 
     def read(self):
         """Return ((ax, ay, az) in g, (gx, gy, gz) in deg/s)."""
@@ -103,7 +101,6 @@ def _make_imu(sda_pin=None, scl_pin=None):
                 "MPU-6050 not found at 0x68/0x69. Devices on bus: "
                 + ", ".join(hex(d) for d in devices)
             )
-        print(f"Found MPU-6050 at I2C address: {hex(mpu_address)}")
         return MPU6050(i2c, address=mpu_address)
 
     if IMU == 'bmi270':
@@ -145,7 +142,6 @@ class OrientationSensor:
 
     def calibrate(self, samples=50):
         """Measure the at-rest offsets. Keep the robot still."""
-        print("Calibrating orientation sensor... Please keep still.")
 
         accel_x_sum = accel_y_sum = accel_z_sum = 0
         gyro_x_sum = gyro_y_sum = gyro_z_sum = 0
@@ -169,8 +165,6 @@ class OrientationSensor:
         self.gyro_x_offset = gyro_x_sum / samples
         self.gyro_y_offset = gyro_y_sum / samples
         self.gyro_z_offset = gyro_z_sum / samples
-
-        print("Calibration complete.")
 
     def update(self):
         """Integrate the sensors; returns (roll, pitch, yaw) in degrees."""
