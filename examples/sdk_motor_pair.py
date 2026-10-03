@@ -17,12 +17,18 @@ PAIR_1 = 1
 PAIR_2 = 2
 PAIR_3 = 3
 
-# Straight-line yaw hold (PD on yaw error, wheel deg/s per degree and per deg/s).
+# Straight-line yaw hold (PID on yaw error, wheel deg/s per degree and per deg/s).
+# The integral term is what cancels a constant left/right imbalance (a weak
+# motor, one side dragging): P alone settles with a standing heading error of
+# disturbance/(2*KP) -- ~5 degrees for an 8% weak motor -- so the robot drives
+# straight but along a line pointing off course.
 YAW_KP = 3.0
+YAW_KI = 8.0
 YAW_KD = 0.3
 YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
-TURN_TOLERANCE_DEG = 3.0
+TURN_TOLERANCE_DEG = 3.0        # close enough to not start a correction move
+TURN_STOP_DEG = 0.5             # once moving, creep until this close / crossing
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
 TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
 TURN_MIN_DPS = 30           # but never slower than this per wheel (a slower wheel stalls on carpet)
@@ -46,6 +52,8 @@ class MotorPair:
         # afterwards.
         self.target_heading = 0.0
         self._heading_unknown = False
+        self._yaw_integral = 0.0
+        self._yaw_last_ms = time.ticks_ms()
 
         self.orientation_sensor = None
         if use_orientation and HAS_ORIENTATION:
@@ -102,6 +110,8 @@ class MotorPair:
         self._drive(steering, velocity)
 
     def _init_yaw_reference(self, steering):
+        self._yaw_integral = 0.0
+        self._yaw_last_ms = time.ticks_ms()
         if self.orientation_sensor and steering == 0:
             self._settle_heading()
             return self.target_heading
@@ -115,7 +125,17 @@ class MotorPair:
                 current_yaw = self._current_yaw()
                 yaw_error = target_yaw - current_yaw
 
-                correction = yaw_error * YAW_KP - self.orientation_sensor.yaw_rate * YAW_KD
+                now = time.ticks_ms()
+                dt = time.ticks_diff(now, self._yaw_last_ms) / 1000.0
+                self._yaw_last_ms = now
+                if 0 < dt < 0.5:
+                    self._yaw_integral += yaw_error * dt
+                    limit = YAW_MAX_CORRECTION / YAW_KI
+                    self._yaw_integral = max(-limit, min(limit, self._yaw_integral))
+
+                correction = (yaw_error * YAW_KP
+                              + self._yaw_integral * YAW_KI
+                              - self.orientation_sensor.yaw_rate * YAW_KD)
                 correction = max(-YAW_MAX_CORRECTION, min(YAW_MAX_CORRECTION, correction))
                 if correction_mode == 'position':
                     left_motor = motor._get_motor(self.left_port)
@@ -143,11 +163,16 @@ class MotorPair:
 
     def _turn_to_heading(self, target_yaw, left_velocity, right_velocity, clockwise_sign):
         """Closed loop on yaw: ramps up, slows down over the last degrees,
-        reverses if it goes past the target while moving, and stops once
-        inside the tolerance. It does not hunt after stopping: whatever the
-        coast leaves is absorbed by the next straight run, which holds the
-        same target heading. clockwise_sign is +1 when the given wheel
-        velocities turn the robot clockwise (yaw increasing), -1 otherwise."""
+        reverses if it goes past the target while moving, and creeps all the
+        way to the target before stopping. Stopping as soon as the error was
+        inside a tolerance band left every turn systematically short by the
+        whole band (the band is always entered from the approach side), so
+        the tolerance only decides whether a turn is worth starting; a turn
+        in progress ends at TURN_STOP_DEG / on crossing the target. It does
+        not hunt after stopping: whatever the coast leaves is absorbed by the
+        next straight run, which holds the same target heading.
+        clockwise_sign is +1 when the given wheel velocities turn the robot
+        clockwise (yaw increasing), -1 otherwise."""
         start_time = time.ticks_ms()
         direction = 0
         phase_start = start_time
@@ -159,8 +184,15 @@ class MotorPair:
         while time.ticks_diff(time.ticks_ms(), start_time) < TURN_TIMEOUT_MS:
             yaw_error = target_yaw - self._current_yaw()
 
-            if abs(yaw_error) <= TURN_TOLERANCE_DEG:
-                break
+            if direction == 0:
+                # Not moving yet: already close enough to not bother.
+                if abs(yaw_error) <= TURN_TOLERANCE_DEG:
+                    break
+            else:
+                # Moving: stop when the remaining error (measured along the
+                # direction being turned) is gone or crossed.
+                if yaw_error * direction * clockwise_sign <= TURN_STOP_DEG:
+                    break
 
             now = time.ticks_ms()
             wanted = clockwise_sign if yaw_error > 0 else -clockwise_sign
