@@ -254,6 +254,11 @@ function Wheel(scene, parent, pos, rot, port, options) {
       return;
     }
 
+    // PySTEM: push grip / damping changes into Ammo when the config changes
+    if (typeof minibotPhysics != 'undefined') {
+      minibotPhysics.syncWheel(self);
+    }
+
     self.mesh.physicsImpostor.applyForce(self.TIRE_DOWNWARDS_FORCE, self.mesh.getAbsolutePosition());
     if (self.mode == self.modes.RUN) {
       self.setMotorSpeed(delta);
@@ -319,7 +324,16 @@ function Wheel(scene, parent, pos, rot, port, options) {
       self.state = self.states.RUNNING;
     }
 
-    let speed = -self._speed_sp / 180 * Math.PI;
+    // PySTEM: surface / motor-imbalance model (js/minibotPhysics.js)
+    let sp = self._speed_sp;
+    let force = self.MOTOR_POWER_DEFAULT;
+    if (typeof minibotPhysics != 'undefined' && minibotPhysics.active()) {
+      let adjusted = minibotPhysics.applyToWheel(self, sp, delta);
+      sp = adjusted.speed;
+      force = adjusted.force;
+    }
+
+    let speed = -sp / 180 * Math.PI;
     if (speed > self.MAX_SPEED) {
       speed = self.MAX_SPEED;
     } else if (speed < -self.MAX_SPEED) {
@@ -328,7 +342,7 @@ function Wheel(scene, parent, pos, rot, port, options) {
     if (reversed) {
       speed = -speed;
     }
-    self.joint.setMotor(speed, self.MOTOR_POWER_DEFAULT);
+    self.joint.setMotor(speed, force);
   };
 
   this.updatePosition = function(delta) {

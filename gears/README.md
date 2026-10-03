@@ -27,6 +27,14 @@ The World Builder therefore has no model library; everything else works.
   possible in Skulpt) so beginner programs such as `led_blink.py` run.
 - `js/minibotSim.js` — Skulpt module `minibot_sim` (speech/voice command
   queues, `speech_start/stop/labels`, head-angle and pin-change reporting).
+- `js/minibotPhysics.js` — programmable (no UI) surface and motor-imbalance
+  model: `minibotPhysics.set({surface: 'carpet'|'hardwood'|{...}, motors:
+  {left: {power, friction}, right: {...}}, seed})` from the console or the
+  `minibot-physics` postMessage. `js/Wheel.js` consults it each physics
+  frame (stall threshold, rolling-resistance loss, response lag, speed
+  noise, per-motor power/torque scale) and pushes tyre grip and chassis
+  damping into Ammo. Defaults to the ideal wheel, so nothing changes until
+  it is configured.
 - `js/skulpt.js` — the modules above are registered in `externalLibs`, and
   Skulpt's `time` module gains MicroPython's `ticks_ms / ticks_diff /
   sleep_ms` so on-device code runs unchanged.

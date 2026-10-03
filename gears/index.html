@@ -221,7 +221,8 @@
   <script src="js/worlds/world_Arena.js?v=c1828281"></script>
   <script src="js/robotComponents.js?v=9dd8b611"></script>
   <script src="js/robotTemplates.js?v=8f469b71"></script>
-  <script src="js/Wheel.js?v=bb27211a"></script>
+  <script src="js/minibotPhysics.js?v=1"></script>
+  <script src="js/Wheel.js?v=bb27211b"></script>
   <script src="js/Robot.js?v=d9b6ce3a"></script>
   <script>
     var robots = [];
@@ -451,6 +452,16 @@
       } else if (msg.type == 'minibot-speech-listen') {
         if (window.minibotSpeech) {
           if (msg.listening) { window.minibotSpeech.start(); } else { window.minibotSpeech.stop(); }
+        }
+      } else if (msg.type == 'minibot-physics') {
+        // Programmable surface / motor-imbalance model, no UI
+        // (js/minibotPhysics.js): {config: {surface, motors, seed}} merges
+        // into the current config; {config: null} resets to the ideal wheel.
+        try {
+          let result = msg.config ? minibotPhysics.set(msg.config) : minibotPhysics.reset();
+          e.source.postMessage({type: 'minibot-physics-set', config: result}, window.location.origin);
+        } catch (err) {
+          simPanel.consoleWriteErrors('physics: ' + err.message);
         }
       } else if (msg.type == 'minibot-get-code') {
         filesManager.updateCurrentFile();
