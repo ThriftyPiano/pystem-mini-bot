@@ -16,6 +16,21 @@ PORT_F = 'F'
 
 VELOCITY_WINDOW_TICKS = 4   # x control_loop_ms
 
+# Per-wheel velocity loop (feedforward + PI on measured speed). The
+# feedforward does the bulk of the work; the PI only trims. These are low
+# on purpose: the speed measurement lags ~200 ms (the window below, needed
+# because one 50 ms tick sees only ~1 encoder pulse at cruise), so an
+# aggressive integral winds up and oscillates against that lag -- a single
+# wheel commanded 150 dps swung between 20 and 270 dps with ki=1.5.
+# Tuned on the real robot (2026-10, BLE telemetry).
+VELOCITY_KP = 0.12
+VELOCITY_KI = 0.10
+# Weight of each fresh windowed sample in the measured-velocity EMA; 1.0
+# disables the extra smoothing. The windowed speed is quantised to ~45 dps
+# steps (one encoder pulse per ~45 dps over the window), so a little EMA
+# keeps that quantisation noise out of the correction without much lag.
+VELOCITY_MEAS_ALPHA = 0.6
+
 CLOCKWISE = 1
 COUNTERCLOCKWISE = -1
 SHORTEST_PATH = 0
@@ -164,7 +179,8 @@ class Motor:
             hist.append((pos, now))
             dt_win = time.ticks_diff(now, old_t) / 1000.0
             inst = (pos - old_pos) / dt_win if dt_win > 0 else 0.0
-        self.measured_velocity = 0.5 * self.measured_velocity + 0.5 * inst
+        a = VELOCITY_MEAS_ALPHA
+        self.measured_velocity = (1.0 - a) * self.measured_velocity + a * inst
         measured = self.measured_velocity
 
         error = target - measured
@@ -174,9 +190,8 @@ class Motor:
         self.velocity_integral += error * dt
         self.velocity_integral = max(-200, min(200, self.velocity_integral))
 
-        # High ki so a stalled wheel breaks static friction quickly.
-        kp = 0.05
-        ki = 1.5
+        kp = VELOCITY_KP
+        ki = VELOCITY_KI
         correction = error * kp + self.velocity_integral * ki
 
         new_percent = ff_percent + correction
