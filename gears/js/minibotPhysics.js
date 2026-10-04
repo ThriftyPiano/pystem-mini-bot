@@ -29,6 +29,14 @@
 //   friction     resistance scale for that side's drivetrain: multiplies the
 //                surface's rollingDps and stallDps for this wheel
 //
+// NOTE: `power` scales the achieved wheel speed open-loop, i.e. it models a
+// weak motor with NO working encoder feedback. The real robot's per-wheel
+// velocity loop compensates most of a constant imbalance by itself, so the
+// same `power` figure produces more heading drift here than on hardware.
+// motor_pair's yaw-hold gains are tuned against the real robot (its sluggish
+// inner loops oscillate at gains this instant-response model tolerates);
+// judge straight-line drift under imbalance qualitatively, not in degrees.
+//
 // Wheel.js calls applyToWheel() every physics frame while a wheel is driven
 // and syncWheel() every frame to push grip/damping changes into Ammo.
 

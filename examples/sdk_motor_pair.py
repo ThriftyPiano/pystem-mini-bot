@@ -19,12 +19,17 @@ PAIR_3 = 3
 
 # Straight-line yaw hold (PID on yaw error, wheel deg/s per degree and per deg/s).
 # The integral term is what cancels a constant left/right imbalance (a weak
-# motor, one side dragging): P alone settles with a standing heading error of
-# disturbance/(2*KP) -- ~5 degrees for an 8% weak motor -- so the robot drives
-# straight but along a line pointing off course.
-YAW_KP = 3.0
-YAW_KI = 8.0
-YAW_KD = 0.3
+# motor, one side dragging): P alone settles with a standing heading error.
+# Gains are tuned LOW against the real robot (2026-10, BLE yaw telemetry on
+# the StickS3 bot): the outer loop acts through each wheel's velocity loop,
+# which measures speed over a ~200 ms window and slews at 300 dps/s, so a
+# high-bandwidth outer loop corrects half a wiggle late and oscillates.
+# KP=3/KI=8 wiggled +-20 degrees at 1 Hz on hardwood; these hold +-2.
+# (The simulator's wheels respond instantly, so it tolerates far higher
+# gains -- do not retune these against the simulator alone.)
+YAW_KP = 0.6
+YAW_KI = 0.5
+YAW_KD = 0.8
 YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
 TURN_TOLERANCE_DEG = 3.0        # close enough to not start a correction move
@@ -213,6 +218,7 @@ class MotorPair:
     def move_for_degrees(self, degrees, steering=0, velocity=None):
         if velocity is None:
             velocity = self.default_velocity
+        velocity = abs(velocity)
 
         target_yaw = self._init_yaw_reference(steering)
 
@@ -233,23 +239,32 @@ class MotorPair:
         target_left_position = start_left_position + left_degrees
         target_right_position = start_right_position + (-right_degrees)
 
-        motor.run(self.left_port, int(velocity))
-        motor.run(self.right_port, int(-velocity))
+        # Negative degrees drive backwards: the wheels must run towards the
+        # targets, not at +velocity regardless -- otherwise the targets
+        # recede and the loop never exits (a runaway).
+        signed_velocity = velocity if degrees >= 0 else -velocity
+        motor.run(self.left_port, int(signed_velocity))
+        motor.run(self.right_port, int(-signed_velocity))
 
         # "Reached" is at or past the target in the direction of travel: a
         # fast wheel can step over a window around the target between reads.
         left_dir = 1 if target_left_position >= start_left_position else -1
         right_dir = 1 if target_right_position >= start_right_position else -1
-        while True:
+        # Belt and braces: even a stalled wheel ends the move eventually.
+        timeout_ms = int(abs(degrees) / max(velocity, 1) * 3000) + 2000
+        start_time = time.ticks_ms()
+        while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
             left_reached = (left_motor.position - target_left_position) * left_dir >= -20
             right_reached = (right_motor.position - target_right_position) * right_dir >= -20
 
             if left_reached or right_reached:
                 break
 
-            self._apply_yaw_correction(steering, target_yaw, velocity, 'velocity')
+            self._apply_yaw_correction(steering, target_yaw, signed_velocity, 'velocity')
 
             time.sleep_ms(10)
+        else:
+            print("TIMEOUT: Forcing stop.")
 
         self.stop()
 
