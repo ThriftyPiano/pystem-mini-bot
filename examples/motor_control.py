@@ -25,11 +25,11 @@ motor_pair.pair(motor_pair.PAIR_1, motor.PORT_A, motor.PORT_B)
 for side in range(4):
     print("Side", side + 1, ": straight for", SIDE_M, "m")
     motor_pair.move_for_degrees(motor_pair.PAIR_1, SIDE_DEGREES, 0, velocity=DRIVE_VELOCITY)
-    time.sleep(1)
+    time.sleep(0.2)
 
     print("Turning right 90 degrees...")
     motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 90, TURN_VELOCITY, -TURN_VELOCITY)
-    time.sleep(1)
+    time.sleep(0.2)
 
 motor_pair.stop(motor_pair.PAIR_1)
 print("Square complete!")

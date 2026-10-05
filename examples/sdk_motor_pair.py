@@ -34,9 +34,10 @@ YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
 TURN_TOLERANCE_DEG = 3.0        # close enough to not start a correction move
 TURN_STOP_DEG = 0.5             # once moving, creep until this close / crossing
-TURN_COAST_DEG = 7.5            # the robot turns about this much more after the stop command
+TURN_COAST_DEG = 9.0            # the robot turns about this much more after the stop command
                                 # (measured on the robot with the gyro sampled through stop():
-                                # 7-8 degrees at 40 dps/wheel, 8-9 at 70; a rate-based estimate
+                                # 7-12 degrees at 40 dps/wheel; set so turns end at or just
+                                # short of the target rather than past it. A rate-based estimate
                                 # was tried and failed -- the creep is jerky and one spiky gyro
                                 # sample stopped turns 10-16 degrees early)
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
@@ -288,6 +289,10 @@ class MotorPair:
             else:
                 # Moving: stop when the remaining error (measured along the
                 # direction being turned) is down to the coast, or crossed.
+                # No hunting afterwards: a turn that lands a few degrees
+                # short is finished by the next straight run's heading hold,
+                # while reversing to fix it rocked the robot back and forth
+                # and often ended further off.
                 if yaw_error * direction * clockwise_sign <= TURN_STOP_DEG + TURN_COAST_DEG:
                     reason = "reached"
                     break
