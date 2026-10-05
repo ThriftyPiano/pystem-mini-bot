@@ -293,11 +293,31 @@ class Motor:
         self.velocity = 0
         self.control_timer.deinit()
         self._set_servo_speed(0)
-        time.sleep_ms(50)
+        _idle(50)
         self._set_servo_speed(0)
-        time.sleep_ms(50)
+        _idle(50)
         self._set_servo_speed(0)
         return
+
+
+# While a motor stops, the robot is still coasting -- the end of a turn is
+# 5-10 degrees of real rotation during these sleeps. Whoever integrates the
+# gyro (motor_pair) registers a hook so the sleeps keep sampling it; with
+# plain sleeps the IMU missed that rotation and every square corner came
+# out ~12 degrees past 90 on the real robot.
+_idle_hook = None
+
+
+def set_idle_hook(fn):
+    global _idle_hook
+    _idle_hook = fn
+
+
+def _idle(ms):
+    if _idle_hook is not None:
+        _idle_hook(ms)
+    else:
+        time.sleep_ms(ms)
 
 _motors = {}
 

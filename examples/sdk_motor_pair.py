@@ -34,10 +34,11 @@ YAW_MAX_CORRECTION = 40
 # Yaw-feedback turns.
 TURN_TOLERANCE_DEG = 3.0        # close enough to not start a correction move
 TURN_STOP_DEG = 0.5             # once moving, creep until this close / crossing
-TURN_COAST_DEG = 4.0            # the robot turns about this much more after the stop command
-                                # (measured 5-7 from the creep speed; a rate-based estimate was
-                                # tried and failed: the creep is jerky and one spiky gyro sample
-                                # stopped turns 10-16 degrees early)
+TURN_COAST_DEG = 7.5            # the robot turns about this much more after the stop command
+                                # (measured on the robot with the gyro sampled through stop():
+                                # 7-8 degrees at 40 dps/wheel, 8-9 at 70; a rate-based estimate
+                                # was tried and failed -- the creep is jerky and one spiky gyro
+                                # sample stopped turns 10-16 degrees early)
 TURN_SLOW_ZONE_DEG = 45.0   # start slowing this far from the target
 TURN_MIN_SCALE = 0.25       # creep speed near the target, as a fraction of the commanded speed
 TURN_MIN_DPS = 30           # but never slower than this per wheel (a slower wheel stalls on carpet)
@@ -87,6 +88,16 @@ class MotorPair:
             except Exception as e:
                 print(f"Failed to initialize orientation sensor: {e}")
                 self.orientation_sensor = None
+        if self.orientation_sensor and hasattr(motor, 'set_idle_hook'):
+            # keep the yaw integrating while the motors' stop() sleeps (the
+            # robot is still coasting then); the simulator's shim has no hook
+            motor.set_idle_hook(self._idle_sampling)
+
+    def _idle_sampling(self, ms):
+        start = time.ticks_ms()
+        while time.ticks_diff(time.ticks_ms(), start) < ms:
+            self._current_yaw()
+            time.sleep_ms(5)
 
     def _get_motor_velocity(self, velocity, is_right_motor=False):
         return velocity

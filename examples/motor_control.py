@@ -14,7 +14,7 @@ from config import MOTOR_CONFIG
 
 SIDE_M = 0.4            # length of each side (40 cm)
 DRIVE_VELOCITY = 90     # wheel deg/s while driving straight (slow = no slip)
-TURN_VELOCITY = 70      # wheel deg/s per wheel while turning in place
+TURN_VELOCITY = 40      # wheel deg/s per wheel while turning in place (slow = less coast past the target)
 
 WHEEL_CIRCUMFERENCE_CM = math.pi * MOTOR_CONFIG['wheel_diameter_cm']
 SIDE_DEGREES = round(SIDE_M * 100 / WHEEL_CIRCUMFERENCE_CM * 360)      # wheel degrees per side
