@@ -117,6 +117,10 @@ def _axis_remap(vec):
     return out[0], out[1], out[2]
 
 
+# Longest gap the gyro integration bridges with one sample (see update()).
+MAX_INTEGRATION_S = 0.05
+
+
 class OrientationSensor:
     def __init__(self, sda_pin=None, scl_pin=None):
         self.imu = _make_imu(sda_pin, scl_pin)
@@ -169,8 +173,18 @@ class OrientationSensor:
     def update(self):
         """Integrate the sensors; returns (roll, pitch, yaw) in degrees."""
         current_time = time.ticks_ms()
-        dt = (current_time - self.last_time) / 1000.0
+        dt = time.ticks_diff(current_time, self.last_time) / 1000.0
         self.last_time = current_time
+        # One sample cannot stand for a long gap. The first read after a
+        # move's stop() came 416 ms after the previous one, while the gyro
+        # still showed the stop jerk (-38 deg/s, gone 30 ms later): applied
+        # to the whole gap that put -16 degrees of fictional yaw on every
+        # straight run, and the following turn then really over-rotated by
+        # that much to "catch up" (measured on the robot with an overhead
+        # camera). Bound the step so a stale sample contributes at most one
+        # control period's worth.
+        if dt > MAX_INTEGRATION_S:
+            dt = MAX_INTEGRATION_S
 
         (accel_x_g, accel_y_g, accel_z_g), (gyro_x_dps, gyro_y_dps, gyro_z_dps) = self._read()
 
