@@ -5,13 +5,13 @@ import time
 import motor_pair
 from color_sensor import reflection
 
-BASE_SPEED = 200   # degrees per second
-MAX_SPEED = 400
+BASE_SPEED = 90    # degrees per second (slow: no wheel slip, see motor_control.py)
+MAX_SPEED = 180
 MIN_SPEED = 0
 
 EDGE_TARGET = 35   # sensor reading on the edge (0 = dark, 100 = bright)
 
-KP = 8             # steering gain
+KP = 4             # steering gain (scaled with BASE_SPEED)
 
 
 class LineFollower:
@@ -35,7 +35,7 @@ class LineFollower:
         error = sensor_value - EDGE_TARGET
 
         correction = KP * error
-        correction = max(-100, min(100, correction))
+        correction = max(-45, min(45, correction))
 
         return correction
 

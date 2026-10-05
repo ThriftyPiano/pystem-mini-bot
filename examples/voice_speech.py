@@ -17,13 +17,13 @@ try:
         cmd = speech.wait_for_command()
         screen.show("Heard:", cmd)
         if cmd == 'forward':
-            motor_pair.move(motor_pair.PAIR_1, 0, velocity=360)
+            motor_pair.move(motor_pair.PAIR_1, 0, velocity=90)
         elif cmd == 'backward':
-            motor_pair.move(motor_pair.PAIR_1, 0, velocity=-360)
+            motor_pair.move(motor_pair.PAIR_1, 0, velocity=-90)
         elif cmd == 'left':
-            motor_pair.move_tank(motor_pair.PAIR_1, -180, 180)
+            motor_pair.move_tank(motor_pair.PAIR_1, -40, 40)
         elif cmd == 'right':
-            motor_pair.move_tank(motor_pair.PAIR_1, 180, -180)
+            motor_pair.move_tank(motor_pair.PAIR_1, 40, -40)
         elif cmd == 'stop':
             motor_pair.stop(motor_pair.PAIR_1)
 finally:

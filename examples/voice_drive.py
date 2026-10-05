@@ -13,8 +13,8 @@ if BOARD == 'sticks3':
     raise SystemExit("voice_drive.py needs the WonderEcho on the Max V1 robot. "
                      "On the StickS3 robot run voice_speech.py instead.")
 
-DRIVE_VELOCITY = 270   # deg/sec
-TURN_VELOCITY  = 38    # deg/sec per wheel, ~34 deg/sec chassis yaw
+DRIVE_VELOCITY = 90    # deg/sec (slow: no wheel slip, see motor_control.py)
+TURN_VELOCITY  = 40    # deg/sec per wheel, ~36 deg/sec chassis yaw
 
 # Port A = left wheel, port B = right wheel (mounted reversed).
 
