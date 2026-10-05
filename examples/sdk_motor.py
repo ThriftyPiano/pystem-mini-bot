@@ -78,6 +78,9 @@ class Motor:
         # distance.
         self.encoder_suspect = False
         self.encoder_faults = 0
+        # last (PWM %, dps) pair at which the loop held its speed
+        self._good_percent = None
+        self._good_dps = 0
         # (position, ticks_ms) of the last few control ticks: velocity is
         # measured over ~200 ms because one tick sees only ~2 pulses.
         self._pos_hist = None
@@ -223,7 +226,16 @@ class Motor:
                 print("ENCODER SILENT %s: no pulses for %d ms at %d%% PWM (%d dps commanded)"
                       % (self.port, silent_ms, self.current_speed, target))
             self.velocity_integral = 0.0
-            new_percent = ff_percent
+            # Drive open loop at the PWM that last held the commanded speed
+            # while the encoder still worked (scaled to the current
+            # target), not the nominal feedforward: these servos are far
+            # from linear (the left one makes 115 dps at 10%), so on the
+            # real robot the nominal value sent a wheel off at twice the
+            # speed of its partner and the "straight" curved 47 degrees.
+            if self._good_percent is not None and self._good_dps:
+                new_percent = self._good_percent * target / self._good_dps
+            else:
+                new_percent = ff_percent
         elif abs(measured) > abs(target) + ENCODER_PLAUSIBLE_DPS:
             # The encoder reports a speed the drive cannot have produced:
             # spurious pulses (seen on the real robot: 335 dps "measured" on
@@ -257,6 +269,11 @@ class Motor:
             correction = error * kp + self.velocity_integral * ki
 
             new_percent = ff_percent + correction
+            # remember what PWM actually produces this speed (used if the
+            # encoder drops out later in the run)
+            if abs(target) > 20 and abs(error) < 0.3 * abs(target):
+                self._good_percent = self.current_speed
+                self._good_dps = target
         # PWM keeps the sign of the target: the single-channel encoder
         # cannot see a direction flip.
         if target > 0.1:
