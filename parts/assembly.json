@@ -1,0 +1,483 @@
+{
+ "units": "m",
+ "up": "z",
+ "meshes": {
+  "ball": {
+   "file": "ball.glb",
+   "tris": 3248,
+   "bytes": 79024
+  },
+  "ball_mount": {
+   "file": "ball_mount.glb",
+   "tris": 3044,
+   "bytes": 90148
+  },
+  "battery_box": {
+   "file": "battery_box.glb",
+   "tris": 12,
+   "bytes": 1696
+  },
+  "battery_mount": {
+   "file": "battery_mount.glb",
+   "tris": 4608,
+   "bytes": 167552
+  },
+  "cable_mount": {
+   "file": "cable_mount.glb",
+   "tris": 664,
+   "bytes": 25136
+  },
+  "chasis": {
+   "file": "chasis.glb",
+   "tris": 10594,
+   "bytes": 381564
+  },
+  "ir_sensor": {
+   "file": "ir_sensor.glb",
+   "tris": 1192,
+   "bytes": 44116
+  },
+  "pcb": {
+   "file": "pcb.glb",
+   "tris": 1512,
+   "bytes": 54688
+  },
+  "servo_case": {
+   "file": "servo_case.glb",
+   "tris": 57510,
+   "bytes": 1900384
+  },
+  "servo_cover": {
+   "file": "servo_cover.glb",
+   "tris": 1854,
+   "bytes": 68020
+  },
+  "speed_sensor": {
+   "file": "speed_sensor.glb",
+   "tris": 272,
+   "bytes": 11276
+  },
+  "spline": {
+   "file": "spline.glb",
+   "tris": 624,
+   "bytes": 25452
+  },
+  "stick_s3": {
+   "file": "stick_s3.glb",
+   "tris": 12,
+   "bytes": 1676
+  },
+  "tire": {
+   "file": "tire.glb",
+   "tris": 1168,
+   "bytes": 48692
+  },
+  "wheel": {
+   "file": "wheel.glb",
+   "tris": 2686,
+   "bytes": 96292
+  }
+ },
+ "links": [
+  {
+   "link": "ball",
+   "mesh": "ball",
+   "position": [
+    -0.10615,
+    0.032101,
+    0.0633
+   ],
+   "quaternion": [
+    1e-06,
+    -1e-06,
+    1.0,
+    4e-06
+   ],
+   "color": [
+    0.262745,
+    0.282353,
+    0.301961
+   ]
+  },
+  {
+   "link": "ball_mount",
+   "mesh": "ball_mount",
+   "position": [
+    -0.10615,
+    0.032101,
+    0.0295
+   ],
+   "quaternion": [
+    1e-06,
+    1e-06,
+    -5e-06,
+    1.0
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "battery_box",
+   "mesh": "battery_box",
+   "position": [
+    -0.07,
+    0.0644,
+    0.0
+   ],
+   "quaternion": [
+    0.0,
+    0.0,
+    -0.707108,
+    0.707105
+   ],
+   "color": [
+    0.262745,
+    0.282353,
+    0.301961
+   ]
+  },
+  {
+   "link": "battery_mount",
+   "mesh": "battery_mount",
+   "position": [
+    -0.07815,
+    -0.00215,
+    0.0265
+   ],
+   "quaternion": [
+    0.707109,
+    0.707105,
+    -1e-06,
+    -1e-06
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "cable_mount",
+   "mesh": "cable_mount",
+   "position": [
+    -0.07165,
+    0.031451,
+    0.0295
+   ],
+   "quaternion": [
+    4e-06,
+    0.707107,
+    0.707106,
+    2e-06
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "chasis",
+   "mesh": "chasis",
+   "position": [
+    -0.12115,
+    0.006101,
+    0.0295
+   ],
+   "quaternion": [
+    1e-06,
+    1e-06,
+    -5e-06,
+    1.0
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "ir_sensor",
+   "mesh": "ir_sensor",
+   "position": [
+    -0.02565,
+    0.0251,
+    0.0521
+   ],
+   "quaternion": [
+    1e-06,
+    1e-06,
+    -5e-06,
+    1.0
+   ],
+   "color": [
+    0.0470588,
+    0.470588,
+    0.435294
+   ]
+  },
+  {
+   "link": "pcb",
+   "mesh": "pcb",
+   "position": [
+    -0.12045,
+    0.026051,
+    0.0225
+   ],
+   "quaternion": [
+    0.707109,
+    0.707105,
+    -1e-06,
+    -1e-06
+   ],
+   "color": [
+    0.0470588,
+    0.470588,
+    0.435294
+   ]
+  },
+  {
+   "link": "servo_case",
+   "mesh": "servo_case",
+   "position": [
+    -0.03345,
+    0.020658,
+    0.0354
+   ],
+   "quaternion": [
+    -2e-06,
+    -0.707105,
+    0.707108,
+    4e-06
+   ],
+   "color": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "link": "servo_case_1",
+   "mesh": "servo_case",
+   "position": [
+    -0.03345,
+    0.043542,
+    0.0354
+   ],
+   "quaternion": [
+    5e-06,
+    0.707105,
+    0.707108,
+    4e-06
+   ],
+   "color": [
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "link": "servo_cover",
+   "mesh": "servo_cover",
+   "position": [
+    -0.05275,
+    0.006101,
+    0.0415
+   ],
+   "quaternion": [
+    1.0,
+    -5e-06,
+    -1e-06,
+    -0.0
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "speed_sensor",
+   "mesh": "speed_sensor",
+   "position": [
+    -0.057149,
+    0.093601,
+    0.0525
+   ],
+   "quaternion": [
+    1.0,
+    -5e-06,
+    -1e-06,
+    -0.0
+   ],
+   "color": [
+    0.0470588,
+    0.470588,
+    0.435294
+   ]
+  },
+  {
+   "link": "speed_sensor_1",
+   "mesh": "speed_sensor",
+   "position": [
+    -0.05715,
+    -0.015399,
+    0.0525
+   ],
+   "quaternion": [
+    1.0,
+    -5e-06,
+    -1e-06,
+    -0.0
+   ],
+   "color": [
+    0.0470588,
+    0.470588,
+    0.435294
+   ]
+  },
+  {
+   "link": "spline",
+   "mesh": "spline",
+   "position": [
+    -0.03345,
+    0.043542,
+    0.0354
+   ],
+   "quaternion": [
+    5e-06,
+    0.707105,
+    0.707108,
+    4e-06
+   ],
+   "color": [
+    0.917647,
+    0.917647,
+    0.917647
+   ]
+  },
+  {
+   "link": "spline_1",
+   "mesh": "spline",
+   "position": [
+    -0.03345,
+    0.020658,
+    0.0354
+   ],
+   "quaternion": [
+    -2e-06,
+    -0.707105,
+    0.707108,
+    4e-06
+   ],
+   "color": [
+    0.917647,
+    0.917647,
+    0.917647
+   ]
+  },
+  {
+   "link": "stick_s3",
+   "mesh": "stick_s3",
+   "position": [
+    -0.09195,
+    -0.021949,
+    0.007
+   ],
+   "quaternion": [
+    0.0,
+    -0.0,
+    0.707105,
+    0.707109
+   ],
+   "color": [
+    0.439216,
+    0.47451,
+    0.501961
+   ]
+  },
+  {
+   "link": "tire",
+   "mesh": "tire",
+   "position": [
+    -0.028249,
+    0.0699,
+    0.0354
+   ],
+   "quaternion": [
+    0.059027,
+    0.704641,
+    -0.704637,
+    0.059022
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "tire_1",
+   "mesh": "tire",
+   "position": [
+    -0.02825,
+    -0.0057,
+    0.0354
+   ],
+   "quaternion": [
+    -0.499996,
+    0.500004,
+    0.499999,
+    0.500001
+   ],
+   "color": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "link": "wheel",
+   "mesh": "wheel",
+   "position": [
+    -0.028249,
+    0.0699,
+    0.0354
+   ],
+   "quaternion": [
+    0.059027,
+    0.704641,
+    -0.704637,
+    0.059022
+   ],
+   "color": [
+    0.262745,
+    0.282353,
+    0.301961
+   ]
+  },
+  {
+   "link": "wheel_1",
+   "mesh": "wheel",
+   "position": [
+    -0.02825,
+    -0.0057,
+    0.0354
+   ],
+   "quaternion": [
+    -0.707107,
+    4e-06,
+    -3e-06,
+    0.707106
+   ],
+   "color": [
+    0.262745,
+    0.282353,
+    0.301961
+   ]
+  }
+ ]
+}
