@@ -1,7 +1,7 @@
 """Convert an Onshape URDF export (glTF meshes with embedded buffers) into the
 files parts.html loads: compact GLBs (one per mesh file, primitives merged by
 material), assembly.json with each link's world placement, and binary STLs
-(mm) for the 3D printed parts, which are the ones coloured red in Onshape.
+(mm) for the 3D printed parts: the ones coloured red in Onshape, plus the wheel.
 
 Usage: python3 util/urdf2glb.py <unzipped export dir containing urdf/ meshes/> parts
 Needs numpy."""
@@ -128,8 +128,9 @@ json.dump({'units': 'm', 'up': 'z', 'meshes': converted, 'links': placements},
           open(os.path.join(out, 'assembly.json'), 'w'), indent=1)
 for k, v in converted.items(): print(f"{k:16s} {v['tris']:6d} tris {v['bytes']/1024:7.0f} KB")
 
-# --- binary STL (mm) for the 3D printed parts: the ones Onshape coloured red ---
-PRINTED = [p['mesh'] for p in placements if p['color'] == [1.0, 0.0, 0.0]]
+# --- binary STL (mm) for the 3D printed parts: the ones Onshape coloured red,
+# plus the wheel (hub with the encoder disk built in), which is grey in the CAD ---
+PRINTED = [p['mesh'] for p in placements if p['color'] == [1.0, 0.0, 0.0]] + ['wheel']
 os.makedirs(os.path.join(out, 'stl'), exist_ok=True)
 for key in sorted(set(PRINTED)):
     d = json.load(open(os.path.join(src, 'meshes', next(f for f in os.listdir(os.path.join(src, 'meshes')) if f.lower() == key + '.gltf'))))

@@ -143,12 +143,33 @@
 
         <div class="content-section">
             <h2>Print List</h2>
-            <p>Six printed parts make up the robot. Everything else is off-the-shelf: two FS90R continuous servos, two 60 mm wheel hubs, two LM393 speed sensors, an IR reflective sensor, a 12 mm magnetic bead for the caster, a 4 × AA battery box, and the M5StickS3 on the Mini Bot HAT. Dimensions below come straight from the CAD model.</p>
+            <p>Seven printed parts make up the robot's body and wheels. Dimensions below come straight from the CAD model.</p>
             <table class="parts" id="partTable">
                 <thead><tr><th>Part</th><th>Qty</th><th>Material</th><th>Size (mm)</th><th>What it does</th><th>File</th></tr></thead>
                 <tbody></tbody>
             </table>
             <p style="margin-top:15px;">Print everything in PLA with 0.2 mm layers and 3 to 4 walls, except the tires, which are TPU for grip. The CAD model lists the tire as PETG only because Onshape has no TPU material. No supports are needed when each part sits on its flat face.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Everything Else</h2>
+            <p>The electronics and hardware that go with the printed parts. Links go to Amazon or the maker's own page; any equivalent part works as long as the pinout matches.</p>
+            <table class="parts bom">
+                <thead><tr><th>Part</th><th>Qty</th><th>Notes</th><th>Where to buy</th></tr></thead>
+                <tbody>
+                    <tr><td>M5StickS3</td><td>1</td><td>ESP32-S3 brain with LCD, microphone, IMU and Bluetooth. Plugs into the HAT.</td><td><a class="stl" href="https://docs.m5stack.com/en/core/StickS3" target="_blank" rel="noopener noreferrer">M5Stack</a></td></tr>
+                    <tr><td>Mini Bot HAT</td><td>1</td><td>Carrier PCB with the buck converter, 4 servo and 4 sensor headers. Order from JLCPCB with the files in the repo.</td><td><a class="stl" href="https://github.com/ThriftyPiano/mini-robot-car/tree/main/hardware/sticks3-bot-hat" target="_blank" rel="noopener noreferrer">GitHub</a></td></tr>
+                    <tr><td>FS90R continuous servo</td><td>2</td><td>Wheel drive, 6 V from the HAT's servo rail.</td><td><a class="stl" href="https://www.robotshop.com/products/feetech-6v-22kg-digital-360-degree-core-gear-servo" target="_blank" rel="noopener noreferrer">RobotShop</a></td></tr>
+                    <tr><td>LM393 speed sensor</td><td>2</td><td>Photo-interrupter that reads the slots in the printed wheel.</td><td><a class="stl" href="https://www.amazon.com/dp/B0776RHKB1" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>IR reflective sensor (TCRT5000)</td><td>1</td><td>Line and colour sensing, analog output.</td><td><a class="stl" href="https://www.amazon.com/dp/B0F5QD9FB4" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>12 mm magnetic bead</td><td>1</td><td>Rear caster ball, held by the printed caster mount.</td><td><a class="stl" href="https://www.amazon.com/Hematite-Natural-Gemstone-Crafting-Jewelry/dp/B0C3MX8J4F/" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>4 × AA battery box</td><td>1</td><td>With switch and 5.5 × 2.1 mm barrel plug for the HAT's power jack.</td><td><a class="stl" href="https://www.amazon.com/dp/B07D1JLG3C" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>Female-to-female Dupont wires</td><td>1 pack</td><td>Connect the sensors to the HAT headers pin for pin.</td><td><a class="stl" href="https://www.amazon.com/dp/B0BRTJQGS6" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>M3 button head screws</td><td>1 kit</td><td>Assorted lengths hold the printed parts, servos and sensors together.</td><td><a class="stl" href="https://www.amazon.com/dp/B0811NDFNJ" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>HC-SR04 distance sensor</td><td>1</td><td>Optional. Plugs into the HAT's DIST header for obstacle avoidance.</td><td><a class="stl" href="https://www.amazon.com/s?k=HC-SR04" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                    <tr><td>SG90 positional servo</td><td>2</td><td>Optional. Pan and tilt for the distance sensor, on the HAT's PAN and TILT headers.</td><td><a class="stl" href="https://www.amazon.com/s?k=SG90+servo" target="_blank" rel="noopener noreferrer">Amazon</a></td></tr>
+                </tbody>
+            </table>
             <div class="notice">
                 Looking for the step-by-step build guide? The <a href="assembly.html">Assembly page</a> documents the <strong>previous version</strong> of the robot, built around the ESP32 Max V1 board. The parts on this page are for the current M5StickS3 build. Most steps still apply, but the board, HAT and printed parts differ.
             </div>
@@ -167,6 +188,7 @@
             { key: 'servo_cover',   name: 'Servo cover',    qty: 1, material: 'PLA', desc: 'Clamps the two continuous servos into the chassis.' },
             { key: 'ball_mount',    name: 'Caster mount',   qty: 1, material: 'PLA', desc: 'Holds the 12 mm magnetic bead that acts as the rear omni wheel.' },
             { key: 'cable_mount',   name: 'Cable mount',    qty: 1, material: 'PLA', desc: 'Clip that keeps the sensor wires tidy along the chassis.' },
+            { key: 'wheel',         name: 'Wheel',          qty: 2, material: 'PLA', desc: 'Wheel hub with the encoder disk built in. Its slots are read by the LM393 speed sensor.' },
             { key: 'tire',          name: 'Tire',           qty: 2, material: 'TPU', desc: 'Fits over the wheel hub. Print in TPU for grip.' },
         ];
         const PRINTED_KEYS = new Set(PRINTED.map(p => p.key));
