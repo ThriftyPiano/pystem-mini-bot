@@ -145,10 +145,10 @@
             <h2>Print List</h2>
             <p>Six printed parts make up the robot. Everything else is off-the-shelf: two FS90R continuous servos, two 60 mm wheel hubs, two LM393 speed sensors, an IR reflective sensor, a 12 mm magnetic bead for the caster, a 4 × AA battery box, and the M5StickS3 on the Mini Bot HAT. Dimensions below come straight from the CAD model.</p>
             <table class="parts" id="partTable">
-                <thead><tr><th>Part</th><th>Qty</th><th>Size (mm)</th><th>What it does</th><th>File</th></tr></thead>
+                <thead><tr><th>Part</th><th>Qty</th><th>Material</th><th>Size (mm)</th><th>What it does</th><th>File</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <p style="margin-top:15px;">Print in PLA or PETG with 0.2 mm layers and 3 to 4 walls. The tires are the exception: print them in TPU for grip. No supports are needed when each part sits on its flat face.</p>
+            <p style="margin-top:15px;">Print everything in PLA with 0.2 mm layers and 3 to 4 walls, except the tires, which are TPU for grip. The CAD model lists the tire as PETG only because Onshape has no TPU material. No supports are needed when each part sits on its flat face.</p>
             <div class="notice">
                 Looking for the step-by-step build guide? The <a href="assembly.html">Assembly page</a> documents the <strong>previous version</strong> of the robot, built around the ESP32 Max V1 board. The parts on this page are for the current M5StickS3 build. Most steps still apply, but the board, HAT and printed parts differ.
             </div>
@@ -162,12 +162,12 @@
 
         // The printed parts, in the order they are shown. Keys match parts/assembly.json meshes.
         const PRINTED = [
-            { key: 'chasis',        name: 'Chassis',        qty: 1, desc: 'Main body. Carries the servos, sensors, caster and the StickS3 HAT.' },
-            { key: 'battery_mount', name: 'Battery mount',  qty: 1, desc: 'Sits between the chassis and the 4 × AA battery box, and locates the Bot HAT.' },
-            { key: 'servo_cover',   name: 'Servo cover',    qty: 1, desc: 'Clamps the two continuous servos into the chassis.' },
-            { key: 'ball_mount',    name: 'Caster mount',   qty: 1, desc: 'Holds the 12 mm magnetic bead that acts as the rear omni wheel.' },
-            { key: 'cable_mount',   name: 'Cable mount',    qty: 1, desc: 'Clip that keeps the sensor wires tidy along the chassis.' },
-            { key: 'tire',          name: 'Tire',           qty: 2, desc: 'Fits over the wheel hub. Print in TPU for grip.' },
+            { key: 'chasis',        name: 'Chassis',        qty: 1, material: 'PLA', desc: 'Main body. Carries the servos, sensors, caster and the StickS3 HAT.' },
+            { key: 'battery_mount', name: 'Battery mount',  qty: 1, material: 'PLA', desc: 'Sits between the chassis and the 4 × AA battery box, and locates the Bot HAT.' },
+            { key: 'servo_cover',   name: 'Servo cover',    qty: 1, material: 'PLA', desc: 'Clamps the two continuous servos into the chassis.' },
+            { key: 'ball_mount',    name: 'Caster mount',   qty: 1, material: 'PLA', desc: 'Holds the 12 mm magnetic bead that acts as the rear omni wheel.' },
+            { key: 'cable_mount',   name: 'Cable mount',    qty: 1, material: 'PLA', desc: 'Clip that keeps the sensor wires tidy along the chassis.' },
+            { key: 'tire',          name: 'Tire',           qty: 2, material: 'TPU', desc: 'Fits over the wheel hub. Print in TPU for grip.' },
         ];
         const PRINTED_KEYS = new Set(PRINTED.map(p => p.key));
 
@@ -280,7 +280,7 @@
                 const m = cloneMesh(keyName, true);
                 single.add(m);
                 const [x, y, z] = sizes[keyName];
-                hud.innerHTML = `<h3>${p.name}</h3><div class="dims">${x} × ${y} × ${z} mm · print ${p.qty}</div><div>${p.desc}</div>
+                hud.innerHTML = `<h3>${p.name}</h3><div class="dims">${x} × ${y} × ${z} mm · print ${p.qty} in ${p.material}</div><div>${p.desc}</div>
                     <a class="dl" href="parts/stl/${keyName}.stl" download>⬇ Download STL</a>`;
                 frame(single);
             }
@@ -299,9 +299,9 @@
         const tbody = document.querySelector('#partTable tbody');
         for (const p of PRINTED) {
             const [x, y, z] = sizes[p.key];
-            add(p.key, p.name, `${p.qty} × · ${x} × ${y} × ${z} mm`);
+            add(p.key, p.name, `${p.qty} × ${p.material} · ${x} × ${y} × ${z} mm`);
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td><a href="#${p.key}" style="color:#667eea;font-weight:600;text-decoration:none;">${p.name}</a></td><td>${p.qty}</td><td>${x} × ${y} × ${z}</td><td>${p.desc}</td><td><a class="stl" href="parts/stl/${p.key}.stl" download>${p.key}.stl</a></td>`;
+            tr.innerHTML = `<td><a href="#${p.key}" style="color:#667eea;font-weight:600;text-decoration:none;">${p.name}</a></td><td>${p.qty}</td><td>${p.material}</td><td>${x} × ${y} × ${z}</td><td>${p.desc}</td><td><a class="stl" href="parts/stl/${p.key}.stl" download>${p.key}.stl</a></td>`;
             tr.querySelector('td a').addEventListener('click', e => { e.preventDefault(); show(p.key); stage.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
             tbody.appendChild(tr);
         }
